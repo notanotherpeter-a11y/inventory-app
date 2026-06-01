@@ -342,6 +342,31 @@
     align-items: center; justify-content: center;
   }
 
+  /* Mobile logo in topbar */
+  .topbar-mobile-logo {
+    display: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .topbar-mobile-logo img {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(192,57,43,0.6));
+  }
+  .topbar-mobile-logo-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
   /* ════════════════════════════════════
      BUTTONS
   ════════════════════════════════════ */
@@ -980,6 +1005,8 @@
     .sidebar-toggle { display: none; }
     .topbar { padding: 0 16px; }
     .topbar-date { display: none; }
+    .topbar-breadcrumb { display: none; }
+    .topbar-mobile-logo { display: flex; }
   }
   @media (max-width: 500px) {
     .summary-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1050,7 +1077,7 @@
 <div class="layout" id="layout">
 
   <!-- Topbar -->
-  <div class="topbar">
+  <div class="topbar" style="position:relative;">
     <div class="topbar-left">
       <button class="mobile-menu-btn" onclick="openMobileSidebar()" title="Open menu">☰</button>
       <div class="topbar-breadcrumb">
@@ -1058,6 +1085,11 @@
         <span class="topbar-breadcrumb-sep">/</span>
         <span class="topbar-breadcrumb-page" id="topbarTitle">Inventory</span>
       </div>
+    </div>
+    <!-- Mobile centered logo -->
+    <div class="topbar-mobile-logo">
+      <img src="logo.png" alt="Masterform">
+      <span class="topbar-mobile-logo-text">Masterform</span>
     </div>
     <div class="topbar-actions">
       <span class="topbar-date" id="topbarDate"></span>
