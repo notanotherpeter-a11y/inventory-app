@@ -18,6 +18,9 @@
     --text: #e8eaf6;
     --muted: #8892b0;
     --card-radius: 14px;
+    --sidebar-w: 220px;
+    --sidebar-collapsed-w: 64px;
+    --topbar-h: 48px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -25,13 +28,11 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    /* Masterform background */
     background-image: url('bg.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
   }
-  /* Dark overlay so text stays readable over the photo */
   body::before {
     content: '';
     position: fixed;
@@ -40,38 +41,259 @@
     z-index: 0;
     pointer-events: none;
   }
-  nav, .main { position: relative; z-index: 1; }
 
-  /* ── Top Nav ── */
-  nav {
+  /* ── Sidebar ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-w);
+    background: rgba(26, 29, 39, 0.80);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid #2e334d;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  .sidebar.collapsed {
+    width: var(--sidebar-collapsed-w);
+  }
+
+  /* Brand */
+  .sidebar-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    gap: 8px;
+    min-height: 96px;
+  }
+  .sidebar-brand img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+    transition: opacity 0.15s;
+  }
+  .sidebar-brand-text {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.15s;
+    padding: 0 8px;
+  }
+  .sidebar.collapsed .sidebar-brand-text {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Nav */
+  .sidebar-nav {
+    flex: 1;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+    min-height: 42px;
+  }
+  .nav-item:hover {
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .nav-item.active {
+    background: rgba(79, 142, 247, 0.18);
+    color: var(--accent);
+  }
+  .nav-item .nav-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    width: 24px;
+    text-align: center;
+    line-height: 1;
+  }
+  .nav-item .nav-label {
+    opacity: 1;
+    transition: opacity 0.15s;
+    flex: 1;
+  }
+  .sidebar.collapsed .nav-item .nav-label {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+  }
+  .sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: 10px 0;
+    gap: 0;
+  }
+
+  /* Divider */
+  .sidebar-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 12px;
+    flex-shrink: 0;
+  }
+
+  /* Quick Stats */
+  .sidebar-stats {
+    padding: 10px 8px 8px;
+    flex-shrink: 0;
+  }
+  .sidebar-stats-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    padding: 0 12px 8px;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.15s;
+  }
+  .sidebar.collapsed .sidebar-stats-title {
+    opacity: 0;
+  }
+  .sidebar-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 12px;
+    border-radius: 8px;
+    gap: 10px;
+    transition: background 0.15s;
+  }
+  .sidebar-stat:hover { background: var(--surface2); }
+  .sidebar-stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.15s;
+  }
+  .sidebar-stat-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  .sidebar.collapsed .sidebar-stat-label {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+  }
+  .sidebar.collapsed .sidebar-stat {
+    justify-content: center;
+    padding: 7px 0;
+  }
+
+  /* Collapse toggle */
+  .sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sidebar.collapsed .sidebar-toggle {
+    justify-content: center;
+    padding: 12px 0;
+  }
+  .toggle-btn {
+    width: 32px; height: 32px;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--muted);
+    cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .toggle-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── Layout shell ── */
+  .layout {
+    position: relative;
+    z-index: 1;
+    margin-left: var(--sidebar-w);
+    transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .layout.collapsed {
+    margin-left: var(--sidebar-collapsed-w);
+  }
+
+  /* ── Slim top bar ── */
+  .topbar {
+    height: var(--topbar-h);
     background: rgba(26, 29, 39, 0.75);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
-    padding: 0 28px;
-    height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 0 24px;
     position: sticky;
     top: 0;
     z-index: 100;
-  }
-  .nav-brand {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
-  }
-  .nav-brand .icon {
-    width: 44px; height: 44px;
-    border-radius: 8px;
-    overflow: hidden;
-    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .nav-brand .icon img {
-    width: 100%; height: 100%; object-fit: cover;
+  .topbar-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .topbar-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Mobile hamburger (only on small screens) */
+  .mobile-menu-btn {
+    display: none;
+    width: 34px; height: 34px;
+    border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--text);
+    cursor: pointer; font-size: 18px;
+    align-items: center; justify-content: center;
+  }
+
+  /* ── Buttons (preserved) ── */
   .btn {
     padding: 8px 16px; border-radius: 8px; border: none;
     cursor: pointer; font-size: 13px; font-weight: 600;
@@ -93,10 +315,10 @@
   .btn-success:hover { background: #16a34a; }
   .btn-sm { padding: 6px 12px; font-size: 12px; }
 
-  /* ── Layout ── */
-  .main { padding: 28px; max-width: 1300px; margin: 0 auto; }
+  /* ── Main content ── */
+  .main { padding: 28px; max-width: 1300px; margin: 0 auto; flex: 1; }
 
-  /* ── Summary Cards ── */
+  /* ── Summary Cards (preserved) ── */
   .summary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -118,7 +340,7 @@
   .summary-card.yellow { border-color: var(--yellow); }
   .summary-card.red { border-color: var(--red); }
 
-  /* ── Tabs ── */
+  /* ── Tabs (preserved) ── */
   .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: rgba(26,29,39,0.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 4px; border-radius: 10px; width: fit-content; }
   .tab {
     padding: 8px 18px; border-radius: 8px; border: none;
@@ -128,14 +350,14 @@
   .tab.active { background: var(--accent); color: #fff; }
   .tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
 
-  /* ── Section header ── */
+  /* ── Section header (preserved) ── */
   .section-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 16px;
   }
   .section-title { font-size: 16px; font-weight: 700; }
 
-  /* ── Inventory Grid ── */
+  /* ── Inventory Grid (preserved) ── */
   .inventory-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -214,13 +436,13 @@
   }
   .item-menu-btn:hover { background: var(--surface2); color: var(--text); }
 
-  /* ── Progress bar ── */
+  /* ── Progress bar (preserved) ── */
   .stock-bar { margin-top: 14px; }
   .stock-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
   .stock-bar-track { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
   .stock-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
 
-  /* ── Modal ── */
+  /* ── Modal (preserved) ── */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.7);
     display: flex; align-items: center; justify-content: center;
@@ -247,7 +469,7 @@
   .form-select option { background: var(--surface2); }
   .modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
 
-  /* ── Log tab ── */
+  /* ── Log tab (preserved) ── */
   .log-filters { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; }
   .search-box {
     background: var(--surface); border: 1px solid var(--border);
@@ -273,7 +495,7 @@
   .tx-out { color: var(--red); font-weight: 700; }
   .tx-adjust { color: var(--yellow); font-weight: 700; }
 
-  /* ── Toast ── */
+  /* ── Toast (preserved) ── */
   .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; }
   .toast {
     background: var(--surface2); border: 1px solid var(--border);
@@ -286,97 +508,186 @@
   .toast.toast-success { border-color: var(--green); }
   .toast.toast-error { border-color: var(--red); }
 
-  /* ── Empty state ── */
+  /* ── Empty state (preserved) ── */
   .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty .icon { font-size: 48px; margin-bottom: 12px; }
   .empty p { font-size: 14px; }
 
-  /* ── Chip ── */
+  /* ── Chip (preserved) ── */
   .chip {
     display: inline-flex; align-items: center; gap: 4px;
     background: var(--surface2); border: 1px solid var(--border);
     border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--muted);
   }
 
-  /* Responsive */
-  @media (max-width: 600px) {
+  /* ── Mobile overlay (covers content when sidebar open on mobile) ── */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 190;
+    backdrop-filter: blur(2px);
+  }
+  .sidebar-overlay.visible { display: block; }
+
+  /* ── Responsive ── */
+  @media (max-width: 767px) {
+    .sidebar {
+      left: calc(-1 * var(--sidebar-w));
+      width: var(--sidebar-w) !important;
+      transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .sidebar.mobile-open {
+      left: 0;
+    }
+    .layout {
+      margin-left: 0 !important;
+    }
+    .mobile-menu-btn {
+      display: flex;
+    }
     .main { padding: 16px; }
-    nav { padding: 0 16px; }
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .sidebar-toggle { display: none; }
+  }
+  @media (max-width: 600px) {
     .summary-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
 <body>
 
-<nav>
-  <div class="nav-brand">
-    <div class="icon"><img src="logo.png" alt="Masterform logo"></div>
-    Masterform Inventory Manager
-  </div>
-  <div class="nav-actions">
-    <button class="btn btn-outline btn-sm" onclick="exportData()">⬇ Export</button>
-    <button class="btn btn-primary btn-sm" onclick="openAddModal()">＋ Add Item</button>
-  </div>
-</nav>
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
 
-<div class="main">
-
-  <!-- Summary Cards -->
-  <div class="summary-grid" id="summaryGrid"></div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('inventory', this)">📦 Inventory</button>
-    <button class="tab" onclick="switchTab('log', this)">📋 Transaction Log</button>
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <img src="logo.png" alt="Masterform logo">
+    <div class="sidebar-brand-text">Masterform<br>Inventory Manager</div>
   </div>
 
-  <!-- Inventory Tab -->
-  <div id="tab-inventory">
-    <div class="section-header">
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <span class="section-title">All Items</span>
-        <select class="form-select" style="width:auto;padding:6px 10px;font-size:12px;" id="categoryFilter" onchange="renderInventory()">
-          <option value="">All Categories</option>
-          <option value="Bar Chair">Bar Chair</option>
-          <option value="Metal Pallet">Metal Pallet</option>
-          <option value="Timber Pallet">Timber Pallet</option>
-        </select>
+  <!-- Nav items -->
+  <nav class="sidebar-nav">
+    <button class="nav-item active" id="nav-inventory" onclick="sidebarSwitchTab('inventory')">
+      <span class="nav-icon">📦</span>
+      <span class="nav-label">Inventory</span>
+    </button>
+    <button class="nav-item" id="nav-log" onclick="sidebarSwitchTab('log')">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Transaction Log</span>
+    </button>
+    <button class="nav-item" onclick="openAddModal()">
+      <span class="nav-icon">➕</span>
+      <span class="nav-label">Add Item</span>
+    </button>
+    <button class="nav-item" onclick="openTransactionModal()">
+      <span class="nav-icon">⇄</span>
+      <span class="nav-label">Stock In / Out</span>
+    </button>
+  </nav>
+
+  <!-- Divider -->
+  <div class="sidebar-divider"></div>
+
+  <!-- Quick stats -->
+  <div class="sidebar-stats">
+    <div class="sidebar-stats-title">Quick Stats</div>
+    <div class="sidebar-stat">
+      <span class="sidebar-stat-label">Total Items</span>
+      <span class="sidebar-stat-value" id="stat-total-items">0</span>
+    </div>
+    <div class="sidebar-stat">
+      <span class="sidebar-stat-label">Total Units</span>
+      <span class="sidebar-stat-value" id="stat-total-units">0</span>
+    </div>
+  </div>
+
+  <!-- Collapse toggle -->
+  <div class="sidebar-toggle">
+    <button class="toggle-btn" onclick="toggleSidebar()" title="Collapse sidebar" id="toggleBtn">☰</button>
+  </div>
+
+</aside>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+<!-- Main layout -->
+<div class="layout" id="layout">
+
+  <!-- Slim top bar -->
+  <div class="topbar">
+    <div class="topbar-title">
+      <button class="mobile-menu-btn" onclick="openMobileSidebar()" title="Open menu">☰</button>
+      <span id="topbarTitle">📦 Inventory</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline btn-sm" onclick="exportData()">⬇ Export</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main">
+
+    <!-- Summary Cards -->
+    <div class="summary-grid" id="summaryGrid"></div>
+
+    <!-- Tabs (kept for in-content tab switching; hidden visually on wider screens if preferred) -->
+    <div class="tabs">
+      <button class="tab active" id="tab-btn-inventory" onclick="switchTab('inventory', this)">📦 Inventory</button>
+      <button class="tab" id="tab-btn-log" onclick="switchTab('log', this)">📋 Transaction Log</button>
+    </div>
+
+    <!-- Inventory Tab -->
+    <div id="tab-inventory">
+      <div class="section-header">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <span class="section-title">All Items</span>
+          <select class="form-select" style="width:auto;padding:6px 10px;font-size:12px;" id="categoryFilter" onchange="renderInventory()">
+            <option value="">All Categories</option>
+            <option value="Bar Chair">Bar Chair</option>
+            <option value="Metal Pallet">Metal Pallet</option>
+            <option value="Timber Pallet">Timber Pallet</option>
+          </select>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="openTransactionModal()">⇄ Stock In / Out</button>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="openTransactionModal()">⇄ Stock In / Out</button>
+      <div class="inventory-grid" id="inventoryGrid"></div>
     </div>
-    <div class="inventory-grid" id="inventoryGrid"></div>
-  </div>
 
-  <!-- Log Tab -->
-  <div id="tab-log" style="display:none;">
-    <div class="log-filters">
-      <input class="search-box" placeholder="🔍 Search item or note..." id="logSearch" oninput="renderLog()">
-      <select class="form-select" style="width:auto;padding:8px 12px;font-size:13px;" id="logTypeFilter" onchange="renderLog()">
-        <option value="">All Types</option>
-        <option value="IN">Stock In</option>
-        <option value="OUT">Stock Out</option>
-        <option value="ADJUST">Adjustment</option>
-        <option value="ADD">Item Added</option>
-      </select>
-      <button class="btn btn-ghost btn-sm" onclick="clearLog()">🗑 Clear Log</button>
+    <!-- Log Tab -->
+    <div id="tab-log" style="display:none;">
+      <div class="log-filters">
+        <input class="search-box" placeholder="🔍 Search item or note..." id="logSearch" oninput="renderLog()">
+        <select class="form-select" style="width:auto;padding:8px 12px;font-size:13px;" id="logTypeFilter" onchange="renderLog()">
+          <option value="">All Types</option>
+          <option value="IN">Stock In</option>
+          <option value="OUT">Stock Out</option>
+          <option value="ADJUST">Adjustment</option>
+          <option value="ADD">Item Added</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="clearLog()">🗑 Clear Log</button>
+      </div>
+      <div class="log-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Item</th>
+              <th>Type</th>
+              <th>Qty Change</th>
+              <th>Balance After</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="log-table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Date & Time</th>
-            <th>Item</th>
-            <th>Type</th>
-            <th>Qty Change</th>
-            <th>Balance After</th>
-            <th>Note</th>
-          </tr>
-        </thead>
-        <tbody id="logBody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+
+  </div><!-- /.main -->
+</div><!-- /.layout -->
 
 <!-- Add Item Modal -->
 <div class="modal-overlay" id="addModal">
@@ -537,6 +848,16 @@ function barColor(item) {
   return 'var(--green)';
 }
 
+// ─── Sidebar Stats ────────────────────────────────────────────────────────────
+function updateSidebarStats() {
+  const totalItems = items.length;
+  const totalUnits = items.reduce((s, i) => s + i.qty, 0);
+  const elItems = document.getElementById('stat-total-items');
+  const elUnits = document.getElementById('stat-total-units');
+  if (elItems) elItems.textContent = totalItems;
+  if (elUnits) elUnits.textContent = totalUnits.toLocaleString();
+}
+
 // ─── Render Summary ──────────────────────────────────────────────────────────
 function renderSummary() {
   const total   = items.length;
@@ -572,6 +893,7 @@ function renderSummary() {
       <div class="sub">across all items</div>
     </div>
   `;
+  updateSidebarStats();
 }
 
 // ─── Render Inventory ────────────────────────────────────────────────────────
@@ -862,12 +1184,66 @@ function clearLog() {
 }
 
 // ─── Tab Switching ────────────────────────────────────────────────────────────
+// Core tab switcher — works from both the in-content tabs and the sidebar nav
 function switchTab(tab, el) {
   document.getElementById('tab-inventory').style.display = tab === 'inventory' ? '' : 'none';
   document.getElementById('tab-log').style.display       = tab === 'log' ? '' : 'none';
+  // Sync in-content tab buttons
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
+  // Sync sidebar nav items
+  document.getElementById('nav-inventory').classList.toggle('active', tab === 'inventory');
+  document.getElementById('nav-log').classList.toggle('active', tab === 'log');
+  // Update topbar title
+  const titles = { inventory: '📦 Inventory', log: '📋 Transaction Log' };
+  const topbarTitleEl = document.getElementById('topbarTitle');
+  if (topbarTitleEl && titles[tab]) topbarTitleEl.textContent = titles[tab];
   if (tab === 'log') renderLog();
+}
+
+// Called from sidebar nav items (no tab button element to pass)
+function sidebarSwitchTab(tab) {
+  // Find the matching in-content tab button and activate it
+  const tabBtn = document.getElementById(`tab-btn-${tab}`);
+  switchTab(tab, tabBtn);
+  // On mobile, close sidebar after navigation
+  closeMobileSidebar();
+}
+
+// ─── Sidebar Collapse / Expand ────────────────────────────────────────────────
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const layout  = document.getElementById('layout');
+  const btn     = document.getElementById('toggleBtn');
+  const collapsed = sidebar.classList.toggle('collapsed');
+  layout.classList.toggle('collapsed', collapsed);
+  btn.textContent = collapsed ? '▶' : '☰';
+  btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+  // Persist state
+  localStorage.setItem('sidebar_collapsed', collapsed ? '1' : '0');
+}
+
+// Restore sidebar state on load
+(function restoreSidebarState() {
+  if (localStorage.getItem('sidebar_collapsed') === '1') {
+    const sidebar = document.getElementById('sidebar');
+    const layout  = document.getElementById('layout');
+    const btn     = document.getElementById('toggleBtn');
+    sidebar.classList.add('collapsed');
+    layout.classList.add('collapsed');
+    if (btn) { btn.textContent = '▶'; btn.title = 'Expand sidebar'; }
+  }
+})();
+
+// ─── Mobile Sidebar ───────────────────────────────────────────────────────────
+function openMobileSidebar() {
+  document.getElementById('sidebar').classList.add('mobile-open');
+  document.getElementById('sidebarOverlay').classList.add('visible');
+}
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebarOverlay').classList.remove('visible');
 }
 
 // ─── Modals ───────────────────────────────────────────────────────────────────
@@ -906,6 +1282,7 @@ function exportData() {
 function renderAll() {
   renderSummary();
   renderInventory();
+  updateSidebarStats();
 }
 
 renderAll();
