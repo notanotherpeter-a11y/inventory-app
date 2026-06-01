@@ -11,9 +11,9 @@
   :root {
     --bg:             #080a10;
     --sidebar-bg:     #0d0f18;
-    --surface:        rgba(255,255,255,0.04);
-    --surface-border: rgba(255,255,255,0.08);
-    --surface-hover:  rgba(255,255,255,0.06);
+    --surface:        rgba(18,21,35,0.92);
+    --surface-border: rgba(255,255,255,0.12);
+    --surface-hover:  rgba(24,27,44,0.97);
     --accent:         #c0392b;
     --accent2:        #e74c3c;
     --green:          #10b981;
@@ -46,8 +46,7 @@
     content: '';
     position: fixed;
     inset: 0;
-    /* Gradient overlay: deeper at edges, slightly lighter centre so logo shows through */
-    background: radial-gradient(ellipse at center, rgba(5,6,12,0.82) 0%, rgba(5,6,12,0.94) 100%);
+    background: rgba(5,6,12,0.93);
     z-index: 0;
     pointer-events: none;
   }
@@ -418,8 +417,10 @@
     margin-bottom: 32px;
   }
   .summary-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(18,21,35,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 16px;
     padding: 20px;
     position: relative;
@@ -428,9 +429,9 @@
     border-left: 4px solid transparent;
   }
   .summary-card:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(24,27,44,0.96);
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
   }
   .summary-card.accent { border-left-color: #3b82f6; }
   .summary-card.green  { border-left-color: var(--green); }
@@ -474,10 +475,10 @@
     display: flex;
     gap: 2px;
     margin-bottom: 24px;
-    background: rgba(255,255,255,0.03);
+    background: rgba(18,21,35,0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
     padding: 4px;
     border-radius: 12px;
     width: fit-content;
@@ -534,8 +535,10 @@
     gap: 14px;
   }
   .item-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(18,21,35,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.10);
     border-radius: 16px;
     padding: 22px;
     transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
@@ -544,8 +547,8 @@
     cursor: default;
   }
   .item-card:hover {
-    background: rgba(255,255,255,0.06);
-    border-color: rgba(192,57,43,0.4);
+    background: rgba(24,27,44,0.97);
+    border-color: rgba(192,57,43,0.5);
     transform: translateY(-3px);
     box-shadow: 0 20px 40px rgba(0,0,0,0.4);
   }
