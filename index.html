@@ -681,12 +681,18 @@ function applyTransaction() {
 
 // ─── Add Item Modal ──────────────────────────────────────────────────────────
 function openAddModal() {
+  // Fully reset every field — don't rely on previous state
   document.getElementById('addName').value = '';
   document.getElementById('addQty').value = 0;
   document.getElementById('addUnit').value = 'pcs';
   document.getElementById('addThreshold').value = 10;
-  document.getElementById('addCategory').value = 'Bar Chair';
-  toggleVariation();
+  // Force category back to first option (Bar Chair) using selectedIndex
+  const catSel = document.getElementById('addCategory');
+  catSel.selectedIndex = 0;
+  // Also reset variation dropdown to first option
+  document.getElementById('addVariation').selectedIndex = 0;
+  // Hide variation group since default is Bar Chair
+  document.getElementById('variationGroup').style.display = 'none';
   openModal('addModal');
   setTimeout(() => document.getElementById('addName').focus(), 200);
 }
@@ -699,18 +705,23 @@ function toggleVariation() {
 function addItem() {
   const name     = document.getElementById('addName').value.trim();
   const category = document.getElementById('addCategory').value;
-  const variation = category === 'Metal Pallet' ? document.getElementById('addVariation').value : '';
+  // Only use variation if category is Metal Pallet AND variation group is visible
+  const variationGroup = document.getElementById('variationGroup');
+  const variation = (category === 'Metal Pallet' && variationGroup.style.display !== 'none')
+    ? document.getElementById('addVariation').value
+    : '';
   const qty      = parseInt(document.getElementById('addQty').value) || 0;
   const unit     = document.getElementById('addUnit').value.trim() || 'pcs';
   const threshold = parseInt(document.getElementById('addThreshold').value) || 10;
   if (!name) { toast('Please enter an item name', 'error'); return; }
 
-  const fullName = variation ? `${name} ${variation}` : name;
+  // Keep name clean — variation shown as separate chip on the card, not appended to name
   const id = uid();
-  items.push({ id, name: fullName, category, variation, qty, unit, threshold });
-  logs.unshift({ id: uid(), ts: new Date().toISOString(), itemId: id, itemName: fullName, type: 'ADD', change: qty, balance: qty, note: 'Item created' });
+  const displayName = variation ? `${name} (${variation})` : name;
+  items.push({ id, name: displayName, category, variation, qty, unit, threshold });
+  logs.unshift({ id: uid(), ts: new Date().toISOString(), itemId: id, itemName: displayName, type: 'ADD', change: qty, balance: qty, note: 'Item created' });
   save(); renderAll(); closeModal('addModal');
-  toast(`"${fullName}" added to inventory`, 'success');
+  toast(`"${displayName}" added to inventory`, 'success');
 }
 
 // ─── Edit Modal ──────────────────────────────────────────────────────────────
