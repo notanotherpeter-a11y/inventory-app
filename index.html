@@ -637,17 +637,24 @@ function openTransactionModal(preItemId) {
 
 function setTxType(type, btn) {
   txType = type;
+  // Reset all type buttons to outline
   document.querySelectorAll('#txModal .btn').forEach(b => {
     if (['Stock In','Stock Out','Adjust'].some(t => b.textContent.includes(t))) {
       b.className = 'btn btn-outline';
       b.style.flex = '1';
     }
   });
-  if (btn) {
-    btn.className = type === 'IN' ? 'btn btn-success' : type === 'OUT' ? 'btn btn-danger' : 'btn btn-primary';
-    btn.style.flex = '1';
+  // Highlight the active button — use passed btn or find it by text
+  const target = btn || [...document.querySelectorAll('#txModal .btn')].find(b =>
+    (type === 'IN'     && b.textContent.includes('Stock In'))  ||
+    (type === 'OUT'    && b.textContent.includes('Stock Out')) ||
+    (type === 'ADJUST' && b.textContent.includes('Adjust'))
+  );
+  if (target) {
+    target.className = type === 'IN' ? 'btn btn-success' : type === 'OUT' ? 'btn btn-danger' : 'btn btn-primary';
+    target.style.flex = '1';
   }
-  const labels = { IN: 'Quantity to Add', OUT: 'Quantity to Remove', ADJUST: 'Set Stock to (absolute)' };
+  const labels = { IN: 'Quantity to Add', OUT: 'Quantity to Remove', ADJUST: 'Set Stock to (absolute value)' };
   document.getElementById('txQtyLabel').textContent = labels[type];
 }
 
@@ -655,7 +662,9 @@ function applyTransaction() {
   const id = document.getElementById('txItem').value;
   const qty = parseInt(document.getElementById('txQty').value);
   const note = document.getElementById('txNote').value;
-  if (!qty || qty <= 0) { toast('Enter a valid quantity', 'error'); return; }
+  // ADJUST allows 0 (set stock to zero); IN/OUT require a positive number
+  const invalid = isNaN(qty) || qty < 0 || (txType !== 'ADJUST' && qty <= 0);
+  if (invalid) { toast('Enter a valid quantity', 'error'); return; }
 
   const item = items.find(i => i.id === id);
   if (!item) return;
