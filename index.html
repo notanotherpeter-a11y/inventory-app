@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
     --bg:             #080a10;
@@ -327,6 +328,16 @@
     color: var(--muted);
     font-weight: 500;
     letter-spacing: 0.02em;
+  }
+  .sync-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    transition: color 0.3s;
   }
 
   /* Mobile hamburger */
@@ -1092,6 +1103,7 @@
       <span class="topbar-mobile-logo-text">Masterform</span>
     </div>
     <div class="topbar-actions">
+      <span class="sync-badge" id="syncStatus">⟳ Loading…</span>
       <span class="topbar-date" id="topbarDate"></span>
       <button class="btn btn-outline btn-sm" onclick="exportData()">⬇ Export CSV</button>
     </div>
@@ -1269,29 +1281,100 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
+// ─── Supabase ────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://mpgeagbeaexqdiazyifc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wZ2VhZ2JlYWV4cWRpYXp5aWZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyODkxOTMsImV4cCI6MjA5NTg2NTE5M30.xKpTmSBn4LnSe2ADStvbG3jSTJGMI-7BIc9l_jBceBk';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let dbReady = false;
+
 // ─── Data ───────────────────────────────────────────────────────────────────
-let items = JSON.parse(localStorage.getItem('inv_items') || '[]');
-let logs  = JSON.parse(localStorage.getItem('inv_logs')  || '[]');
+let items = [];
+let logs  = [];
 let txType = 'IN';
 
-// Seed default items if empty
-if (items.length === 0) {
-  const defaults = [
-    { id: uid(), name: 'Bar Chair', category: 'Bar Chair', variation: '', qty: 0, unit: 'pcs', threshold: 10 },
-    { id: uid(), name: 'Metal Pallet 1.5mm', category: 'Metal Pallet', variation: '1.5mm', qty: 0, unit: 'pcs', threshold: 10 },
-    { id: uid(), name: 'Metal Pallet 1.2mm', category: 'Metal Pallet', variation: '1.2mm', qty: 0, unit: 'pcs', threshold: 10 },
-    { id: uid(), name: 'Metal Pallet 0.95mm', category: 'Metal Pallet', variation: '0.95mm', qty: 0, unit: 'pcs', threshold: 10 },
-    { id: uid(), name: 'Metal Pallet 0.75mm', category: 'Metal Pallet', variation: '0.75mm', qty: 0, unit: 'pcs', threshold: 10 },
-    { id: uid(), name: 'Timber Pallet', category: 'Timber Pallet', variation: '', qty: 0, unit: 'pcs', threshold: 10 },
-  ];
-  items = defaults;
-  save();
-}
+function uid() { return crypto.randomUUID(); }
 
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function save() {
   localStorage.setItem('inv_items', JSON.stringify(items));
-  localStorage.setItem('inv_logs', JSON.stringify(logs));
+  localStorage.setItem('inv_logs',  JSON.stringify(logs));
+}
+
+function setSyncStatus(s) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  if (s === 'syncing') { el.textContent = '⟳ Syncing'; el.style.color = 'var(--yellow)'; }
+  if (s === 'synced')  { el.textContent = '✓ Synced';  el.style.color = 'var(--green)';  }
+  if (s === 'offline') { el.textContent = '⚡ Offline'; el.style.color = 'var(--muted)';  }
+  if (s === 'error')   { el.textContent = '✗ Error';   el.style.color = 'var(--red)';    }
+}
+
+function mapLogFromDb(r) {
+  return { id: r.id, ts: r.created_at, itemId: r.item_id, itemName: r.item_name,
+           type: r.type, change: r.qty_change, balance: r.qty_after, note: r.note || '' };
+}
+
+const DEFAULT_ITEMS = [
+  { name: 'Bar Chair',          category: 'Bar Chair',    variation: '',      qty: 0, unit: 'pcs', threshold: 10 },
+  { name: 'Metal Pallet 1.5mm', category: 'Metal Pallet', variation: '1.5mm', qty: 0, unit: 'pcs', threshold: 10 },
+  { name: 'Metal Pallet 1.2mm', category: 'Metal Pallet', variation: '1.2mm', qty: 0, unit: 'pcs', threshold: 10 },
+  { name: 'Metal Pallet 0.95mm',category: 'Metal Pallet', variation: '0.95mm',qty: 0, unit: 'pcs', threshold: 10 },
+  { name: 'Metal Pallet 0.75mm',category: 'Metal Pallet', variation: '0.75mm',qty: 0, unit: 'pcs', threshold: 10 },
+  { name: 'Timber Pallet',      category: 'Timber Pallet',variation: '',      qty: 0, unit: 'pcs', threshold: 10 },
+];
+
+async function initData() {
+  setSyncStatus('syncing');
+  try {
+    const [r1, r2] = await Promise.all([
+      sb.from('items').select('*').order('created_at'),
+      sb.from('transaction_logs').select('*').order('created_at', { ascending: false }).limit(300)
+    ]);
+    if (r1.error || r2.error) throw new Error('Supabase query failed');
+
+    if (r1.data.length === 0) {
+      // Seed defaults
+      const { data: seeded } = await sb.from('items').insert(DEFAULT_ITEMS).select();
+      items = seeded || [];
+    } else {
+      items = r1.data;
+    }
+    logs = (r2.data || []).map(mapLogFromDb);
+    dbReady = true;
+    setSyncStatus('synced');
+  } catch (err) {
+    console.warn('Supabase unavailable, using localStorage:', err);
+    items = JSON.parse(localStorage.getItem('inv_items') || '[]');
+    logs  = JSON.parse(localStorage.getItem('inv_logs')  || '[]');
+    if (items.length === 0) {
+      items = DEFAULT_ITEMS.map(d => ({ ...d, id: uid() }));
+    }
+    setSyncStatus('offline');
+  }
+  save();
+  renderAll();
+}
+
+async function dbSaveItem(item) {
+  if (!dbReady) return;
+  setSyncStatus('syncing');
+  const { error } = await sb.from('items').upsert(item);
+  setSyncStatus(error ? 'error' : 'synced');
+}
+
+async function dbDeleteItem(id) {
+  if (!dbReady) return;
+  setSyncStatus('syncing');
+  const { error } = await sb.from('items').delete().eq('id', id);
+  setSyncStatus(error ? 'error' : 'synced');
+}
+
+async function dbSaveLog(log, qtyBefore) {
+  if (!dbReady) return;
+  await sb.from('transaction_logs').insert({
+    item_id: log.itemId, item_name: log.itemName, type: log.type,
+    qty_before: qtyBefore, qty_change: log.change, qty_after: log.balance,
+    note: log.note || null
+  });
 }
 
 // ─── Icons & Colors ─────────────────────────────────────────────────────────
@@ -1444,9 +1527,13 @@ function quickAdjust(id, dir) {
   const newQty = Math.max(0, item.qty + change);
   const diff = newQty - item.qty;
   if (diff === 0) return;
+  const before = item.qty;
   item.qty = newQty;
-  logs.unshift({ id: uid(), ts: new Date().toISOString(), itemId: id, itemName: item.name, type: diff > 0 ? 'IN' : 'OUT', change: diff, balance: newQty, note: 'Quick adjust' });
+  const log = { id: uid(), ts: new Date().toISOString(), itemId: id, itemName: item.name, type: diff > 0 ? 'IN' : 'OUT', change: diff, balance: newQty, note: 'Quick adjust' };
+  logs.unshift(log);
   save();
+  dbSaveItem(item);
+  dbSaveLog(log, before);
   // Update only this card in-place — no full re-render so the card stays put
   updateCardInPlace(item);
   renderSummary();
@@ -1537,9 +1624,11 @@ function applyTransaction() {
   if (txType === 'OUT')    item.qty = Math.max(0, before - qty);
   if (txType === 'ADJUST') item.qty = qty;
   const diff = item.qty - before;
-
-  logs.unshift({ id: uid(), ts: new Date().toISOString(), itemId: id, itemName: item.name, type: txType, change: diff, balance: item.qty, note });
+  const txLog = { id: uid(), ts: new Date().toISOString(), itemId: id, itemName: item.name, type: txType, change: diff, balance: item.qty, note };
+  logs.unshift(txLog);
   save(); renderAll(); closeModal('txModal');
+  dbSaveItem(item);
+  dbSaveLog(txLog, before);
   toast(`${item.name} updated → ${item.qty} ${item.unit}`, 'success');
 }
 
@@ -1579,12 +1668,15 @@ function addItem() {
   const threshold = parseInt(document.getElementById('addThreshold').value) || 10;
   if (!name) { toast('Please enter an item name', 'error'); return; }
 
-  // Keep name clean — variation shown as separate chip on the card, not appended to name
   const id = uid();
   const displayName = variation ? `${name} (${variation})` : name;
-  items.push({ id, name: displayName, category, variation, qty, unit, threshold });
-  logs.unshift({ id: uid(), ts: new Date().toISOString(), itemId: id, itemName: displayName, type: 'ADD', change: qty, balance: qty, note: 'Item created' });
+  const newItem = { id, name: displayName, category, variation, qty, unit, threshold };
+  items.push(newItem);
+  const addLog = { id: uid(), ts: new Date().toISOString(), itemId: id, itemName: displayName, type: 'ADD', change: qty, balance: qty, note: 'Item created' };
+  logs.unshift(addLog);
   save(); renderAll(); closeModal('addModal');
+  dbSaveItem(newItem);
+  dbSaveLog(addLog, 0);
   toast(`"${displayName}" added to inventory`, 'success');
 }
 
@@ -1607,6 +1699,7 @@ function saveEdit() {
   item.unit      = document.getElementById('editUnit').value.trim() || item.unit;
   item.threshold = parseInt(document.getElementById('editThreshold').value) || 10;
   save(); renderAll(); closeModal('editModal');
+  dbSaveItem(item);
   toast('Item updated', 'success');
 }
 
@@ -1615,6 +1708,7 @@ function deleteItem() {
   if (!confirm('Delete this item? This cannot be undone.')) return;
   items = items.filter(i => i.id !== id);
   save(); renderAll(); closeModal('editModal');
+  dbDeleteItem(id);
   toast('Item deleted', 'error');
 }
 
@@ -1776,7 +1870,8 @@ function renderAll() {
   updateSidebarStats();
 }
 
-renderAll();
+// Start the app — load from Supabase
+initData();
 </script>
 </body>
 </html>
