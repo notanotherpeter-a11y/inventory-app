@@ -25,11 +25,28 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    /* Masterform background */
+    background-image: url('bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
   }
+  /* Dark overlay so text stays readable over the photo */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 12, 20, 0.82);
+    z-index: 0;
+    pointer-events: none;
+  }
+  nav, .main { position: relative; z-index: 1; }
 
   /* ── Top Nav ── */
   nav {
-    background: var(--surface);
+    background: rgba(26, 29, 39, 0.75);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
     padding: 0 28px;
     height: 64px;
@@ -83,7 +100,9 @@
     gap: 16px; margin-bottom: 28px;
   }
   .summary-card {
-    background: var(--surface);
+    background: rgba(26, 29, 39, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
     border-radius: var(--card-radius);
     padding: 20px;
@@ -97,7 +116,7 @@
   .summary-card.red { border-color: var(--red); }
 
   /* ── Tabs ── */
-  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--surface); padding: 4px; border-radius: 10px; width: fit-content; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: rgba(26,29,39,0.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 4px; border-radius: 10px; width: fit-content; }
   .tab {
     padding: 8px 18px; border-radius: 8px; border: none;
     background: transparent; color: var(--muted); cursor: pointer;
@@ -120,7 +139,9 @@
     gap: 16px;
   }
   .item-card {
-    background: var(--surface);
+    background: rgba(26, 29, 39, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
     border-radius: var(--card-radius);
     padding: 20px;
