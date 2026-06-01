@@ -620,8 +620,46 @@ function quickAdjust(id, dir) {
   if (diff === 0) return;
   item.qty = newQty;
   logs.unshift({ id: uid(), ts: new Date().toISOString(), itemId: id, itemName: item.name, type: diff > 0 ? 'IN' : 'OUT', change: diff, balance: newQty, note: 'Quick adjust' });
-  save(); renderAll();
+  save();
+  // Update only this card in-place — no full re-render so the card stays put
+  updateCardInPlace(item);
+  renderSummary();
   toast(diff > 0 ? `+${diff} added to ${item.name}` : `${diff} removed from ${item.name}`, diff > 0 ? 'success' : 'error');
+}
+
+// Update a single card's visuals without moving it in the grid
+function updateCardInPlace(item) {
+  const card = document.getElementById(`card-${item.id}`);
+  if (!card) return;
+
+  const status = stockStatus(item);
+  const color  = barColor(item);
+  const maxBar = Math.max(item.qty, item.threshold * 2, 1);
+  const fillPct = Math.min((item.qty / maxBar) * 100, 100);
+
+  // Card border class
+  card.className = `item-card ${status}`;
+
+  // Quantity number + colour
+  const qtyEl = card.querySelector('.item-qty');
+  if (qtyEl) { qtyEl.textContent = item.qty.toLocaleString(); qtyEl.style.color = color; }
+
+  // Status badge
+  const headerEl = card.querySelector('.item-header');
+  if (headerEl) {
+    const badge = headerEl.querySelector('.item-badge');
+    if (badge) badge.outerHTML; // placeholder — replace below
+    headerEl.innerHTML = headerEl.innerHTML.replace(
+      /<span class="item-badge[^"]*">[^<]*<\/span>/,
+      stockBadge(item)
+    );
+  }
+
+  // Progress bar fill + label
+  const fill = card.querySelector('.stock-bar-fill');
+  if (fill) { fill.style.width = fillPct + '%'; fill.style.background = color; }
+  const barLabel = card.querySelector('.stock-bar-label span:last-child');
+  if (barLabel) barLabel.textContent = `${item.qty} / ${item.threshold * 2} (target)`;
 }
 
 // ─── Transaction Modal ───────────────────────────────────────────────────────
