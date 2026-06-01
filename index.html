@@ -35,8 +35,10 @@
     min-height: 100vh;
     background-image: url('bg.jpg');
     background-size: cover;
-    background-position: center;
+    background-position: center center;
     background-attachment: fixed;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -44,7 +46,8 @@
     content: '';
     position: fixed;
     inset: 0;
-    background: rgba(5,6,12,0.88);
+    /* Gradient overlay: deeper at edges, slightly lighter centre so logo shows through */
+    background: radial-gradient(ellipse at center, rgba(5,6,12,0.82) 0%, rgba(5,6,12,0.94) 100%);
     z-index: 0;
     pointer-events: none;
   }
