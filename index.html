@@ -356,15 +356,13 @@
   /* Mobile logo in topbar */
   .topbar-mobile-logo {
     display: none;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     align-items: center;
     gap: 8px;
-    pointer-events: none;
+    cursor: pointer;
+    text-decoration: none;
   }
   .topbar-mobile-logo img {
-    height: 32px;
+    height: 28px;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 0 8px rgba(192,57,43,0.6));
@@ -1396,16 +1394,16 @@
   <div class="topbar" style="position:relative;">
     <div class="topbar-left">
       <button class="mobile-menu-btn" onclick="openMobileSidebar()" title="Open menu">☰</button>
+      <!-- Mobile logo — sits right next to burger, clicks go to Home -->
+      <div class="topbar-mobile-logo" onclick="sidebarSwitchTab('home')" title="Go to Home">
+        <img src="logo.png" alt="Masterform">
+        <span class="topbar-mobile-logo-text">Masterform</span>
+      </div>
       <div class="topbar-breadcrumb">
         <span class="topbar-breadcrumb-root">Masterform</span>
         <span class="topbar-breadcrumb-sep">/</span>
         <span class="topbar-breadcrumb-page" id="topbarTitle">Home</span>
       </div>
-    </div>
-    <!-- Mobile centered logo -->
-    <div class="topbar-mobile-logo">
-      <img src="logo.png" alt="Masterform">
-      <span class="topbar-mobile-logo-text">Masterform</span>
     </div>
     <div class="topbar-actions">
       <span class="sync-badge" id="syncStatus">⟳ Loading…</span>
