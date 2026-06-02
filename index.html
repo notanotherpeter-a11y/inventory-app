@@ -1022,6 +1022,177 @@
   @media (max-width: 500px) {
     .summary-grid { grid-template-columns: repeat(2, 1fr); }
   }
+
+  /* ════════════════════════════════════
+     PASSWORD PAGE
+  ════════════════════════════════════ */
+  .passwords-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .passwords-search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .passwords-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+  }
+  .pwd-card {
+    background: rgba(18,21,35,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 16px;
+    padding: 22px;
+    transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+  .pwd-card:hover {
+    background: rgba(24,27,44,0.97);
+    border-color: rgba(192,57,43,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  }
+  .pwd-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 10px;
+  }
+  .pwd-service {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .pwd-cat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .pwd-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+  .pwd-field-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    width: 52px;
+    flex-shrink: 0;
+  }
+  .pwd-field-value {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pwd-field-value.masked {
+    letter-spacing: 0.2em;
+    font-size: 11px;
+  }
+  .pwd-icon-btn {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s cubic-bezier(0.4,0,0.2,1);
+    flex-shrink: 0;
+  }
+  .pwd-icon-btn:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .pwd-icon-btn.del:hover {
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .pwd-url {
+    font-size: 11px;
+    color: #60a5fa;
+    text-decoration: none;
+    margin-bottom: 8px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 4px;
+  }
+  .pwd-url:hover { text-decoration: underline; }
+  .pwd-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+    line-height: 1.5;
+  }
+  .pwd-vis-wrap {
+    position: relative;
+  }
+  .pwd-vis-wrap .form-input {
+    padding-right: 44px;
+  }
+  .pwd-vis-toggle {
+    position: absolute;
+    right: 10px; top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    line-height: 1;
+  }
+  .page-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(245,158,11,0.07);
+    border: 1px solid rgba(245,158,11,0.15);
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: var(--yellow);
+    font-weight: 500;
+  }
 </style>
 </head>
 <body>
@@ -1044,6 +1215,13 @@
     <button class="nav-item" id="nav-log" onclick="sidebarSwitchTab('log')">
       <span class="nav-icon">📋</span>
       <span class="nav-label">Transaction Log</span>
+    </button>
+
+    <div class="sidebar-divider" style="margin: 8px 4px;"></div>
+
+    <button class="nav-item" id="nav-passwords" onclick="sidebarSwitchTab('passwords')">
+      <span class="nav-icon">🔐</span>
+      <span class="nav-label">Password Lists</span>
     </button>
 
     <div class="sidebar-divider" style="margin: 8px 4px;"></div>
@@ -1168,6 +1346,32 @@
       </div>
     </div>
 
+    <!-- Password Lists Page -->
+    <div id="page-passwords" style="display:none;">
+      <div class="passwords-header">
+        <div>
+          <div class="section-title" style="font-size:18px;">🔐 Password Lists</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Credentials saved on this device only</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddPasswordModal()">＋ Add Password</button>
+      </div>
+      <div class="page-banner">
+        ⚠️ Passwords are stored locally in your browser. They do not sync to the cloud.
+      </div>
+      <div class="passwords-search">
+        <input class="search-box" id="pwdSearch" placeholder="Search service or username…" oninput="renderPasswords()">
+        <select class="form-select" style="width:auto;padding:9px 14px;font-size:13px;border-radius:10px;" id="pwdCategoryFilter" onchange="renderPasswords()">
+          <option value="">All Categories</option>
+          <option value="Machine Login">Machine Login</option>
+          <option value="Software">Software</option>
+          <option value="Website">Website</option>
+          <option value="WiFi">WiFi</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="passwords-grid" id="passwordsGrid"></div>
+    </div>
+
   </div><!-- /.main -->
 </div><!-- /.layout -->
 
@@ -1273,6 +1477,51 @@
       <div style="flex:1;"></div>
       <button class="btn btn-subtle" onclick="closeModal('editModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Password Modal -->
+<div class="modal-overlay" id="pwdModal">
+  <div class="modal">
+    <div class="modal-title" id="pwdModalTitle">Add Password</div>
+    <input type="hidden" id="pwdEditId">
+    <div class="form-group">
+      <label class="form-label">Service / App Name</label>
+      <input class="form-input" id="pwdService" placeholder="e.g. HAN'S LASER Software, Office WiFi…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="pwdCategory">
+        <option value="Machine Login">Machine Login</option>
+        <option value="Software">Software</option>
+        <option value="Website">Website</option>
+        <option value="WiFi">WiFi</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Username / Email</label>
+      <input class="form-input" id="pwdUsername" placeholder="username or email" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="pwd-vis-wrap">
+        <input class="form-input" id="pwdPassword" type="password" placeholder="password" autocomplete="off">
+        <button type="button" class="pwd-vis-toggle" id="pwdVisBtn" onclick="togglePwdInputVis()">👁</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">URL (optional)</label>
+      <input class="form-input" id="pwdUrl" placeholder="https://…" type="url">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <input class="form-input" id="pwdNotes" placeholder="Any extra info…">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-subtle" onclick="closeModal('pwdModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePwd()">Save</button>
     </div>
   </div>
 </div>
@@ -1764,6 +2013,10 @@ function clearLog() {
 
 // ─── Tab Switching ────────────────────────────────────────────────────────────
 function switchTab(tab, el) {
+  // Hide password page, show main content
+  document.getElementById('page-passwords').style.display = 'none';
+  document.getElementById('summaryGrid').style.display = '';
+  document.querySelector('.tabs').style.display = '';
   document.getElementById('tab-inventory').style.display = tab === 'inventory' ? '' : 'none';
   document.getElementById('tab-log').style.display       = tab === 'log' ? '' : 'none';
   // Sync in-content tab buttons
@@ -1772,6 +2025,7 @@ function switchTab(tab, el) {
   // Sync sidebar nav items
   document.getElementById('nav-inventory').classList.toggle('active', tab === 'inventory');
   document.getElementById('nav-log').classList.toggle('active', tab === 'log');
+  document.getElementById('nav-passwords').classList.remove('active');
   // Update topbar title
   const titles = { inventory: 'Inventory', log: 'Transaction Log' };
   const topbarTitleEl = document.getElementById('topbarTitle');
@@ -1781,10 +2035,203 @@ function switchTab(tab, el) {
 
 // Called from sidebar nav items (no tab button element to pass)
 function sidebarSwitchTab(tab) {
+  if (tab === 'passwords') {
+    // Hide inventory content, show password page
+    document.getElementById('summaryGrid').style.display = 'none';
+    document.querySelector('.tabs').style.display = 'none';
+    document.getElementById('tab-inventory').style.display = 'none';
+    document.getElementById('tab-log').style.display = 'none';
+    document.getElementById('page-passwords').style.display = '';
+    // Sidebar active states
+    document.getElementById('nav-inventory').classList.remove('active');
+    document.getElementById('nav-log').classList.remove('active');
+    document.getElementById('nav-passwords').classList.add('active');
+    // Topbar title
+    const topbarTitleEl = document.getElementById('topbarTitle');
+    if (topbarTitleEl) topbarTitleEl.textContent = 'Password Lists';
+    renderPasswords();
+    closeMobileSidebar();
+    return;
+  }
   const tabBtn = document.getElementById(`tab-btn-${tab}`);
   switchTab(tab, tabBtn);
-  // On mobile, close sidebar after navigation
   closeMobileSidebar();
+}
+
+// ─── Passwords ────────────────────────────────────────────────────────────────
+let passwords = JSON.parse(localStorage.getItem('inv_passwords') || '[]');
+const pwdRevealSet = new Set();
+
+const PWD_CAT_STYLE = {
+  'Machine Login': { bg: 'rgba(192,57,43,0.12)',  color: '#e74c3c', border: 'rgba(192,57,43,0.25)',  icon: '⚙️' },
+  'Software':      { bg: 'rgba(59,130,246,0.12)',  color: '#3b82f6', border: 'rgba(59,130,246,0.25)',  icon: '💻' },
+  'Website':       { bg: 'rgba(16,185,129,0.12)',  color: '#10b981', border: 'rgba(16,185,129,0.25)',  icon: '🌐' },
+  'WiFi':          { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b', border: 'rgba(245,158,11,0.25)',  icon: '📶' },
+  'Other':         { bg: 'rgba(107,114,128,0.12)', color: '#9ca3af', border: 'rgba(107,114,128,0.25)', icon: '🔑' },
+};
+
+function savePwds() {
+  localStorage.setItem('inv_passwords', JSON.stringify(passwords));
+}
+
+function renderPasswords() {
+  const search = (document.getElementById('pwdSearch')?.value || '').toLowerCase();
+  const catFilter = document.getElementById('pwdCategoryFilter')?.value || '';
+  let filtered = passwords.filter(p => {
+    const matchCat = !catFilter || p.category === catFilter;
+    const matchSearch = !search ||
+      p.service.toLowerCase().includes(search) ||
+      (p.username || '').toLowerCase().includes(search) ||
+      (p.notes || '').toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+
+  const grid = document.getElementById('passwordsGrid');
+  if (!grid) return;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="icon">🔐</div><p>${passwords.length === 0 ? 'No passwords saved yet. Add your first one!' : 'No results found.'}</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const style = PWD_CAT_STYLE[p.category] || PWD_CAT_STYLE['Other'];
+    const revealed = pwdRevealSet.has(p.id);
+    const pwdLen = (p.password || '').length;
+    const maskedPwd = revealed ? (p.password || '') : '•'.repeat(Math.min(pwdLen || 8, 14));
+    const userRow = p.username ? `
+      <div class="pwd-field">
+        <span class="pwd-field-label">User</span>
+        <span class="pwd-field-value">${escHtml(p.username)}</span>
+        <button class="pwd-icon-btn" onclick="copyPwdField('${p.id}','user')" title="Copy username">📋</button>
+      </div>` : '';
+    const urlRow = p.url ? `<a class="pwd-url" href="${escHtml(p.url)}" target="_blank" rel="noopener noreferrer">🔗 ${escHtml(p.url)}</a>` : '';
+    const noteRow = p.notes ? `<div class="pwd-note">${escHtml(p.notes)}</div>` : '';
+    return `
+    <div class="pwd-card" id="pwdcard-${p.id}">
+      <div class="pwd-card-header">
+        <div style="min-width:0;flex:1;">
+          <div class="pwd-service">${escHtml(p.service)}</div>
+          <span class="pwd-cat-chip" style="background:${style.bg};color:${style.color};border:1px solid ${style.border};">${style.icon} ${p.category}</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="pwd-icon-btn" onclick="openEditPasswordModal('${p.id}')" title="Edit">✏️</button>
+          <button class="pwd-icon-btn del" onclick="deletePwd('${p.id}')" title="Delete">🗑</button>
+        </div>
+      </div>
+      ${userRow}
+      <div class="pwd-field">
+        <span class="pwd-field-label">Pass</span>
+        <span class="pwd-field-value ${revealed ? '' : 'masked'}" id="pwdv-${p.id}">${revealed ? escHtml(p.password || '') : maskedPwd}</span>
+        <button class="pwd-icon-btn" onclick="togglePwdReveal('${p.id}')" title="${revealed ? 'Hide' : 'Show'}" id="pwdrevealbtn-${p.id}">${revealed ? '🙈' : '👁'}</button>
+        <button class="pwd-icon-btn" onclick="copyPwdField('${p.id}','pass')" title="Copy password">📋</button>
+      </div>
+      ${urlRow}
+      ${noteRow}
+    </div>`;
+  }).join('');
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function togglePwdReveal(id) {
+  if (pwdRevealSet.has(id)) pwdRevealSet.delete(id);
+  else pwdRevealSet.add(id);
+  const p = passwords.find(x => x.id === id);
+  if (!p) return;
+  const revealed = pwdRevealSet.has(id);
+  const el = document.getElementById(`pwdv-${id}`);
+  const btn = document.getElementById(`pwdrevealbtn-${id}`);
+  if (el) {
+    el.textContent = revealed ? (p.password || '') : '•'.repeat(Math.min((p.password || '').length || 8, 14));
+    el.classList.toggle('masked', !revealed);
+  }
+  if (btn) btn.textContent = revealed ? '🙈' : '👁';
+}
+
+function copyPwdField(id, field) {
+  const p = passwords.find(x => x.id === id);
+  if (!p) return;
+  const text = field === 'user' ? p.username : p.password;
+  if (!text) { toast('Nothing to copy', 'error'); return; }
+  navigator.clipboard.writeText(text)
+    .then(() => toast(field === 'user' ? 'Username copied!' : 'Password copied!', 'success'))
+    .catch(() => toast('Copy failed — try manually', 'error'));
+}
+
+function openAddPasswordModal() {
+  document.getElementById('pwdModalTitle').textContent = 'Add Password';
+  document.getElementById('pwdEditId').value = '';
+  document.getElementById('pwdService').value = '';
+  document.getElementById('pwdCategory').selectedIndex = 0;
+  document.getElementById('pwdUsername').value = '';
+  document.getElementById('pwdPassword').value = '';
+  document.getElementById('pwdPassword').type = 'password';
+  document.getElementById('pwdVisBtn').textContent = '👁';
+  document.getElementById('pwdUrl').value = '';
+  document.getElementById('pwdNotes').value = '';
+  openModal('pwdModal');
+  setTimeout(() => document.getElementById('pwdService').focus(), 200);
+}
+
+function openEditPasswordModal(id) {
+  const p = passwords.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('pwdModalTitle').textContent = 'Edit Password';
+  document.getElementById('pwdEditId').value = id;
+  document.getElementById('pwdService').value = p.service || '';
+  document.getElementById('pwdCategory').value = p.category || 'Other';
+  document.getElementById('pwdUsername').value = p.username || '';
+  document.getElementById('pwdPassword').value = p.password || '';
+  document.getElementById('pwdPassword').type = 'password';
+  document.getElementById('pwdVisBtn').textContent = '👁';
+  document.getElementById('pwdUrl').value = p.url || '';
+  document.getElementById('pwdNotes').value = p.notes || '';
+  openModal('pwdModal');
+}
+
+function togglePwdInputVis() {
+  const input = document.getElementById('pwdPassword');
+  const btn   = document.getElementById('pwdVisBtn');
+  if (input.type === 'password') { input.type = 'text';     btn.textContent = '🙈'; }
+  else                           { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+function savePwd() {
+  const service = document.getElementById('pwdService').value.trim();
+  if (!service) { toast('Please enter a service name', 'error'); return; }
+  const editId = document.getElementById('pwdEditId').value;
+  const data = {
+    service,
+    category: document.getElementById('pwdCategory').value,
+    username: document.getElementById('pwdUsername').value.trim(),
+    password: document.getElementById('pwdPassword').value,
+    url:      document.getElementById('pwdUrl').value.trim(),
+    notes:    document.getElementById('pwdNotes').value.trim(),
+  };
+  if (editId) {
+    const idx = passwords.findIndex(p => p.id === editId);
+    if (idx !== -1) passwords[idx] = { ...passwords[idx], ...data };
+    toast(`"${service}" updated`, 'success');
+  } else {
+    passwords.unshift({ id: uid(), ...data });
+    toast(`"${service}" saved`, 'success');
+  }
+  savePwds();
+  closeModal('pwdModal');
+  renderPasswords();
+}
+
+function deletePwd(id) {
+  const p = passwords.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm(`Delete "${p.service}"? This cannot be undone.`)) return;
+  passwords = passwords.filter(x => x.id !== id);
+  savePwds();
+  renderPasswords();
+  toast(`"${p.service}" deleted`, 'error');
 }
 
 // ─── Sidebar Collapse / Expand ────────────────────────────────────────────────
