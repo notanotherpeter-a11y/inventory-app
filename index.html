@@ -2880,7 +2880,19 @@ function sendOrderEmail() {
   const mailtoLink = `mailto:genecarlogallardo@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   window.location.href = mailtoLink;
-  toast('Opening email client…', 'success');
+
+  // Reset all quantities to 0 and status back to pending after sending
+  setTimeout(() => {
+    orders.forEach(o => {
+      o.qty = 0;
+      o.status = 'pending';
+      o.orderedAt = null;
+      o.receivedAt = null;
+    });
+    saveOrders();
+    renderOrders();
+    toast('Order sent — quantities reset to zero', 'success');
+  }, 800);
 }
 
 function deleteOrder(id) {
