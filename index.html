@@ -1777,7 +1777,7 @@
   <div class="modal">
     <div class="modal-title">✉ Email Settings</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
-      Orders are sent via <strong>Gmail web compose</strong> — make sure you're logged into Gmail in this browser. The sender will be whoever is currently logged in.
+      Emails are sent directly from your Gmail account via the backend. Your email and App Password are stored securely in Vercel — never in the app.
     </div>
     <div class="form-group">
       <label class="form-label">Send To (Recipient)</label>
@@ -2931,14 +2931,27 @@ function sendOrderEmail() {
 
   const subject = `Masterform Order List — ${new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}`;
 
-  // Build Gmail web compose URL (opens in Gmail directly — no mail client needed)
-  let gmailUrl = `https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(emailSettings.to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  if (emailSettings.cc) gmailUrl += `&cc=${encodeURIComponent(emailSettings.cc)}`;
+  // Send via backend API (one click — no compose window)
+  const sendBtn = document.querySelector('[onclick="sendOrderEmail()"]');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ Sending…'; }
 
-  window.open(gmailUrl, '_blank');
+  try {
+    const res = await fetch('/api/send-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: emailSettings.to,
+        cc: emailSettings.cc || '',
+        subject,
+        body,
+      }),
+    });
 
-  // Reset all quantities to 0 and status back to pending after sending
-  setTimeout(() => {
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Send failed');
+
+    // Reset all quantities to 0 and status back to pending after sending
     orders.forEach(o => {
       o.qty = 0;
       o.status = 'pending';
@@ -2947,8 +2960,13 @@ function sendOrderEmail() {
     });
     saveOrders();
     renderOrders();
-    toast('Order sent — quantities reset to zero', 'success');
-  }, 800);
+    toast('✅ Order sent! Quantities reset to zero.', 'success');
+
+  } catch (err) {
+    toast(`❌ ${err.message}`, 'error');
+  } finally {
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '✉ Send Order'; }
+  }
 }
 
 function deleteOrder(id) {
