@@ -1624,6 +1624,7 @@
           <div style="font-size:12px;color:var(--muted);margin-top:4px;">Track items that need to be ordered</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-subtle btn-sm" onclick="openEmailSettingsModal()" title="Email Settings">⚙ Email</button>
           <button class="btn btn-outline btn-sm" onclick="sendOrderEmail()">✉ Send Order</button>
           <button class="btn btn-primary btn-sm" onclick="openAddOrderModal()">＋ Add Item</button>
         </div>
@@ -1767,6 +1768,31 @@
       <div style="flex:1;"></div>
       <button class="btn btn-subtle" onclick="closeModal('editModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Settings Modal -->
+<div class="modal-overlay" id="emailSettingsModal">
+  <div class="modal">
+    <div class="modal-title">✉ Email Settings</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
+      Orders are sent via <strong>Gmail web compose</strong> — make sure you're logged into Gmail in this browser. The sender will be whoever is currently logged in.
+    </div>
+    <div class="form-group">
+      <label class="form-label">Send To (Recipient)</label>
+      <input class="form-input" id="emailTo" type="email" placeholder="recipient@gmail.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">CC (optional)</label>
+      <input class="form-input" id="emailCc" type="email" placeholder="cc@gmail.com">
+    </div>
+    <div style="padding:12px 14px;background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.15);border-radius:10px;font-size:12px;color:#60a5fa;line-height:1.6;">
+      💡 Tip: Open Gmail in this browser and stay logged in. When you press <strong>Send Order</strong>, Gmail compose will open automatically with the order pre-filled.
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-subtle" onclick="closeModal('emailSettingsModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEmailSettings()">Save</button>
     </div>
   </div>
 </div>
@@ -2844,12 +2870,39 @@ function saveOrder() {
   renderOrders();
 }
 
+// ─── Email Settings ───────────────────────────────────────────────────────────
+let emailSettings = JSON.parse(localStorage.getItem('order_email_settings') || 'null') || {
+  to: 'genecarlogallardo@gmail.com',
+  cc: ''
+};
+
+function saveEmailSettingsToStorage() {
+  localStorage.setItem('order_email_settings', JSON.stringify(emailSettings));
+}
+
+function openEmailSettingsModal() {
+  document.getElementById('emailTo').value = emailSettings.to;
+  document.getElementById('emailCc').value = emailSettings.cc || '';
+  openModal('emailSettingsModal');
+}
+
+function saveEmailSettings() {
+  const to = document.getElementById('emailTo').value.trim();
+  if (!to) { toast('Please enter a recipient email', 'error'); return; }
+  emailSettings.to = to;
+  emailSettings.cc = document.getElementById('emailCc').value.trim();
+  saveEmailSettingsToStorage();
+  closeModal('emailSettingsModal');
+  toast('Email settings saved', 'success');
+}
+
 function sendOrderEmail() {
   const toSend = orders.filter(o => o.status !== 'received');
   if (toSend.length === 0) {
     toast('No pending or ordered items to send', 'error');
     return;
   }
+
   const dateStr = new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   const priOrder = { urgent:0, high:1, normal:2, low:3 };
   const sorted = [...toSend].sort((a,b) => priOrder[a.priority] - priOrder[b.priority]);
@@ -2877,9 +2930,12 @@ function sendOrderEmail() {
   body += `Thank you,\nMasterform Systems`;
 
   const subject = `Masterform Order List — ${new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}`;
-  const mailtoLink = `mailto:genecarlogallardo@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-  window.location.href = mailtoLink;
+  // Build Gmail web compose URL (opens in Gmail directly — no mail client needed)
+  let gmailUrl = `https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(emailSettings.to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (emailSettings.cc) gmailUrl += `&cc=${encodeURIComponent(emailSettings.cc)}`;
+
+  window.open(gmailUrl, '_blank');
 
   // Reset all quantities to 0 and status back to pending after sending
   setTimeout(() => {
