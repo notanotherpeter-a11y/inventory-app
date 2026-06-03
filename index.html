@@ -1623,7 +1623,10 @@
           <div class="section-title" style="font-size:18px;">🛒 Order List</div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;">Track items that need to be ordered</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="openAddOrderModal()">＋ Add Item</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="sendOrderEmail()">✉ Send Order</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddOrderModal()">＋ Add Item</button>
+        </div>
       </div>
 
       <!-- Summary pills -->
@@ -2839,6 +2842,45 @@ function saveOrder() {
   saveOrders();
   closeModal('orderModal');
   renderOrders();
+}
+
+function sendOrderEmail() {
+  const toSend = orders.filter(o => o.status !== 'received');
+  if (toSend.length === 0) {
+    toast('No pending or ordered items to send', 'error');
+    return;
+  }
+  const dateStr = new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const priOrder = { urgent:0, high:1, normal:2, low:3 };
+  const sorted = [...toSend].sort((a,b) => priOrder[a.priority] - priOrder[b.priority]);
+
+  const STATUS_EMOJI = { pending: '⏳', ordered: '📦', received: '✅' };
+  const PRI_EMOJI    = { urgent: '🔴', high: '🟠', normal: '🟡', low: '⚪' };
+
+  let body = `Hi,\n\nPlease find below the current order list from Masterform Systems as of ${dateStr}:\n\n`;
+  body += `${'─'.repeat(40)}\n`;
+  body += `ITEMS TO ORDER\n`;
+  body += `${'─'.repeat(40)}\n\n`;
+
+  sorted.forEach((o, i) => {
+    body += `${i + 1}. ${o.name}\n`;
+    body += `   Qty Needed : ${o.qty > 0 ? o.qty + ' ' + o.unit : 'TBC'}\n`;
+    body += `   Priority   : ${PRI_EMOJI[o.priority]} ${o.priority.charAt(0).toUpperCase() + o.priority.slice(1)}\n`;
+    body += `   Status     : ${STATUS_EMOJI[o.status]} ${o.status.charAt(0).toUpperCase() + o.status.slice(1)}\n`;
+    if (o.notes) body += `   Notes      : ${o.notes}\n`;
+    body += '\n';
+  });
+
+  body += `${'─'.repeat(40)}\n`;
+  body += `Total items listed: ${sorted.length}\n\n`;
+  body += `Please confirm receipt and advise on availability and lead times.\n\n`;
+  body += `Thank you,\nMasterform Systems`;
+
+  const subject = `Masterform Order List — ${new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}`;
+  const mailtoLink = `mailto:genecarlogallardo@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  window.location.href = mailtoLink;
+  toast('Opening email client…', 'success');
 }
 
 function deleteOrder(id) {
