@@ -2262,7 +2262,17 @@ function renderHome() {
 }
 
 // ─── Passwords ────────────────────────────────────────────────────────────────
+const DEFAULT_PASSWORDS = [
+  { service: 'NCPrg', category: 'Machine Login', username: '', password: 'hans901', url: '', notes: 'HAN\'S LASER NC Program' },
+  { service: 'Pdata Program', category: 'Software', username: 'Admin', password: '1111', url: '', notes: '' },
+];
+
 let passwords = JSON.parse(localStorage.getItem('inv_passwords') || '[]');
+// Seed defaults if first time
+if (passwords.length === 0) {
+  passwords = DEFAULT_PASSWORDS.map(d => ({ id: uid(), ...d }));
+  localStorage.setItem('inv_passwords', JSON.stringify(passwords));
+}
 const pwdRevealSet = new Set();
 
 const PWD_CAT_STYLE = {
