@@ -1314,6 +1314,90 @@
     font-weight: 700;
     flex-shrink: 0;
   }
+
+  /* ════════════════════════════════════
+     ORDER LIST PAGE
+  ════════════════════════════════════ */
+  .order-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .order-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .order-table-wrap {
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .order-status-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    white-space: nowrap;
+  }
+  .order-status-btn:hover { filter: brightness(1.15); transform: scale(1.04); }
+  .status-pending  { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.25); }
+  .status-ordered  { background: rgba(59,130,246,0.12);  color: #3b82f6; border: 1px solid rgba(59,130,246,0.25); }
+  .status-received { background: rgba(16,185,129,0.12);  color: #10b981; border: 1px solid rgba(16,185,129,0.25); }
+  .priority-low    { background: rgba(107,114,128,0.1); color: #9ca3af; border: 1px solid rgba(107,114,128,0.2); font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .priority-normal { background: rgba(59,130,246,0.1);  color: #3b82f6; border: 1px solid rgba(59,130,246,0.2);  font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .priority-high   { background: rgba(245,158,11,0.1);  color: #f59e0b; border: 1px solid rgba(245,158,11,0.2);  font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .priority-urgent { background: rgba(239,68,68,0.1);   color: #ef4444; border: 1px solid rgba(239,68,68,0.2);   font-size:10px; padding:3px 8px; border-radius:20px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+  .order-qty-input {
+    width: 70px;
+    padding: 6px 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .order-qty-input:focus { border-color: var(--accent); }
+  .order-qty-input::-webkit-outer-spin-button,
+  .order-qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .order-qty-input[type=number] { -moz-appearance: textfield; }
+  .order-summary-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .order-summary-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(18,21,35,0.92);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .order-summary-pill span { font-weight: 800; font-size: 16px; }
 </style>
 </head>
 <body>
@@ -1347,6 +1431,10 @@
     <button class="nav-item" id="nav-passwords" onclick="sidebarSwitchTab('passwords')">
       <span class="nav-icon">🔐</span>
       <span class="nav-label">Password Lists</span>
+    </button>
+    <button class="nav-item" id="nav-orders" onclick="sidebarSwitchTab('orders')">
+      <span class="nav-icon">🛒</span>
+      <span class="nav-label">Order List</span>
     </button>
 
     <div class="sidebar-divider" style="margin: 8px 4px;"></div>
@@ -1528,6 +1616,49 @@
       <div class="passwords-grid" id="passwordsGrid"></div>
     </div>
 
+    <!-- ── ORDER LIST PAGE ── -->
+    <div id="page-orders" style="display:none;">
+      <div class="order-header">
+        <div>
+          <div class="section-title" style="font-size:18px;">🛒 Order List</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Track items that need to be ordered</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddOrderModal()">＋ Add Item</button>
+      </div>
+
+      <!-- Summary pills -->
+      <div class="order-summary-bar" id="orderSummaryBar"></div>
+
+      <!-- Filters -->
+      <div class="order-filters">
+        <input class="search-box" id="orderSearch" placeholder="Search item…" oninput="renderOrders()">
+        <select class="form-select" style="width:auto;padding:9px 14px;font-size:13px;border-radius:10px;" id="orderStatusFilter" onchange="renderOrders()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="ordered">Ordered</option>
+          <option value="received">Received</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="order-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty Needed</th>
+              <th>Unit</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="orderBody"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /.main -->
 </div><!-- /.layout -->
 
@@ -1633,6 +1764,45 @@
       <div style="flex:1;"></div>
       <button class="btn btn-subtle" onclick="closeModal('editModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add / Edit Order Modal -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <div class="modal-title" id="orderModalTitle">Add Order Item</div>
+    <input type="hidden" id="orderEditId">
+    <div class="form-group">
+      <label class="form-label">Item Name</label>
+      <input class="form-input" id="orderName" placeholder="e.g. Metal Sheet 0.95mm">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Qty Needed</label>
+        <input class="form-input" id="orderQty" type="number" placeholder="0" min="0" value="1">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Unit</label>
+        <input class="form-input" id="orderUnit" placeholder="sheets, pcs, kg…" value="sheets">
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:16px;">
+      <label class="form-label">Priority</label>
+      <select class="form-select" id="orderPriority">
+        <option value="low">Low</option>
+        <option value="normal" selected>Normal</option>
+        <option value="high">High</option>
+        <option value="urgent">Urgent</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <input class="form-input" id="orderNotes" placeholder="Supplier, specs, context…">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-subtle" onclick="closeModal('orderModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOrder()">Save</button>
     </div>
   </div>
 </div>
@@ -2168,8 +2338,8 @@ function clearLog() {
 }
 
 // ─── Page Navigation ──────────────────────────────────────────────────────────
-const PAGES = ['home', 'inventory', 'log', 'passwords'];
-const PAGE_TITLES = { home: 'Home', inventory: 'Inventory', log: 'Transaction Log', passwords: 'Password Lists' };
+const PAGES = ['home', 'inventory', 'log', 'passwords', 'orders'];
+const PAGE_TITLES = { home: 'Home', inventory: 'Inventory', log: 'Transaction Log', passwords: 'Password Lists', orders: 'Order List' };
 
 function sidebarSwitchTab(page) {
   // Hide all pages
@@ -2196,6 +2366,7 @@ function sidebarSwitchTab(page) {
   if (page === 'inventory') renderInventory();
   if (page === 'log')       renderLog();
   if (page === 'passwords') renderPasswords();
+  if (page === 'orders')    renderOrders();
 
   closeMobileSidebar();
 }
@@ -2522,6 +2693,162 @@ function exportData() {
   const now = new Date();
   el.textContent = now.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 })();
+
+// ─── Order List ───────────────────────────────────────────────────────────────
+const DEFAULT_ORDERS = [
+  { name: 'Metal Sheet 1.5mm',  qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
+  { name: 'Metal Sheet 1.2mm',  qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
+  { name: 'Metal Sheet 0.95mm', qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
+  { name: 'Metal Sheet 0.75mm', qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
+  { name: 'Carbon Sheet',       qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
+];
+
+let orders = JSON.parse(localStorage.getItem('inv_orders') || '[]');
+if (orders.length === 0) {
+  orders = DEFAULT_ORDERS.map(d => ({ id: uid(), ...d, createdAt: new Date().toISOString() }));
+  localStorage.setItem('inv_orders', JSON.stringify(orders));
+}
+
+function saveOrders() { localStorage.setItem('inv_orders', JSON.stringify(orders)); }
+
+const STATUS_CYCLE = { pending: 'ordered', ordered: 'received', received: 'pending' };
+const STATUS_LABELS = { pending: '⏳ Pending', ordered: '📦 Ordered', received: '✅ Received' };
+const STATUS_CLASS  = { pending: 'status-pending', ordered: 'status-ordered', received: 'status-received' };
+const PRIORITY_LABELS = { low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' };
+
+function cycleOrderStatus(id) {
+  const order = orders.find(o => o.id === id);
+  if (!order) return;
+  order.status = STATUS_CYCLE[order.status] || 'pending';
+  if (order.status === 'ordered')  order.orderedAt  = new Date().toISOString();
+  if (order.status === 'received') order.receivedAt = new Date().toISOString();
+  saveOrders();
+  renderOrders();
+  toast(`${order.name} → ${STATUS_LABELS[order.status]}`, 'success');
+}
+
+function updateOrderQty(id, val) {
+  const order = orders.find(o => o.id === id);
+  if (!order) return;
+  order.qty = parseInt(val) || 0;
+  saveOrders();
+}
+
+function renderOrderSummary() {
+  const bar = document.getElementById('orderSummaryBar');
+  if (!bar) return;
+  const pending  = orders.filter(o => o.status === 'pending').length;
+  const ordered  = orders.filter(o => o.status === 'ordered').length;
+  const received = orders.filter(o => o.status === 'received').length;
+  bar.innerHTML = `
+    <div class="order-summary-pill">⏳ Pending <span style="color:#9ca3af">${pending}</span></div>
+    <div class="order-summary-pill">📦 Ordered <span style="color:#3b82f6">${ordered}</span></div>
+    <div class="order-summary-pill">✅ Received <span style="color:var(--green)">${received}</span></div>
+    <div class="order-summary-pill">Total <span style="color:var(--text)">${orders.length}</span></div>
+  `;
+}
+
+function renderOrders() {
+  renderOrderSummary();
+  const search    = (document.getElementById('orderSearch')?.value || '').toLowerCase();
+  const statusF   = document.getElementById('orderStatusFilter')?.value || '';
+  let filtered = orders.filter(o => {
+    const matchS = !statusF || o.status === statusF;
+    const matchQ = !search  || o.name.toLowerCase().includes(search) || (o.notes||'').toLowerCase().includes(search);
+    return matchS && matchQ;
+  });
+
+  // Sort: urgent → high → normal → low, then by status pending first
+  const priOrder = { urgent:0, high:1, normal:2, low:3 };
+  const stOrder  = { pending:0, ordered:1, received:2 };
+  filtered.sort((a,b) => stOrder[a.status] - stOrder[b.status] || priOrder[a.priority] - priOrder[b.priority]);
+
+  const tbody = document.getElementById('orderBody');
+  if (!tbody) return;
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:48px;font-weight:500;">No items found</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map(o => `
+    <tr>
+      <td style="font-weight:600;font-size:13px;">${escHtml(o.name)}</td>
+      <td>
+        <input class="order-qty-input" type="number" value="${o.qty}" min="0"
+          onchange="updateOrderQty('${o.id}', this.value)"
+          onblur="updateOrderQty('${o.id}', this.value)">
+      </td>
+      <td style="color:var(--muted);font-size:12px;font-weight:500;">${escHtml(o.unit)}</td>
+      <td><span class="priority-${o.priority}">${PRIORITY_LABELS[o.priority]}</span></td>
+      <td>
+        <button class="order-status-btn ${STATUS_CLASS[o.status]}" onclick="cycleOrderStatus('${o.id}')" title="Click to advance status">
+          ${STATUS_LABELS[o.status]}
+        </button>
+      </td>
+      <td style="color:var(--muted);font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(o.notes) || '—'}</td>
+      <td style="text-align:right;white-space:nowrap;">
+        <button class="pwd-icon-btn" onclick="openEditOrderModal('${o.id}')" title="Edit" style="display:inline-flex;">✏️</button>
+        <button class="pwd-icon-btn del" onclick="deleteOrder('${o.id}')" title="Delete" style="display:inline-flex;margin-left:4px;">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function openAddOrderModal() {
+  document.getElementById('orderModalTitle').textContent = 'Add Order Item';
+  document.getElementById('orderEditId').value = '';
+  document.getElementById('orderName').value = '';
+  document.getElementById('orderQty').value = 1;
+  document.getElementById('orderUnit').value = 'sheets';
+  document.getElementById('orderPriority').value = 'normal';
+  document.getElementById('orderNotes').value = '';
+  openModal('orderModal');
+  setTimeout(() => document.getElementById('orderName').focus(), 200);
+}
+
+function openEditOrderModal(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('orderModalTitle').textContent = 'Edit Order Item';
+  document.getElementById('orderEditId').value = id;
+  document.getElementById('orderName').value = o.name;
+  document.getElementById('orderQty').value = o.qty;
+  document.getElementById('orderUnit').value = o.unit;
+  document.getElementById('orderPriority').value = o.priority;
+  document.getElementById('orderNotes').value = o.notes || '';
+  openModal('orderModal');
+}
+
+function saveOrder() {
+  const name = document.getElementById('orderName').value.trim();
+  if (!name) { toast('Please enter an item name', 'error'); return; }
+  const editId = document.getElementById('orderEditId').value;
+  const data = {
+    name,
+    qty:      parseInt(document.getElementById('orderQty').value) || 0,
+    unit:     document.getElementById('orderUnit').value.trim() || 'sheets',
+    priority: document.getElementById('orderPriority').value,
+    notes:    document.getElementById('orderNotes').value.trim(),
+  };
+  if (editId) {
+    const idx = orders.findIndex(o => o.id === editId);
+    if (idx !== -1) orders[idx] = { ...orders[idx], ...data };
+    toast(`"${name}" updated`, 'success');
+  } else {
+    orders.push({ id: uid(), status: 'pending', createdAt: new Date().toISOString(), ...data });
+    toast(`"${name}" added to order list`, 'success');
+  }
+  saveOrders();
+  closeModal('orderModal');
+  renderOrders();
+}
+
+function deleteOrder(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o || !confirm(`Remove "${o.name}" from order list?`)) return;
+  orders = orders.filter(x => x.id !== id);
+  saveOrders();
+  renderOrders();
+  toast(`"${o.name}" removed`, 'error');
+}
 
 // ─── Render All ───────────────────────────────────────────────────────────────
 function renderAll() {
