@@ -1614,6 +1614,10 @@
       <span class="nav-icon">🏢</span>
       <span class="nav-label">Clients</span>
     </button>
+    <button class="nav-item" id="nav-drivers" onclick="sidebarSwitchTab('drivers')">
+      <span class="nav-icon">🚗</span>
+      <span class="nav-label">Drivers</span>
+    </button>
 
   </nav>
 
@@ -1891,6 +1895,7 @@
               <th>Client</th>
               <th>Job #</th>
               <th>Items</th>
+              <th>Driver</th>
               <th>Order Date</th>
               <th>Expected Delivery</th>
               <th>Status</th>
@@ -1960,8 +1965,92 @@
 
     </div>
 
+    <!-- Drivers Page -->
+    <div id="page-drivers" style="display:none;">
+
+      <!-- Driver List View -->
+      <div id="driverListView">
+        <div class="section-header">
+          <div>
+            <div class="section-title" style="font-size:18px;">🚗 Drivers</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Driver profiles and assigned deliveries</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-input" id="driverSearch" placeholder="🔍 Search driver…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderDrivers()">
+            <button class="btn btn-primary" onclick="openDriverModal()">➕ Add Driver</button>
+          </div>
+        </div>
+        <div id="driverGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:4px;"></div>
+        <div id="driverEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">No drivers found. Click <strong>➕ Add Driver</strong> to get started.</div>
+      </div>
+
+      <!-- Driver Detail View -->
+      <div id="driverDetailView" style="display:none;">
+        <div class="section-header" style="margin-bottom:16px;">
+          <button class="btn btn-subtle btn-sm" onclick="closeDriverDetail()" style="display:flex;align-items:center;gap:6px;">← Back to Drivers</button>
+        </div>
+
+        <!-- Driver Info Card -->
+        <div id="driverInfoCard" style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:24px;margin-bottom:20px;"></div>
+
+        <!-- Driver Delivery Stats -->
+        <div id="driverDeliveryStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
+
+        <!-- Driver Delivery Table -->
+        <div class="table-wrap">
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Job #</th>
+                <th>Items</th>
+                <th>Order Date</th>
+                <th>Expected Delivery</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="driverDeliveryBody"></tbody>
+          </table>
+          <div id="driverDeliveryEmpty" style="text-align:center;padding:32px;color:var(--muted);display:none;">No deliveries assigned to this driver yet.</div>
+        </div>
+      </div>
+
+    </div>
+
   </div><!-- /.main -->
 </div><!-- /.layout -->
+
+<!-- Driver Modal -->
+<div class="modal-overlay" id="driverModal">
+  <div class="modal">
+    <div class="modal-title" id="driverModalTitle">Add Driver</div>
+    <input type="hidden" id="driverEditId">
+    <div class="form-group">
+      <label class="form-label">Full Name *</label>
+      <input class="form-input" id="drvName" placeholder="e.g. John Smith">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" id="drvPhone" placeholder="e.g. 0400 000 000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vehicle</label>
+        <input class="form-input" id="drvVehicle" placeholder="e.g. White Truck">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="drvNotes" placeholder="Licence, availability, etc.">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-subtle" onclick="closeModal('driverModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDriver()">Save</button>
+    </div>
+  </div>
+</div>
 
 <!-- Client Modal -->
 <div class="modal-overlay" id="clientModal">
@@ -2035,6 +2124,12 @@
         <label class="form-label">Expected Delivery</label>
         <input class="form-input" type="date" id="dlvDeliveryDate">
       </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Assign Driver</label>
+      <select class="form-input" id="dlvDriver">
+        <option value="">— No driver assigned —</option>
+      </select>
     </div>
     <div class="form-group">
       <label class="form-label">Notes</label>
@@ -2847,8 +2942,8 @@ function clearLog() {
 }
 
 // ─── Page Navigation ──────────────────────────────────────────────────────────
-const PAGES = ['home', 'inventory', 'log', 'passwords', 'orders', 'laser', 'delivery', 'clients'];
-const PAGE_TITLES = { home: 'Home', inventory: 'Inventory', log: 'Transaction Log', passwords: 'Password Lists', orders: 'Order List', laser: 'Laser Instructions', delivery: 'Delivery Status', clients: 'Clients' };
+const PAGES = ['home', 'inventory', 'log', 'passwords', 'orders', 'laser', 'delivery', 'clients', 'drivers'];
+const PAGE_TITLES = { home: 'Home', inventory: 'Inventory', log: 'Transaction Log', passwords: 'Password Lists', orders: 'Order List', laser: 'Laser Instructions', delivery: 'Delivery Status', clients: 'Clients', drivers: 'Drivers' };
 
 function sidebarSwitchTab(page) {
   // Hide all pages
@@ -2878,6 +2973,7 @@ function sidebarSwitchTab(page) {
   if (page === 'orders')    renderOrders();
   if (page === 'delivery')  renderDelivery();
   if (page === 'clients')   renderClients();
+  if (page === 'drivers')   renderDrivers();
 
   closeMobileSidebar();
 }
@@ -3546,6 +3642,199 @@ function renderAll() {
 // Start the app — load from Supabase, open on Home page
 initData();
 
+// ─── Drivers ─────────────────────────────────────────────────────────────────
+let drivers = JSON.parse(localStorage.getItem('inv_drivers') || '[]');
+
+function saveDriversLocal() {
+  localStorage.setItem('inv_drivers', JSON.stringify(drivers));
+}
+
+function renderDrivers() {
+  const search = (document.getElementById('driverSearch')?.value || '').toLowerCase();
+  const list = drivers.filter(d => !search || d.name.toLowerCase().includes(search));
+
+  const grid = document.getElementById('driverGrid');
+  const empty = document.getElementById('driverEmpty');
+  if (!list.length) { grid.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  grid.innerHTML = list.map(d => {
+    const dDeliveries = deliveries.filter(x => x.driver === d.name);
+    const active    = dDeliveries.filter(x => x.status !== 'Delivered' && x.status !== 'Cancelled').length;
+    const delivered = dDeliveries.filter(x => x.status === 'Delivered').length;
+    const initials  = d.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    return `
+      <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:20px;cursor:pointer;transition:border-color 0.2s,transform 0.15s;"
+           onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.borderColor='var(--surface-border)';this.style.transform=''"
+           onclick="openDriverDetail('${d.id}')">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+          <div style="width:44px;height:44px;border-radius:50%;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#3b82f6;flex-shrink:0;">${initials}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.name}</div>
+            <div style="font-size:11px;color:var(--muted);">${d.vehicle || 'No vehicle set'}</div>
+          </div>
+          <div style="display:flex;gap:4px;">
+            <button class="btn btn-subtle btn-sm" onclick="event.stopPropagation();openDriverModal('${d.id}')" title="Edit">✏</button>
+            <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="event.stopPropagation();deleteDriver('${d.id}')" title="Delete">🗑</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+          <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px;">
+            <div style="font-size:18px;font-weight:800;">${dDeliveries.length}</div>
+            <div style="font-size:10px;color:var(--muted);">Total</div>
+          </div>
+          <div style="background:rgba(245,158,11,0.1);border-radius:8px;padding:8px;">
+            <div style="font-size:18px;font-weight:800;color:#f59e0b;">${active}</div>
+            <div style="font-size:10px;color:var(--muted);">Active</div>
+          </div>
+          <div style="background:rgba(16,185,129,0.1);border-radius:8px;padding:8px;">
+            <div style="font-size:18px;font-weight:800;color:#10b981;">${delivered}</div>
+            <div style="font-size:10px;color:var(--muted);">Delivered</div>
+          </div>
+        </div>
+        ${d.phone ? `<div style="font-size:11px;color:var(--muted);margin-top:12px;">📞 ${d.phone}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function openDriverDetail(id) {
+  activeDriverId = id;
+  const d = drivers.find(x => x.id === id);
+  if (!d) return;
+
+  document.getElementById('driverListView').style.display = 'none';
+  document.getElementById('driverDetailView').style.display = '';
+
+  const titleEl = document.getElementById('topbarTitle');
+  if (titleEl) titleEl.textContent = d.name;
+
+  const initials = d.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('driverInfoCard').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="width:56px;height:56px;border-radius:50%;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#3b82f6;">${initials}</div>
+      <div style="flex:1;">
+        <div style="font-size:22px;font-weight:800;">${d.name}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;">
+          ${d.phone   ? `<span style="font-size:13px;color:var(--muted);">📞 ${d.phone}</span>` : ''}
+          ${d.vehicle ? `<span style="font-size:13px;color:var(--muted);">🚗 ${d.vehicle}</span>` : ''}
+          ${d.notes   ? `<span style="font-size:13px;color:var(--muted);">📝 ${d.notes}</span>` : ''}
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="openDriverModal('${d.id}')">✏ Edit Profile</button>
+    </div>`;
+
+  renderDriverDeliveries(d.name);
+}
+
+let activeDriverId = null;
+
+function renderDriverDeliveries(driverName) {
+  const list = deliveries
+    .filter(d => d.driver === driverName)
+    .sort((a, b) => {
+      const aDone = a.status === 'Delivered' || a.status === 'Cancelled';
+      const bDone = b.status === 'Delivered' || b.status === 'Cancelled';
+      if (aDone !== bDone) return aDone ? 1 : -1;
+      return (b.orderDate || '').localeCompare(a.orderDate || '');
+    });
+
+  const counts = {};
+  DLV_STATUS_ORDER.forEach(s => counts[s] = 0);
+  list.forEach(d => { if (counts[d.status] !== undefined) counts[d.status]++; });
+  document.getElementById('driverDeliveryStats').innerHTML = DLV_STATUS_ORDER.map(s => {
+    const st = DLV_STATUS[s];
+    return `<div class="order-summary-pill" style="background:${st.bg};border-color:${st.border};color:${st.color};">${st.icon} ${s} <span>${counts[s]}</span></div>`;
+  }).join('');
+
+  const tbody = document.getElementById('driverDeliveryBody');
+  const empty = document.getElementById('driverDeliveryEmpty');
+  if (!list.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = list.map(d => {
+    const st = DLV_STATUS[d.status] || DLV_STATUS['Pending'];
+    const badge = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${st.bg};color:${st.color};border:1px solid ${st.border};">${st.icon} ${d.status}</span>`;
+    const overdueFlag = d.deliveryDate && d.status !== 'Delivered' && d.status !== 'Cancelled' && new Date(d.deliveryDate) < new Date()
+      ? '<span style="color:#ef4444;font-size:10px;margin-left:4px;">⚠ Overdue</span>' : '';
+    return `<tr>
+      <td style="font-weight:600;">${escHtml(d.client || '—')}</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted);">${escHtml(d.job || '—')}</td>
+      <td style="font-size:12px;">${escHtml(d.items || '—')}</td>
+      <td style="font-size:12px;color:var(--muted);">${d.orderDate ? fmtDate(d.orderDate) : '—'}</td>
+      <td style="font-size:12px;">${d.deliveryDate ? fmtDate(d.deliveryDate) : '—'}${overdueFlag}</td>
+      <td>${badge}</td>
+      <td style="font-size:12px;color:var(--muted);">${escHtml(d.notes || '—')}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-subtle btn-sm" onclick="cycleDeliveryStatus('${d.id}');renderDriverDeliveries('${escHtml(driverName)}')">↻ Next</button>
+          <button class="btn btn-subtle btn-sm" onclick="editDelivery('${d.id}')">✏</button>
+          <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="deleteDelivery('${d.id}');renderDriverDeliveries('${escHtml(driverName)}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function closeDriverDetail() {
+  activeDriverId = null;
+  document.getElementById('driverDetailView').style.display = 'none';
+  document.getElementById('driverListView').style.display = '';
+  const titleEl = document.getElementById('topbarTitle');
+  if (titleEl) titleEl.textContent = 'Drivers';
+  renderDrivers();
+}
+
+function openDriverModal(id) {
+  document.getElementById('driverEditId').value = id || '';
+  document.getElementById('driverModalTitle').textContent = id ? 'Edit Driver' : 'Add Driver';
+  if (id) {
+    const d = drivers.find(x => x.id === id);
+    if (!d) return;
+    document.getElementById('drvName').value    = d.name    || '';
+    document.getElementById('drvPhone').value   = d.phone   || '';
+    document.getElementById('drvVehicle').value = d.vehicle || '';
+    document.getElementById('drvNotes').value   = d.notes   || '';
+  } else {
+    ['drvName','drvPhone','drvVehicle','drvNotes'].forEach(f => document.getElementById(f).value = '');
+  }
+  document.getElementById('driverModal').classList.add('active');
+}
+
+function saveDriver() {
+  const name = document.getElementById('drvName').value.trim();
+  if (!name) { showToast('Driver name is required.', 'error'); return; }
+  const id = document.getElementById('driverEditId').value;
+  const data = {
+    name,
+    phone:   document.getElementById('drvPhone').value.trim(),
+    vehicle: document.getElementById('drvVehicle').value.trim(),
+    notes:   document.getElementById('drvNotes').value.trim(),
+  };
+  if (id) {
+    const idx = drivers.findIndex(x => x.id === id);
+    if (idx !== -1) drivers[idx] = { ...drivers[idx], ...data };
+    showToast('Driver updated.', 'success');
+    if (activeDriverId === id) openDriverDetail(id);
+  } else {
+    drivers.push({ id: uid(), ...data });
+    showToast('Driver added.', 'success');
+  }
+  saveDriversLocal();
+  closeModal('driverModal');
+  renderDrivers();
+}
+
+function deleteDriver(id) {
+  const d = drivers.find(x => x.id === id);
+  if (!d) return;
+  if (!confirm(`Delete ${d.name}? Their delivery assignments will remain.`)) return;
+  drivers = drivers.filter(x => x.id !== id);
+  saveDriversLocal();
+  renderDrivers();
+  showToast('Driver deleted.', 'success');
+}
+
 // ─── Clients ─────────────────────────────────────────────────────────────────
 const DEFAULT_CLIENTS = [
   'Domain', 'SG Formwork', 'I&D Group', 'Tiger', 'PCF',
@@ -3850,6 +4139,7 @@ function renderDelivery() {
       <td style="font-weight:600;">${escHtml(d.client || '—')}</td>
       <td style="font-family:monospace;font-size:12px;color:var(--muted);">${escHtml(d.job || '—')}</td>
       <td style="max-width:200px;font-size:12px;">${escHtml(d.items || '—')}</td>
+      <td style="font-size:12px;color:var(--muted);">${escHtml(d.driver || '—')}</td>
       <td style="font-size:12px;color:var(--muted);">${d.orderDate ? fmtDate(d.orderDate) : '—'}</td>
       <td style="font-size:12px;">${d.deliveryDate ? fmtDate(d.deliveryDate) : '—'}${overdueFlag}</td>
       <td>${badge}</td>
@@ -3879,6 +4169,10 @@ function openDeliveryModal(id) {
   // Populate client dropdown
   const sel = document.getElementById('dlvClient');
   sel.innerHTML = clients.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('');
+  // Populate driver dropdown
+  const dsel = document.getElementById('dlvDriver');
+  dsel.innerHTML = '<option value="">— No driver assigned —</option>' +
+    drivers.map(d => `<option value="${escHtml(d.name)}">${escHtml(d.name)}</option>`).join('');
 
   document.getElementById('deliveryEditId').value = id || '';
   document.getElementById('deliveryModalTitle').textContent = id ? 'Edit Delivery' : 'Add Delivery';
@@ -3891,6 +4185,7 @@ function openDeliveryModal(id) {
     document.getElementById('dlvItems').value = d.items || '';
     document.getElementById('dlvOrderDate').value = d.orderDate || '';
     document.getElementById('dlvDeliveryDate').value = d.deliveryDate || '';
+    document.getElementById('dlvDriver').value = d.driver || '';
     document.getElementById('dlvNotes').value = d.notes || '';
   } else {
     document.getElementById('dlvJob').value = '';
@@ -3898,6 +4193,7 @@ function openDeliveryModal(id) {
     document.getElementById('dlvItems').value = '';
     document.getElementById('dlvOrderDate').value = new Date().toISOString().slice(0,10);
     document.getElementById('dlvDeliveryDate').value = '';
+    document.getElementById('dlvDriver').value = '';
     document.getElementById('dlvNotes').value = '';
   }
   document.getElementById('deliveryModal').classList.add('active');
@@ -3918,6 +4214,7 @@ function saveDelivery() {
     items,
     orderDate:    document.getElementById('dlvOrderDate').value,
     deliveryDate: document.getElementById('dlvDeliveryDate').value,
+    driver:       document.getElementById('dlvDriver').value,
     notes:        document.getElementById('dlvNotes').value.trim(),
   };
 
