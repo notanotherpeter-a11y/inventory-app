@@ -1399,8 +1399,71 @@
   }
   .order-summary-pill span { font-weight: 800; font-size: 16px; }
 </style>
+<style>
+/* ─── Login Screen ─── */
+#loginScreen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  background-image: url('bg.jpg');
+  background-size: cover; background-position: center; background-attachment: fixed;
+  display: flex; align-items: center; justify-content: center;
+}
+#loginScreen::before {
+  content: ''; position: fixed; inset: 0;
+  background: rgba(5,6,12,0.93); z-index: 0; pointer-events: none;
+}
+.login-card {
+  position: relative; z-index: 1;
+  background: rgba(18,21,35,0.97);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 100%; max-width: 380px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  text-align: center;
+}
+.login-logo { height: 56px; margin-bottom: 16px; }
+.login-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.login-sub { font-size: 12px; color: var(--muted); margin-bottom: 32px; }
+.login-field { margin-bottom: 14px; text-align: left; }
+.login-field label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; display: block; margin-bottom: 6px; }
+.login-field input {
+  width: 100%; padding: 12px 14px; border-radius: 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text); font-size: 14px; outline: none;
+  transition: border-color 0.2s;
+}
+.login-field input:focus { border-color: var(--accent); }
+.login-btn {
+  width: 100%; padding: 13px; border-radius: 10px; border: none;
+  background: var(--accent); color: #fff; font-size: 14px; font-weight: 700;
+  cursor: pointer; margin-top: 8px; transition: background 0.2s;
+}
+.login-btn:hover { background: var(--accent2); }
+.login-error { color: var(--red); font-size: 12px; margin-top: 10px; display: none; }
+</style>
 </head>
 <body>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-card">
+    <img src="logo.png" alt="Masterform logo" class="login-logo">
+    <div class="login-title">Masterform Systems</div>
+    <div class="login-sub">Inventory Manager — Sign In</div>
+    <div class="login-field">
+      <label>USERNAME</label>
+      <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>PASSWORD</label>
+      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter') doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError">Incorrect username or password.</div>
+  </div>
+</div>
 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
@@ -1467,6 +1530,14 @@
       <span class="sidebar-stat-label">Total Units</span>
       <span class="sidebar-stat-value" id="stat-total-units">0</span>
     </div>
+  </div>
+
+  <!-- Sign Out -->
+  <div style="padding: 8px 10px 4px;">
+    <button class="nav-item" onclick="signOut()" style="width:100%; color:#ef4444;">
+      <span class="nav-icon">🚪</span>
+      <span class="nav-label">Sign Out</span>
+    </button>
   </div>
 
   <!-- Collapse Toggle -->
@@ -1617,6 +1688,7 @@
           <option value="Software">Software</option>
           <option value="Website">Website</option>
           <option value="WiFi">WiFi</option>
+          <option value="Email">Email</option>
           <option value="Other">Other</option>
         </select>
       </div>
@@ -1677,13 +1749,12 @@
         </div>
       </div>
 
-      <!-- PDF Viewer placeholder -->
-      <div id="laserPdfContainer" style="margin-top:16px;">
-        <div style="background:rgba(18,21,35,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:60px 32px;text-align:center;">
-          <div style="font-size:48px;margin-bottom:16px;">📄</div>
-          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;">Laser Instruction PDF</div>
-          <div style="font-size:13px;color:var(--muted);">PDF will be available here once uploaded.</div>
+      <!-- PDF Viewer -->
+      <div style="margin-top:16px;">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+          <a href="/laser-startup.pdf" target="_blank" download class="btn btn-outline btn-sm">⬇ Download PDF</a>
         </div>
+        <iframe src="/laser-startup.pdf" style="width:100%;height:80vh;border:none;border-radius:12px;background:#fff;" title="Laser Machine Startup Procedure"></iframe>
       </div>
     </div>
 
@@ -1876,6 +1947,7 @@
         <option value="Software">Software</option>
         <option value="Website">Website</option>
         <option value="WiFi">WiFi</option>
+        <option value="Email">Email</option>
         <option value="Other">Other</option>
       </select>
     </div>
@@ -1909,6 +1981,34 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
+// ─── Login ───────────────────────────────────────────────────────────────────
+const AUTH_USER = 'admin';
+const AUTH_PASS = 'Masterform1122';
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (u === AUTH_USER && p === AUTH_PASS) {
+    sessionStorage.setItem('mf_auth', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+  } else {
+    const err = document.getElementById('loginError');
+    err.style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function signOut() {
+  sessionStorage.removeItem('mf_auth');
+  location.reload();
+}
+
+// Check session on load
+if (sessionStorage.getItem('mf_auth') === '1') {
+  document.getElementById('loginScreen').style.display = 'none';
+}
+
 // ─── Supabase ────────────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://mpgeagbeaexqdiazyifc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wZ2VhZ2JlYWV4cWRpYXp5aWZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyODkxOTMsImV4cCI6MjA5NTg2NTE5M30.xKpTmSBn4LnSe2ADStvbG3jSTJGMI-7BIc9l_jBceBk';
@@ -2528,6 +2628,8 @@ function renderHome() {
 const DEFAULT_PASSWORDS = [
   { service: 'NCPrg', category: 'Machine Login', username: '', password: 'hans901', url: '', notes: 'HAN\'S LASER NC Program' },
   { service: 'Pdata Program', category: 'Software', username: 'Admin', password: '1111', url: '', notes: '' },
+  { service: 'Masterform Gmail', category: 'Email', username: 'masterformsystem@gmail.com', password: 'Masterform1122', url: 'https://mail.google.com', notes: 'Inventory app sender email' },
+  { service: 'Inventory App Login', category: 'Software', username: 'admin', password: 'Masterform1122', url: 'https://inventory-app-bay-delta.vercel.app', notes: 'App login credentials' },
 ];
 
 let passwords = JSON.parse(localStorage.getItem('inv_passwords') || '[]');
@@ -2535,6 +2637,14 @@ let passwords = JSON.parse(localStorage.getItem('inv_passwords') || '[]');
 if (passwords.length === 0) {
   passwords = DEFAULT_PASSWORDS.map(d => ({ id: uid(), ...d }));
   localStorage.setItem('inv_passwords', JSON.stringify(passwords));
+} else {
+  // Migrate: add any missing default passwords by service name
+  const existingServices = new Set(passwords.map(p => p.service));
+  const missing = DEFAULT_PASSWORDS.filter(d => !existingServices.has(d.service));
+  if (missing.length > 0) {
+    passwords = [...passwords, ...missing.map(d => ({ id: uid(), ...d }))];
+    localStorage.setItem('inv_passwords', JSON.stringify(passwords));
+  }
 }
 const pwdRevealSet = new Set();
 
@@ -2543,6 +2653,7 @@ const PWD_CAT_STYLE = {
   'Software':      { bg: 'rgba(59,130,246,0.12)',  color: '#3b82f6', border: 'rgba(59,130,246,0.25)',  icon: '💻' },
   'Website':       { bg: 'rgba(16,185,129,0.12)',  color: '#10b981', border: 'rgba(16,185,129,0.25)',  icon: '🌐' },
   'WiFi':          { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b', border: 'rgba(245,158,11,0.25)',  icon: '📶' },
+  'Email':         { bg: 'rgba(139,92,246,0.12)',  color: '#8b5cf6', border: 'rgba(139,92,246,0.25)',  icon: '✉️' },
   'Other':         { bg: 'rgba(107,114,128,0.12)', color: '#9ca3af', border: 'rgba(107,114,128,0.25)', icon: '🔑' },
 };
 
