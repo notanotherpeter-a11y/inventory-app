@@ -1434,6 +1434,15 @@
   transition: border-color 0.2s;
 }
 .login-field input:focus { border-color: var(--accent); }
+.login-field .pw-wrap { position: relative; }
+.login-field .pw-wrap input { padding-right: 42px; }
+.pw-toggle {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--muted);
+  font-size: 16px; line-height: 1; padding: 0;
+  transition: color 0.2s;
+}
+.pw-toggle:hover { color: var(--text); }
 .login-btn {
   width: 100%; padding: 13px; border-radius: 10px; border: none;
   background: var(--accent); color: #fff; font-size: 14px; font-weight: 700;
@@ -1457,8 +1466,11 @@
     </div>
     <div class="login-field">
       <label>PASSWORD</label>
-      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"
-        onkeydown="if(event.key==='Enter') doLogin()">
+      <div class="pw-wrap">
+        <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') doLogin()">
+        <button type="button" class="pw-toggle" onclick="toggleLoginPw()" id="pwToggleBtn" title="Show/hide password">👁</button>
+      </div>
     </div>
     <button class="login-btn" onclick="doLogin()">Sign In</button>
     <div class="login-error" id="loginError">Incorrect username or password.</div>
@@ -1986,6 +1998,18 @@ function doLogin() {
     err.style.display = 'block';
     document.getElementById('loginPass').value = '';
     document.getElementById('loginPass').focus();
+  }
+}
+
+function toggleLoginPw() {
+  const inp = document.getElementById('loginPass');
+  const btn = document.getElementById('pwToggleBtn');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁';
   }
 }
 
