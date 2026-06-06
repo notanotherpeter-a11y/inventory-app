@@ -1610,6 +1610,10 @@
       <span class="nav-icon">🚚</span>
       <span class="nav-label">Delivery Status</span>
     </button>
+    <button class="nav-item" id="nav-clients" onclick="sidebarSwitchTab('clients')">
+      <span class="nav-icon">🏢</span>
+      <span class="nav-label">Clients</span>
+    </button>
 
   </nav>
 
@@ -1902,8 +1906,96 @@
       </div>
     </div>
 
+    <!-- Clients Page -->
+    <div id="page-clients" style="display:none;">
+
+      <!-- Client List View -->
+      <div id="clientListView">
+        <div class="section-header">
+          <div>
+            <div class="section-title" style="font-size:18px;">🏢 Clients</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Client profiles and delivery history</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-input" id="clientSearch" placeholder="🔍 Search client…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderClients()">
+            <button class="btn btn-primary" onclick="openClientModal()">➕ Add Client</button>
+          </div>
+        </div>
+        <div id="clientGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:4px;"></div>
+        <div id="clientEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">No clients found.</div>
+      </div>
+
+      <!-- Client Detail View (hidden until a client is selected) -->
+      <div id="clientDetailView" style="display:none;">
+        <div class="section-header" style="margin-bottom:16px;">
+          <button class="btn btn-subtle btn-sm" onclick="closeClientDetail()" style="display:flex;align-items:center;gap:6px;">← Back to Clients</button>
+          <button class="btn btn-primary" onclick="openDeliveryModalForClient()">➕ Add Delivery</button>
+        </div>
+
+        <!-- Client Info Card -->
+        <div id="clientInfoCard" style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:24px;margin-bottom:20px;"></div>
+
+        <!-- Client Delivery Stats -->
+        <div id="clientDeliveryStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
+
+        <!-- Client Delivery Table -->
+        <div class="table-wrap">
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th>Job #</th>
+                <th>Items</th>
+                <th>Order Date</th>
+                <th>Expected Delivery</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="clientDeliveryBody"></tbody>
+          </table>
+          <div id="clientDeliveryEmpty" style="text-align:center;padding:32px;color:var(--muted);display:none;">No deliveries recorded for this client yet.</div>
+        </div>
+      </div>
+
+    </div>
+
   </div><!-- /.main -->
 </div><!-- /.layout -->
+
+<!-- Client Modal -->
+<div class="modal-overlay" id="clientModal">
+  <div class="modal">
+    <div class="modal-title" id="clientModalTitle">Add Client</div>
+    <input type="hidden" id="clientEditId">
+    <div class="form-group">
+      <label class="form-label">Company Name *</label>
+      <input class="form-input" id="cltName" placeholder="e.g. SG Formwork">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Contact Person</label>
+        <input class="form-input" id="cltContact" placeholder="e.g. John Smith">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" id="cltPhone" placeholder="e.g. 0400 000 000">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" id="cltEmail" placeholder="e.g. contact@sgformwork.com.au">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="cltNotes" placeholder="Any extra details…">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-subtle" onclick="closeModal('clientModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClient()">Save</button>
+    </div>
+  </div>
+</div>
 
 <!-- Delivery Modal -->
 <div class="modal-overlay" id="deliveryModal">
@@ -1911,8 +2003,8 @@
     <div class="modal-title" id="deliveryModalTitle">Add Delivery</div>
     <input type="hidden" id="deliveryEditId">
     <div class="form-group">
-      <label class="form-label">Client Name *</label>
-      <input class="form-input" id="dlvClient" placeholder="e.g. ABC Construction">
+      <label class="form-label">Client *</label>
+      <select class="form-input" id="dlvClient"></select>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
       <div class="form-group">
@@ -2755,8 +2847,8 @@ function clearLog() {
 }
 
 // ─── Page Navigation ──────────────────────────────────────────────────────────
-const PAGES = ['home', 'inventory', 'log', 'passwords', 'orders', 'laser', 'delivery'];
-const PAGE_TITLES = { home: 'Home', inventory: 'Inventory', log: 'Transaction Log', passwords: 'Password Lists', orders: 'Order List', laser: 'Laser Instructions', delivery: 'Delivery Status' };
+const PAGES = ['home', 'inventory', 'log', 'passwords', 'orders', 'laser', 'delivery', 'clients'];
+const PAGE_TITLES = { home: 'Home', inventory: 'Inventory', log: 'Transaction Log', passwords: 'Password Lists', orders: 'Order List', laser: 'Laser Instructions', delivery: 'Delivery Status', clients: 'Clients' };
 
 function sidebarSwitchTab(page) {
   // Hide all pages
@@ -2785,6 +2877,7 @@ function sidebarSwitchTab(page) {
   if (page === 'passwords') renderPasswords();
   if (page === 'orders')    renderOrders();
   if (page === 'delivery')  renderDelivery();
+  if (page === 'clients')   renderClients();
 
   closeMobileSidebar();
 }
@@ -3453,6 +3546,240 @@ function renderAll() {
 // Start the app — load from Supabase, open on Home page
 initData();
 
+// ─── Clients ─────────────────────────────────────────────────────────────────
+const DEFAULT_CLIENTS = [
+  'Domain', 'SG Formwork', 'I&D Group', 'Tiger', 'PCF',
+  'Viscon', 'LVL', 'IRONSIDE', 'HICHORY', 'HENNY',
+  'LB CONCRETE', 'CK FORMWORK', 'ORACLE'
+];
+
+let clients = JSON.parse(localStorage.getItem('inv_clients') || '[]');
+if (clients.length === 0) {
+  clients = DEFAULT_CLIENTS.map(name => ({ id: uid(), name, contact: '', phone: '', email: '', notes: '' }));
+  localStorage.setItem('inv_clients', JSON.stringify(clients));
+} else {
+  // Migrate: add any missing default clients
+  const existing = new Set(clients.map(c => c.name));
+  const missing = DEFAULT_CLIENTS.filter(n => !existing.has(n));
+  if (missing.length) {
+    clients = [...clients, ...missing.map(name => ({ id: uid(), name, contact: '', phone: '', email: '', notes: '' }))];
+    localStorage.setItem('inv_clients', JSON.stringify(clients));
+  }
+}
+
+let activeClientId = null;
+
+function saveClientsLocal() {
+  localStorage.setItem('inv_clients', JSON.stringify(clients));
+}
+
+function renderClients() {
+  const search = (document.getElementById('clientSearch')?.value || '').toLowerCase();
+  const list = clients.filter(c => !search || c.name.toLowerCase().includes(search));
+
+  const grid = document.getElementById('clientGrid');
+  const empty = document.getElementById('clientEmpty');
+
+  if (!list.length) {
+    grid.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = list.map(c => {
+    const cDeliveries = deliveries.filter(d => d.client === c.name);
+    const active = cDeliveries.filter(d => d.status !== 'Delivered' && d.status !== 'Cancelled').length;
+    const delivered = cDeliveries.filter(d => d.status === 'Delivered').length;
+    const last = cDeliveries.filter(d => d.deliveryDate).sort((a,b) => b.deliveryDate.localeCompare(a.deliveryDate))[0];
+    const initials = c.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    return `
+      <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:20px;cursor:pointer;transition:border-color 0.2s,transform 0.15s;"
+           onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.borderColor='var(--surface-border)';this.style.transform=''"
+           onclick="openClientDetail('${c.id}')">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:var(--accent);flex-shrink:0;">${initials}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+            <div style="font-size:11px;color:var(--muted);">${c.contact || 'No contact set'}</div>
+          </div>
+          <div style="display:flex;gap:4px;">
+            <button class="btn btn-subtle btn-sm" onclick="event.stopPropagation();openClientModal('${c.id}')" title="Edit">✏</button>
+            <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="event.stopPropagation();deleteClient('${c.id}')" title="Delete">🗑</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
+          <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px;">
+            <div style="font-size:18px;font-weight:800;">${cDeliveries.length}</div>
+            <div style="font-size:10px;color:var(--muted);">Total</div>
+          </div>
+          <div style="background:rgba(245,158,11,0.1);border-radius:8px;padding:8px;">
+            <div style="font-size:18px;font-weight:800;color:#f59e0b;">${active}</div>
+            <div style="font-size:10px;color:var(--muted);">Active</div>
+          </div>
+          <div style="background:rgba(16,185,129,0.1);border-radius:8px;padding:8px;">
+            <div style="font-size:18px;font-weight:800;color:#10b981;">${delivered}</div>
+            <div style="font-size:10px;color:var(--muted);">Delivered</div>
+          </div>
+        </div>
+        ${c.phone ? `<div style="font-size:11px;color:var(--muted);margin-top:12px;">📞 ${c.phone}</div>` : ''}
+        ${last ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">🕐 Last: ${fmtDate(last.deliveryDate)}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function openClientDetail(id) {
+  activeClientId = id;
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+
+  document.getElementById('clientListView').style.display = 'none';
+  document.getElementById('clientDetailView').style.display = '';
+
+  // Update topbar title
+  const titleEl = document.getElementById('topbarTitle');
+  if (titleEl) titleEl.textContent = c.name;
+
+  // Client info card
+  document.getElementById('clientInfoCard').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="width:56px;height:56px;border-radius:14px;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:var(--accent);">
+        ${c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:22px;font-weight:800;">${c.name}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;">
+          ${c.contact ? `<span style="font-size:13px;color:var(--muted);">👤 ${c.contact}</span>` : ''}
+          ${c.phone   ? `<span style="font-size:13px;color:var(--muted);">📞 ${c.phone}</span>` : ''}
+          ${c.email   ? `<span style="font-size:13px;color:var(--muted);">✉ ${c.email}</span>` : ''}
+          ${c.notes   ? `<span style="font-size:13px;color:var(--muted);">📝 ${c.notes}</span>` : ''}
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="openClientModal('${c.id}')">✏ Edit Profile</button>
+    </div>`;
+
+  renderClientDeliveries(c.name);
+}
+
+function renderClientDeliveries(clientName) {
+  const list = deliveries
+    .filter(d => d.client === clientName)
+    .sort((a, b) => {
+      const aDone = a.status === 'Delivered' || a.status === 'Cancelled';
+      const bDone = b.status === 'Delivered' || b.status === 'Cancelled';
+      if (aDone !== bDone) return aDone ? 1 : -1;
+      return (b.orderDate || '').localeCompare(a.orderDate || '');
+    });
+
+  // Stats
+  const counts = {};
+  DLV_STATUS_ORDER.forEach(s => counts[s] = 0);
+  list.forEach(d => { if (counts[d.status] !== undefined) counts[d.status]++; });
+  document.getElementById('clientDeliveryStats').innerHTML = DLV_STATUS_ORDER.map(s => {
+    const st = DLV_STATUS[s];
+    return `<div class="order-summary-pill" style="background:${st.bg};border-color:${st.border};color:${st.color};">${st.icon} ${s} <span>${counts[s]}</span></div>`;
+  }).join('');
+
+  const tbody = document.getElementById('clientDeliveryBody');
+  const empty = document.getElementById('clientDeliveryEmpty');
+  if (!list.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = list.map(d => {
+    const st = DLV_STATUS[d.status] || DLV_STATUS['Pending'];
+    const badge = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${st.bg};color:${st.color};border:1px solid ${st.border};">${st.icon} ${d.status}</span>`;
+    const overdueFlag = d.deliveryDate && d.status !== 'Delivered' && d.status !== 'Cancelled' && new Date(d.deliveryDate) < new Date()
+      ? '<span style="color:#ef4444;font-size:10px;margin-left:4px;">⚠ Overdue</span>' : '';
+    return `<tr>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted);">${escHtml(d.job || '—')}</td>
+      <td style="font-size:12px;">${escHtml(d.items || '—')}</td>
+      <td style="font-size:12px;color:var(--muted);">${d.orderDate ? fmtDate(d.orderDate) : '—'}</td>
+      <td style="font-size:12px;">${d.deliveryDate ? fmtDate(d.deliveryDate) : '—'}${overdueFlag}</td>
+      <td>${badge}</td>
+      <td style="font-size:12px;color:var(--muted);">${escHtml(d.notes || '—')}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-subtle btn-sm" onclick="cycleDeliveryStatus('${d.id}');renderClientDeliveries('${escHtml(clientName)}')">↻ Next</button>
+          <button class="btn btn-subtle btn-sm" onclick="editDelivery('${d.id}')">✏</button>
+          <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="deleteDelivery('${d.id}');renderClientDeliveries('${escHtml(clientName)}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function closeClientDetail() {
+  activeClientId = null;
+  document.getElementById('clientDetailView').style.display = 'none';
+  document.getElementById('clientListView').style.display = '';
+  const titleEl = document.getElementById('topbarTitle');
+  if (titleEl) titleEl.textContent = 'Clients';
+  renderClients();
+}
+
+function openClientModal(id) {
+  document.getElementById('clientEditId').value = id || '';
+  document.getElementById('clientModalTitle').textContent = id ? 'Edit Client' : 'Add Client';
+  if (id) {
+    const c = clients.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('cltName').value    = c.name    || '';
+    document.getElementById('cltContact').value = c.contact || '';
+    document.getElementById('cltPhone').value   = c.phone   || '';
+    document.getElementById('cltEmail').value   = c.email   || '';
+    document.getElementById('cltNotes').value   = c.notes   || '';
+  } else {
+    ['cltName','cltContact','cltPhone','cltEmail','cltNotes'].forEach(f => document.getElementById(f).value = '');
+  }
+  document.getElementById('clientModal').classList.add('active');
+}
+
+function saveClient() {
+  const name = document.getElementById('cltName').value.trim();
+  if (!name) { showToast('Company name is required.', 'error'); return; }
+  const id = document.getElementById('clientEditId').value;
+  const data = {
+    name,
+    contact: document.getElementById('cltContact').value.trim(),
+    phone:   document.getElementById('cltPhone').value.trim(),
+    email:   document.getElementById('cltEmail').value.trim(),
+    notes:   document.getElementById('cltNotes').value.trim(),
+  };
+  if (id) {
+    const idx = clients.findIndex(x => x.id === id);
+    if (idx !== -1) clients[idx] = { ...clients[idx], ...data };
+    showToast('Client updated.', 'success');
+    // Refresh detail view if open
+    if (activeClientId === id) openClientDetail(id);
+  } else {
+    clients.push({ id: uid(), ...data });
+    showToast('Client added.', 'success');
+  }
+  saveClientsLocal();
+  closeModal('clientModal');
+  renderClients();
+}
+
+function deleteClient(id) {
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  if (!confirm(`Delete ${c.name}? Their delivery records will remain.`)) return;
+  clients = clients.filter(x => x.id !== id);
+  saveClientsLocal();
+  renderClients();
+  showToast('Client deleted.', 'success');
+}
+
+function openDeliveryModalForClient() {
+  const c = clients.find(x => x.id === activeClientId);
+  openDeliveryModal();
+  if (c) {
+    const sel = document.getElementById('dlvClient');
+    sel.value = c.name;
+  }
+}
+
 // ─── Delivery Status ─────────────────────────────────────────────────────────
 let deliveries = JSON.parse(localStorage.getItem('inv_deliveries') || '[]');
 
@@ -3549,12 +3876,16 @@ function escHtml(str) {
 }
 
 function openDeliveryModal(id) {
+  // Populate client dropdown
+  const sel = document.getElementById('dlvClient');
+  sel.innerHTML = clients.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('');
+
   document.getElementById('deliveryEditId').value = id || '';
   document.getElementById('deliveryModalTitle').textContent = id ? 'Edit Delivery' : 'Add Delivery';
   if (id) {
     const d = deliveries.find(x => x.id === id);
     if (!d) return;
-    document.getElementById('dlvClient').value = d.client || '';
+    sel.value = d.client || '';
     document.getElementById('dlvJob').value = d.job || '';
     document.getElementById('dlvStatus').value = d.status || 'Pending';
     document.getElementById('dlvItems').value = d.items || '';
@@ -3562,7 +3893,6 @@ function openDeliveryModal(id) {
     document.getElementById('dlvDeliveryDate').value = d.deliveryDate || '';
     document.getElementById('dlvNotes').value = d.notes || '';
   } else {
-    document.getElementById('dlvClient').value = '';
     document.getElementById('dlvJob').value = '';
     document.getElementById('dlvStatus').value = 'Pending';
     document.getElementById('dlvItems').value = '';
