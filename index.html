@@ -2130,9 +2130,10 @@
       <select class="form-input" id="usrRole" onchange="updateEntityDropdown()">
         <option value="client">Client</option>
         <option value="driver">Driver</option>
+        <option value="staff">Staff (Inventory + Order List)</option>
       </select>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="usrEntityGroup">
       <label class="form-label" id="usrEntityLabel">Linked Client *</label>
       <select class="form-input" id="usrEntity"></select>
     </div>
@@ -2531,6 +2532,14 @@ function doLogin() {
   }
 }
 
+// Nav items visible per role
+const ROLE_NAV = {
+  admin: ['home','inventory','log','passwords','orders','laser','delivery','clients','drivers','users'],
+  staff: ['inventory','orders'],
+  client: [],
+  driver: [],
+};
+
 function applyRoleLayout(role, entity) {
   if (role === 'client') {
     document.getElementById('layout').style.display = 'none';
@@ -2544,8 +2553,20 @@ function applyRoleLayout(role, entity) {
     document.getElementById('driverPortal').style.display = '';
     document.getElementById('portalDriverName').textContent = entity;
     renderDriverPortal(entity);
+  } else if (role === 'staff') {
+    // Show full layout but restrict sidebar to inventory + orders only
+    const allowed = ROLE_NAV.staff;
+    PAGES.forEach(p => {
+      const nav = document.getElementById(`nav-${p}`);
+      if (nav) nav.style.display = allowed.includes(p) ? '' : 'none';
+    });
+    // Hide quick stats (admin-only info)
+    const stats = document.querySelector('.sidebar-stats');
+    if (stats) stats.style.display = 'none';
+    // Auto land on Inventory
+    sidebarSwitchTab('inventory');
   } else {
-    // admin — show Users nav item
+    // admin — show Users nav item + all nav
     const navUsers = document.getElementById('nav-users');
     if (navUsers) navUsers.style.display = '';
   }
@@ -2658,10 +2679,15 @@ function renderUsers() {
   if (!nonAdmin.length) { tbody.innerHTML=''; empty.style.display=''; return; }
   empty.style.display='none';
   tbody.innerHTML = nonAdmin.map(u => {
-    const roleColor = u.role==='client' ? '#c0392b' : '#3b82f6';
+    const roleStyles = {
+      client: { bg: 'rgba(192,57,43,0.12)', color: '#c0392b' },
+      driver: { bg: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
+      staff:  { bg: 'rgba(16,185,129,0.12)', color: '#10b981' },
+    };
+    const rs = roleStyles[u.role] || roleStyles.staff;
     return `<tr>
       <td style="font-weight:600;">${escHtml(u.username)}</td>
-      <td><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${u.role==='client'?'rgba(192,57,43,0.12)':'rgba(59,130,246,0.12)'};color:${roleColor};">${u.role}</span></td>
+      <td><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${rs.bg};color:${rs.color};">${u.role}</span></td>
       <td>${escHtml(u.entity||'—')}</td>
       <td style="font-family:monospace;font-size:12px;color:var(--muted);">••••••••</td>
       <td>
@@ -2678,12 +2704,18 @@ function updateEntityDropdown() {
   const role = document.getElementById('usrRole').value;
   const label = document.getElementById('usrEntityLabel');
   const sel = document.getElementById('usrEntity');
-  if (role === 'client') {
-    label.textContent = 'Linked Client *';
-    sel.innerHTML = clients.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('');
+  const group = document.getElementById('usrEntityGroup');
+  if (role === 'staff') {
+    group.style.display = 'none';
   } else {
-    label.textContent = 'Linked Driver *';
-    sel.innerHTML = drivers.map(d => `<option value="${escHtml(d.name)}">${escHtml(d.name)}</option>`).join('');
+    group.style.display = '';
+    if (role === 'client') {
+      label.textContent = 'Linked Client *';
+      sel.innerHTML = clients.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('');
+    } else {
+      label.textContent = 'Linked Driver *';
+      sel.innerHTML = drivers.map(d => `<option value="${escHtml(d.name)}">${escHtml(d.name)}</option>`).join('');
+    }
   }
 }
 
