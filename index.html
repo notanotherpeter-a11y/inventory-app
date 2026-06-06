@@ -1606,6 +1606,10 @@
       <span class="nav-icon">⚡</span>
       <span class="nav-label">Laser Instructions</span>
     </button>
+    <button class="nav-item" id="nav-delivery" onclick="sidebarSwitchTab('delivery')">
+      <span class="nav-icon">🚚</span>
+      <span class="nav-label">Delivery Status</span>
+    </button>
 
   </nav>
 
@@ -1851,8 +1855,105 @@
       </div>
     </div>
 
+    <!-- Delivery Status Page -->
+    <div id="page-delivery" style="display:none;">
+      <div class="section-header">
+        <div>
+          <div class="section-title" style="font-size:18px;">🚚 Delivery Status</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Track client deliveries and order fulfilment</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input class="form-input" id="deliverySearch" placeholder="🔍 Search client or job…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderDelivery()">
+          <select class="form-input" id="deliveryFilter" style="width:150px;padding:8px 12px;font-size:13px;" onchange="renderDelivery()">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Dispatched">Dispatched</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <button class="btn btn-primary" onclick="openDeliveryModal()">➕ Add Delivery</button>
+        </div>
+      </div>
+
+      <!-- Summary pills -->
+      <div id="deliverySummary" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table class="inv-table" id="deliveryTable">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Job #</th>
+              <th>Items</th>
+              <th>Order Date</th>
+              <th>Expected Delivery</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="deliveryBody"></tbody>
+        </table>
+        <div id="deliveryEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">
+          No deliveries found. Click <strong>➕ Add Delivery</strong> to get started.
+        </div>
+      </div>
+    </div>
+
   </div><!-- /.main -->
 </div><!-- /.layout -->
+
+<!-- Delivery Modal -->
+<div class="modal-overlay" id="deliveryModal">
+  <div class="modal">
+    <div class="modal-title" id="deliveryModalTitle">Add Delivery</div>
+    <input type="hidden" id="deliveryEditId">
+    <div class="form-group">
+      <label class="form-label">Client Name *</label>
+      <input class="form-input" id="dlvClient" placeholder="e.g. ABC Construction">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Job / Order #</label>
+        <input class="form-input" id="dlvJob" placeholder="e.g. JOB-2026-001">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="dlvStatus">
+          <option value="Pending">Pending</option>
+          <option value="Processing">Processing</option>
+          <option value="Dispatched">Dispatched</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Items / Description *</label>
+      <input class="form-input" id="dlvItems" placeholder="e.g. 10x Metal Sheet 1.55mm, 5x Bar Chair Pallet">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Order Date</label>
+        <input class="form-input" type="date" id="dlvOrderDate">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Expected Delivery</label>
+        <input class="form-input" type="date" id="dlvDeliveryDate">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="dlvNotes" placeholder="Any extra details…">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-subtle" onclick="closeModal('deliveryModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDelivery()">Save</button>
+    </div>
+  </div>
+</div>
 
 <!-- Add Item Modal -->
 <div class="modal-overlay" id="addModal">
@@ -2654,8 +2755,8 @@ function clearLog() {
 }
 
 // ─── Page Navigation ──────────────────────────────────────────────────────────
-const PAGES = ['home', 'inventory', 'log', 'passwords', 'orders'];
-const PAGE_TITLES = { home: 'Home', inventory: 'Inventory', log: 'Transaction Log', passwords: 'Password Lists', orders: 'Order List' };
+const PAGES = ['home', 'inventory', 'log', 'passwords', 'orders', 'laser', 'delivery'];
+const PAGE_TITLES = { home: 'Home', inventory: 'Inventory', log: 'Transaction Log', passwords: 'Password Lists', orders: 'Order List', laser: 'Laser Instructions', delivery: 'Delivery Status' };
 
 function sidebarSwitchTab(page) {
   // Hide all pages
@@ -2683,6 +2784,7 @@ function sidebarSwitchTab(page) {
   if (page === 'log')       renderLog();
   if (page === 'passwords') renderPasswords();
   if (page === 'orders')    renderOrders();
+  if (page === 'delivery')  renderDelivery();
 
   closeMobileSidebar();
 }
@@ -3350,6 +3452,175 @@ function renderAll() {
 
 // Start the app — load from Supabase, open on Home page
 initData();
+
+// ─── Delivery Status ─────────────────────────────────────────────────────────
+let deliveries = JSON.parse(localStorage.getItem('inv_deliveries') || '[]');
+
+const DLV_STATUS = {
+  'Pending':    { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.3)',  icon: '🕐' },
+  'Processing': { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.3)',  icon: '⚙️' },
+  'Dispatched': { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',  border: 'rgba(139,92,246,0.3)',  icon: '🚚' },
+  'Delivered':  { color: '#10b981', bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.3)',  icon: '✅' },
+  'Cancelled':  { color: '#6b7280', bg: 'rgba(107,114,128,0.12)', border: 'rgba(107,114,128,0.3)', icon: '❌' },
+};
+
+const DLV_STATUS_ORDER = ['Pending', 'Processing', 'Dispatched', 'Delivered', 'Cancelled'];
+
+function saveDeliveriesLocal() {
+  localStorage.setItem('inv_deliveries', JSON.stringify(deliveries));
+}
+
+function renderDelivery() {
+  const search = (document.getElementById('deliverySearch')?.value || '').toLowerCase();
+  const filter = document.getElementById('deliveryFilter')?.value || '';
+
+  let list = deliveries.filter(d => {
+    const matchSearch = !search ||
+      (d.client || '').toLowerCase().includes(search) ||
+      (d.job || '').toLowerCase().includes(search) ||
+      (d.items || '').toLowerCase().includes(search);
+    const matchFilter = !filter || d.status === filter;
+    return matchSearch && matchFilter;
+  });
+
+  // Sort: non-delivered first (by order date desc), delivered last
+  list.sort((a, b) => {
+    const aDone = a.status === 'Delivered' || a.status === 'Cancelled';
+    const bDone = b.status === 'Delivered' || b.status === 'Cancelled';
+    if (aDone !== bDone) return aDone ? 1 : -1;
+    return (b.orderDate || '').localeCompare(a.orderDate || '');
+  });
+
+  // Summary pills
+  const summary = document.getElementById('deliverySummary');
+  if (summary) {
+    const counts = {};
+    DLV_STATUS_ORDER.forEach(s => counts[s] = 0);
+    deliveries.forEach(d => { if (counts[d.status] !== undefined) counts[d.status]++; });
+    summary.innerHTML = DLV_STATUS_ORDER.map(s => {
+      const st = DLV_STATUS[s];
+      return `<div class="order-summary-pill" style="background:${st.bg};border-color:${st.border};color:${st.color};">
+        ${st.icon} ${s} <span>${counts[s]}</span>
+      </div>`;
+    }).join('');
+  }
+
+  const tbody = document.getElementById('deliveryBody');
+  const empty = document.getElementById('deliveryEmpty');
+  if (!list.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  tbody.innerHTML = list.map(d => {
+    const st = DLV_STATUS[d.status] || DLV_STATUS['Pending'];
+    const badge = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${st.bg};color:${st.color};border:1px solid ${st.border};">${st.icon} ${d.status}</span>`;
+    const overdueFlag = d.deliveryDate && d.status !== 'Delivered' && d.status !== 'Cancelled' && new Date(d.deliveryDate) < new Date()
+      ? '<span style="color:#ef4444;font-size:10px;margin-left:4px;">⚠ Overdue</span>' : '';
+    return `<tr>
+      <td style="font-weight:600;">${escHtml(d.client || '—')}</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted);">${escHtml(d.job || '—')}</td>
+      <td style="max-width:200px;font-size:12px;">${escHtml(d.items || '—')}</td>
+      <td style="font-size:12px;color:var(--muted);">${d.orderDate ? fmtDate(d.orderDate) : '—'}</td>
+      <td style="font-size:12px;">${d.deliveryDate ? fmtDate(d.deliveryDate) : '—'}${overdueFlag}</td>
+      <td>${badge}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:150px;">${escHtml(d.notes || '—')}</td>
+      <td>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-subtle btn-sm" onclick="cycleDeliveryStatus('${d.id}')">↻ Next</button>
+          <button class="btn btn-subtle btn-sm" onclick="editDelivery('${d.id}')">✏</button>
+          <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="deleteDelivery('${d.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function fmtDate(dateStr) {
+  if (!dateStr) return '—';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function openDeliveryModal(id) {
+  document.getElementById('deliveryEditId').value = id || '';
+  document.getElementById('deliveryModalTitle').textContent = id ? 'Edit Delivery' : 'Add Delivery';
+  if (id) {
+    const d = deliveries.find(x => x.id === id);
+    if (!d) return;
+    document.getElementById('dlvClient').value = d.client || '';
+    document.getElementById('dlvJob').value = d.job || '';
+    document.getElementById('dlvStatus').value = d.status || 'Pending';
+    document.getElementById('dlvItems').value = d.items || '';
+    document.getElementById('dlvOrderDate').value = d.orderDate || '';
+    document.getElementById('dlvDeliveryDate').value = d.deliveryDate || '';
+    document.getElementById('dlvNotes').value = d.notes || '';
+  } else {
+    document.getElementById('dlvClient').value = '';
+    document.getElementById('dlvJob').value = '';
+    document.getElementById('dlvStatus').value = 'Pending';
+    document.getElementById('dlvItems').value = '';
+    document.getElementById('dlvOrderDate').value = new Date().toISOString().slice(0,10);
+    document.getElementById('dlvDeliveryDate').value = '';
+    document.getElementById('dlvNotes').value = '';
+  }
+  document.getElementById('deliveryModal').classList.add('active');
+}
+
+function editDelivery(id) { openDeliveryModal(id); }
+
+function saveDelivery() {
+  const client = document.getElementById('dlvClient').value.trim();
+  const items  = document.getElementById('dlvItems').value.trim();
+  if (!client || !items) { showToast('Client and Items are required.', 'error'); return; }
+
+  const id = document.getElementById('deliveryEditId').value;
+  const data = {
+    client,
+    job:          document.getElementById('dlvJob').value.trim(),
+    status:       document.getElementById('dlvStatus').value,
+    items,
+    orderDate:    document.getElementById('dlvOrderDate').value,
+    deliveryDate: document.getElementById('dlvDeliveryDate').value,
+    notes:        document.getElementById('dlvNotes').value.trim(),
+  };
+
+  if (id) {
+    const idx = deliveries.findIndex(x => x.id === id);
+    if (idx !== -1) deliveries[idx] = { ...deliveries[idx], ...data };
+    showToast('Delivery updated.', 'success');
+  } else {
+    deliveries.push({ id: uid(), ...data });
+    showToast('Delivery added.', 'success');
+  }
+
+  saveDeliveriesLocal();
+  closeModal('deliveryModal');
+  renderDelivery();
+}
+
+function deleteDelivery(id) {
+  if (!confirm('Delete this delivery entry?')) return;
+  deliveries = deliveries.filter(d => d.id !== id);
+  saveDeliveriesLocal();
+  renderDelivery();
+  showToast('Delivery deleted.', 'success');
+}
+
+function cycleDeliveryStatus(id) {
+  const d = deliveries.find(x => x.id === id);
+  if (!d) return;
+  const idx = DLV_STATUS_ORDER.indexOf(d.status);
+  d.status = DLV_STATUS_ORDER[(idx + 1) % DLV_STATUS_ORDER.length];
+  saveDeliveriesLocal();
+  renderDelivery();
+}
 
 // ─── Chatbot ─────────────────────────────────────────────────────────────────
 let chatOpen = false;
