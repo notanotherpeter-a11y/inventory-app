@@ -2506,7 +2506,7 @@
 // ─── Login ───────────────────────────────────────────────────────────────────
 // ─── User Accounts ────────────────────────────────────────────────────────────
 let appUsers = JSON.parse(localStorage.getItem('inv_users') || '[]');
-// Seed default admin
+// Seed default admin in localStorage cache so login works immediately on first load
 if (!appUsers.find(u => u.role === 'admin')) {
   appUsers.unshift({ id: uid(), username: 'admin', password: 'Masterform1122', role: 'admin', entity: '' });
   localStorage.setItem('inv_users', JSON.stringify(appUsers));
@@ -2514,10 +2514,33 @@ if (!appUsers.find(u => u.role === 'admin')) {
 
 function saveAppUsers() { localStorage.setItem('inv_users', JSON.stringify(appUsers)); }
 
-function doLogin() {
+async function sbSaveUser(user) {
+  const { error } = await sb.from('app_users').upsert(user);
+  if (error) console.warn('User save error:', error.message);
+  saveAppUsers();
+}
+
+async function sbDeleteUser(id) {
+  await sb.from('app_users').delete().eq('id', id);
+  saveAppUsers();
+}
+
+async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
-  const match = appUsers.find(x => x.username === u && x.password === p);
+  // Check localStorage cache first (fast)
+  let match = appUsers.find(x => x.username === u && x.password === p);
+  // Fallback: query Supabase (handles new devices / users created on other devices)
+  if (!match) {
+    const { data } = await sb.from('app_users').select('*').eq('username', u).eq('password', p).maybeSingle();
+    if (data) {
+      match = data;
+      if (!appUsers.find(x => x.id === data.id)) {
+        appUsers.push(data);
+        saveAppUsers();
+      }
+    }
+  }
   if (match) {
     sessionStorage.setItem('mf_auth', '1');
     sessionStorage.setItem('mf_role', match.role);
@@ -2653,7 +2676,7 @@ function markDelivered(id, driverName) {
   const d = deliveries.find(x => x.id === id);
   if (!d) return;
   d.status = 'Delivered';
-  localStorage.setItem('inv_deliveries', JSON.stringify(deliveries));
+  sbSaveDelivery(d);
   renderDriverPortal(driverName);
 }
 
@@ -2752,15 +2775,17 @@ function saveUser() {
   const duplicate = appUsers.find(u => u.username === username && u.id !== id);
   if (duplicate) { showToast('Username already exists.', 'error'); return; }
   const data = { username, password, role, entity };
+  let saved;
   if (id) {
     const idx = appUsers.findIndex(u => u.id === id);
-    if (idx !== -1) appUsers[idx] = { ...appUsers[idx], ...data };
+    if (idx !== -1) { appUsers[idx] = { ...appUsers[idx], ...data }; saved = appUsers[idx]; }
     showToast('User updated.', 'success');
   } else {
-    appUsers.push({ id: uid(), ...data });
+    saved = { id: uid(), ...data };
+    appUsers.push(saved);
     showToast('User created.', 'success');
   }
-  saveAppUsers();
+  if (saved) sbSaveUser(saved); else saveAppUsers();
   closeModal('userModal');
   renderUsers();
 }
@@ -2770,7 +2795,7 @@ function deleteUser(id) {
   if (!u) return;
   if (!confirm(`Delete user "${u.username}"?`)) return;
   appUsers = appUsers.filter(x => x.id !== id);
-  saveAppUsers();
+  sbDeleteUser(id);
   renderUsers();
   showToast('User deleted.', 'success');
 }
@@ -2834,19 +2859,21 @@ const DEFAULT_ITEMS = [
 async function initData() {
   setSyncStatus('syncing');
   try {
-    const [r1, r2] = await Promise.all([
+    const [r1, r2, r3, r4, r5, r6] = await Promise.all([
       sb.from('items').select('*').order('created_at'),
-      sb.from('transaction_logs').select('*').order('created_at', { ascending: false }).limit(300)
+      sb.from('transaction_logs').select('*').order('created_at', { ascending: false }).limit(300),
+      sb.from('clients').select('*').order('name'),
+      sb.from('drivers').select('*').order('name'),
+      sb.from('deliveries').select('*').order('created_at', { ascending: false }),
+      sb.from('app_users').select('*'),
     ]);
     if (r1.error || r2.error) throw new Error('Supabase query failed');
 
     if (r1.data.length === 0) {
-      // Seed defaults
       const { data: seeded } = await sb.from('items').insert(DEFAULT_ITEMS).select();
       items = seeded || [];
     } else {
       items = r1.data;
-      // Migrate: insert any default items missing by name
       const existingNames = new Set(items.map(i => i.name));
       const missing = DEFAULT_ITEMS.filter(d => !existingNames.has(d.name));
       if (missing.length > 0) {
@@ -2855,6 +2882,65 @@ async function initData() {
       }
     }
     logs = (r2.data || []).map(mapLogFromDb);
+
+    // ── Clients from Supabase ──
+    if (!r3.error) {
+      if (r3.data.length === 0) {
+        const seed = DEFAULT_CLIENTS.map(name => ({ id: uid(), name, contact: '', phone: '', email: '', notes: '' }));
+        const { data: sc } = await sb.from('clients').insert(seed).select();
+        clients = sc || seed;
+      } else {
+        clients = r3.data;
+        const existing = new Set(clients.map(c => c.name));
+        const missing = DEFAULT_CLIENTS.filter(n => !existing.has(n));
+        if (missing.length) {
+          const toAdd = missing.map(name => ({ id: uid(), name, contact: '', phone: '', email: '', notes: '' }));
+          const { data: added } = await sb.from('clients').insert(toAdd).select();
+          clients = [...clients, ...(added || toAdd)];
+        }
+      }
+      localStorage.setItem('inv_clients', JSON.stringify(clients));
+    }
+
+    // ── Drivers from Supabase ──
+    if (!r4.error) {
+      if (r4.data.length === 0) {
+        const seed = DEFAULT_DRIVERS.map(name => ({ id: uid(), name, phone: '', vehicle: '', notes: '' }));
+        const { data: sd } = await sb.from('drivers').insert(seed).select();
+        drivers = sd || seed;
+      } else {
+        drivers = r4.data;
+        const existing = new Set(drivers.map(d => d.name));
+        const missing = DEFAULT_DRIVERS.filter(n => !existing.has(n));
+        if (missing.length) {
+          const toAdd = missing.map(name => ({ id: uid(), name, phone: '', vehicle: '', notes: '' }));
+          const { data: added } = await sb.from('drivers').insert(toAdd).select();
+          drivers = [...drivers, ...(added || toAdd)];
+        }
+      }
+      localStorage.setItem('inv_drivers', JSON.stringify(drivers));
+    }
+
+    // ── Deliveries from Supabase ──
+    if (!r5.error) {
+      deliveries = r5.data || [];
+      localStorage.setItem('inv_deliveries', JSON.stringify(deliveries));
+    }
+
+    // ── App Users from Supabase ──
+    if (!r6.error) {
+      const sbUsers = r6.data || [];
+      // Ensure admin exists in Supabase
+      if (!sbUsers.find(u => u.role === 'admin')) {
+        const admin = appUsers.find(u => u.role === 'admin') || { id: uid(), username: 'admin', password: 'Masterform1122', role: 'admin', entity: '' };
+        await sb.from('app_users').upsert(admin);
+        sbUsers.push(admin);
+      }
+      // Merge: Supabase is authoritative, update local cache
+      appUsers = sbUsers;
+      saveAppUsers();
+    }
+
     dbReady = true;
     setSyncStatus('synced');
   } catch (err) {
@@ -2864,7 +2950,6 @@ async function initData() {
     if (items.length === 0) {
       items = DEFAULT_ITEMS.map(d => ({ ...d, id: uid() }));
     } else {
-      // Migrate localStorage: add missing default items
       const existingNames = new Set(items.map(i => i.name));
       const missing = DEFAULT_ITEMS.filter(d => !existingNames.has(d.name));
       if (missing.length > 0) items = [...items, ...missing.map(d => ({ ...d, id: uid() }))];
@@ -4026,8 +4111,15 @@ if (drivers.length === 0) {
   }
 }
 
-function saveDriversLocal() {
-  localStorage.setItem('inv_drivers', JSON.stringify(drivers));
+function saveDriversLocal() { localStorage.setItem('inv_drivers', JSON.stringify(drivers)); }
+async function sbSaveDriver(driver) {
+  const { error } = await sb.from('drivers').upsert(driver);
+  if (error) console.warn('Driver save error:', error.message);
+  saveDriversLocal();
+}
+async function sbDeleteDriver(id) {
+  await sb.from('drivers').delete().eq('id', id);
+  saveDriversLocal();
 }
 
 function renderDrivers() {
@@ -4192,16 +4284,18 @@ function saveDriver() {
     vehicle: document.getElementById('drvVehicle').value.trim(),
     notes:   document.getElementById('drvNotes').value.trim(),
   };
+  let saved;
   if (id) {
     const idx = drivers.findIndex(x => x.id === id);
-    if (idx !== -1) drivers[idx] = { ...drivers[idx], ...data };
+    if (idx !== -1) { drivers[idx] = { ...drivers[idx], ...data }; saved = drivers[idx]; }
     showToast('Driver updated.', 'success');
     if (activeDriverId === id) openDriverDetail(id);
   } else {
-    drivers.push({ id: uid(), ...data });
+    saved = { id: uid(), ...data };
+    drivers.push(saved);
     showToast('Driver added.', 'success');
   }
-  saveDriversLocal();
+  if (saved) sbSaveDriver(saved); else saveDriversLocal();
   closeModal('driverModal');
   renderDrivers();
 }
@@ -4211,7 +4305,7 @@ function deleteDriver(id) {
   if (!d) return;
   if (!confirm(`Delete ${d.name}? Their delivery assignments will remain.`)) return;
   drivers = drivers.filter(x => x.id !== id);
-  saveDriversLocal();
+  sbDeleteDriver(id);
   renderDrivers();
   showToast('Driver deleted.', 'success');
 }
@@ -4239,8 +4333,15 @@ if (clients.length === 0) {
 
 let activeClientId = null;
 
-function saveClientsLocal() {
-  localStorage.setItem('inv_clients', JSON.stringify(clients));
+function saveClientsLocal() { localStorage.setItem('inv_clients', JSON.stringify(clients)); }
+async function sbSaveClient(client) {
+  const { error } = await sb.from('clients').upsert(client);
+  if (error) console.warn('Client save error:', error.message);
+  saveClientsLocal();
+}
+async function sbDeleteClient(id) {
+  await sb.from('clients').delete().eq('id', id);
+  saveClientsLocal();
 }
 
 function renderClients() {
@@ -4416,17 +4517,18 @@ function saveClient() {
     email:   document.getElementById('cltEmail').value.trim(),
     notes:   document.getElementById('cltNotes').value.trim(),
   };
+  let saved;
   if (id) {
     const idx = clients.findIndex(x => x.id === id);
-    if (idx !== -1) clients[idx] = { ...clients[idx], ...data };
+    if (idx !== -1) { clients[idx] = { ...clients[idx], ...data }; saved = clients[idx]; }
     showToast('Client updated.', 'success');
-    // Refresh detail view if open
     if (activeClientId === id) openClientDetail(id);
   } else {
-    clients.push({ id: uid(), ...data });
+    saved = { id: uid(), ...data };
+    clients.push(saved);
     showToast('Client added.', 'success');
   }
-  saveClientsLocal();
+  if (saved) sbSaveClient(saved); else saveClientsLocal();
   closeModal('clientModal');
   renderClients();
 }
@@ -4436,7 +4538,7 @@ function deleteClient(id) {
   if (!c) return;
   if (!confirm(`Delete ${c.name}? Their delivery records will remain.`)) return;
   clients = clients.filter(x => x.id !== id);
-  saveClientsLocal();
+  sbDeleteClient(id);
   renderClients();
   showToast('Client deleted.', 'success');
 }
@@ -4463,8 +4565,15 @@ const DLV_STATUS = {
 
 const DLV_STATUS_ORDER = ['Pending', 'Processing', 'Dispatched', 'Delivered', 'Cancelled'];
 
-function saveDeliveriesLocal() {
-  localStorage.setItem('inv_deliveries', JSON.stringify(deliveries));
+function saveDeliveriesLocal() { localStorage.setItem('inv_deliveries', JSON.stringify(deliveries)); }
+async function sbSaveDelivery(delivery) {
+  const { error } = await sb.from('deliveries').upsert(delivery);
+  if (error) console.warn('Delivery save error:', error.message);
+  saveDeliveriesLocal();
+}
+async function sbDeleteDelivery(id) {
+  await sb.from('deliveries').delete().eq('id', id);
+  saveDeliveriesLocal();
 }
 
 function renderDelivery() {
@@ -4599,16 +4708,17 @@ function saveDelivery() {
     notes:        document.getElementById('dlvNotes').value.trim(),
   };
 
+  let saved;
   if (id) {
     const idx = deliveries.findIndex(x => x.id === id);
-    if (idx !== -1) deliveries[idx] = { ...deliveries[idx], ...data };
+    if (idx !== -1) { deliveries[idx] = { ...deliveries[idx], ...data }; saved = deliveries[idx]; }
     showToast('Delivery updated.', 'success');
   } else {
-    deliveries.push({ id: uid(), ...data });
+    saved = { id: uid(), ...data };
+    deliveries.push(saved);
     showToast('Delivery added.', 'success');
   }
-
-  saveDeliveriesLocal();
+  if (saved) sbSaveDelivery(saved); else saveDeliveriesLocal();
   closeModal('deliveryModal');
   renderDelivery();
 }
@@ -4616,7 +4726,7 @@ function saveDelivery() {
 function deleteDelivery(id) {
   if (!confirm('Delete this delivery entry?')) return;
   deliveries = deliveries.filter(d => d.id !== id);
-  saveDeliveriesLocal();
+  sbDeleteDelivery(id);
   renderDelivery();
   showToast('Delivery deleted.', 'success');
 }
@@ -4626,7 +4736,7 @@ function cycleDeliveryStatus(id) {
   if (!d) return;
   const idx = DLV_STATUS_ORDER.indexOf(d.status);
   d.status = DLV_STATUS_ORDER[(idx + 1) % DLV_STATUS_ORDER.length];
-  saveDeliveriesLocal();
+  sbSaveDelivery(d);
   renderDelivery();
 }
 
