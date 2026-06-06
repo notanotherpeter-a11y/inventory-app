@@ -1436,6 +1436,10 @@
       <span class="nav-icon">🛒</span>
       <span class="nav-label">Order List</span>
     </button>
+    <button class="nav-item" id="nav-laser" onclick="sidebarSwitchTab('laser')">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">Laser Instructions</span>
+    </button>
 
     <div class="sidebar-divider" style="margin: 8px 4px;"></div>
 
@@ -1555,7 +1559,10 @@
             <option value="Timber Pallet">Timber Pallet</option>
           </select>
         </div>
-        <button class="btn btn-subtle btn-sm" onclick="openTransactionModal()">⇄ Stock In / Out</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="sendInventoryEmail()">✉ Send Inventory</button>
+          <button class="btn btn-subtle btn-sm" onclick="openTransactionModal()">⇄ Stock In / Out</button>
+        </div>
       </div>
       <div class="inventory-grid" id="inventoryGrid"></div>
     </div>
@@ -1637,7 +1644,7 @@
       <div class="order-filters">
         <input class="search-box" id="orderSearch" placeholder="Search item…" oninput="renderOrders()">
         <select class="form-select" style="width:auto;padding:9px 14px;font-size:13px;border-radius:10px;" id="orderStatusFilter" onchange="renderOrders()">
-          <option value="">All Statuses</option>
+          <option value="">All Status</option>
           <option value="pending">Pending</option>
           <option value="ordered">Ordered</option>
           <option value="received">Received</option>
@@ -1652,14 +1659,31 @@
               <th>Item</th>
               <th>Qty Needed</th>
               <th>Unit</th>
-              <th>Priority</th>
-              <th>Status</th>
               <th>Notes</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="orderBody"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ── LASER INSTRUCTIONS PAGE ── -->
+    <div id="page-laser" style="display:none;">
+      <div class="section-header">
+        <div>
+          <div class="section-title" style="font-size:18px;">⚡ Laser Instructions</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Machine operating procedures and guidelines</div>
+        </div>
+      </div>
+
+      <!-- PDF Viewer placeholder -->
+      <div id="laserPdfContainer" style="margin-top:16px;">
+        <div style="background:rgba(18,21,35,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:60px 32px;text-align:center;">
+          <div style="font-size:48px;margin-bottom:16px;">📄</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;">Laser Instruction PDF</div>
+          <div style="font-size:13px;color:var(--muted);">PDF will be available here once uploaded.</div>
+        </div>
       </div>
     </div>
 
@@ -1918,12 +1942,19 @@ function mapLogFromDb(r) {
 }
 
 const DEFAULT_ITEMS = [
-  { name: 'Bar Chair',          category: 'Bar Chair',    variation: '',      qty: 0, unit: 'pcs', threshold: 10 },
-  { name: 'Metal Pallet 1.5mm', category: 'Metal Pallet', variation: '1.5mm', qty: 0, unit: 'pcs', threshold: 10 },
-  { name: 'Metal Pallet 1.2mm', category: 'Metal Pallet', variation: '1.2mm', qty: 0, unit: 'pcs', threshold: 10 },
-  { name: 'Metal Pallet 0.95mm',category: 'Metal Pallet', variation: '0.95mm',qty: 0, unit: 'pcs', threshold: 10 },
-  { name: 'Metal Pallet 0.75mm',category: 'Metal Pallet', variation: '0.75mm',qty: 0, unit: 'pcs', threshold: 10 },
-  { name: 'Timber Pallet',      category: 'Timber Pallet',variation: '',      qty: 0, unit: 'pcs', threshold: 10 },
+  { name: 'Bar Chair Pallet',    category: 'Bar Chair',    variation: '',      qty: 0, unit: 'pallet', threshold: 10 },
+  { name: 'Metal Sheet 1.95mm',  category: 'Metal Sheet',  variation: '1.95mm', qty: 0, unit: 'pallet', threshold: 10 },
+  { name: 'Metal Sheet Carbon',  category: 'Metal Sheet',  variation: '',        qty: 0, unit: 'pallet', threshold: 10 },
+  { name: 'Metal Pallet 1.55mm', category: 'Metal Pallet', variation: '1.55mm', qty: 0, unit: 'pallet', threshold: 10 },
+  { name: 'Metal Pallet 1.15mm', category: 'Metal Pallet', variation: '1.15mm', qty: 0, unit: 'pallet', threshold: 10 },
+  { name: 'Metal Pallet 0.95mm',category: 'Metal Pallet', variation: '0.95mm',qty: 0, unit: 'pallet', threshold: 10 },
+  { name: 'Metal Pallet 0.75mm',category: 'Metal Pallet', variation: '0.75mm',qty: 0, unit: 'pallet', threshold: 10 },
+  { name: 'Timber Pallet',      category: 'Timber Pallet',variation: '',      qty: 0, unit: 'pallet', threshold: 10 },
+  { name: 'Coil 60mm',          category: 'Coil',         variation: '60mm',  qty: 0, unit: 'coil', threshold: 5 },
+  { name: 'Coil 100mm',         category: 'Coil',         variation: '100mm', qty: 0, unit: 'coil', threshold: 5 },
+  { name: 'Gas Cylinder (Forklift)', category: 'Equipment', variation: '', qty: 0, unit: 'cylinders', threshold: 2 },
+  { name: 'Argon Cylinder (Welder)', category: 'Equipment', variation: '', qty: 0, unit: 'cylinders', threshold: 2 },
+  { name: 'Black Cylinder',          category: 'Equipment', variation: '', qty: 0, unit: 'cylinders', threshold: 2 },
 ];
 
 async function initData() {
@@ -1941,6 +1972,13 @@ async function initData() {
       items = seeded || [];
     } else {
       items = r1.data;
+      // Migrate: insert any default items missing by name
+      const existingNames = new Set(items.map(i => i.name));
+      const missing = DEFAULT_ITEMS.filter(d => !existingNames.has(d.name));
+      if (missing.length > 0) {
+        const { data: added } = await sb.from('items').insert(missing).select();
+        if (added) items = [...items, ...added];
+      }
     }
     logs = (r2.data || []).map(mapLogFromDb);
     dbReady = true;
@@ -1951,9 +1989,31 @@ async function initData() {
     logs  = JSON.parse(localStorage.getItem('inv_logs')  || '[]');
     if (items.length === 0) {
       items = DEFAULT_ITEMS.map(d => ({ ...d, id: uid() }));
+    } else {
+      // Migrate localStorage: add missing default items
+      const existingNames = new Set(items.map(i => i.name));
+      const missing = DEFAULT_ITEMS.filter(d => !existingNames.has(d.name));
+      if (missing.length > 0) items = [...items, ...missing.map(d => ({ ...d, id: uid() }))];
     }
     setSyncStatus('offline');
   }
+  // Sync orders to match inventory — order list always mirrors inventory items
+  const inventoryMap = new Map(items.map(i => [i.name, i]));
+  // Remove orders for items no longer in inventory
+  orders = orders.filter(o => inventoryMap.has(o.name));
+  // Update units on existing orders to match current inventory unit
+  orders = orders.map(o => ({ ...o, unit: inventoryMap.get(o.name)?.unit || o.unit }));
+  // Add orders for inventory items not yet in order list
+  const existingOrderNames = new Set(orders.map(o => o.name));
+  const missingOrders = items.filter(i => !existingOrderNames.has(i.name));
+  if (missingOrders.length > 0) {
+    orders = [...orders, ...missingOrders.map(i => ({
+      id: uid(), name: i.name, qty: 0, unit: i.unit,
+      priority: 'normal', status: 'pending', notes: '',
+      createdAt: new Date().toISOString()
+    }))];
+  }
+  localStorage.setItem('inv_orders', JSON.stringify(orders));
   save();
   renderAll();
 }
@@ -1987,6 +2047,9 @@ function categoryStyle(cat) {
     'Bar Chair':     { icon: '🪑', bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
     'Metal Pallet':  { icon: '🔩', bg: 'rgba(192,57,43,0.15)', color: '#c0392b' },
     'Timber Pallet': { icon: '🪵', bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
+    'Metal Sheet':   { icon: '🔧', bg: 'rgba(20,184,166,0.15)',   color: '#14b8a6' },
+    'Equipment':     { icon: '⛽', bg: 'rgba(249,115,22,0.15)',   color: '#f97316' },
+    'Coil':          { icon: '🌀', bg: 'rgba(139,92,246,0.15)',  color: '#8b5cf6' },
   };
   return map[cat] || { icon: '📦', bg: 'rgba(255,255,255,0.08)', color: '#6b7280' };
 }
@@ -2724,17 +2787,10 @@ function exportData() {
 })();
 
 // ─── Order List ───────────────────────────────────────────────────────────────
-const DEFAULT_ORDERS = [
-  { name: 'Metal Sheet 1.5mm',  qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
-  { name: 'Metal Sheet 1.2mm',  qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
-  { name: 'Metal Sheet 0.95mm', qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
-  { name: 'Metal Sheet 0.75mm', qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
-  { name: 'Carbon Sheet',       qty: 0, unit: 'sheets', priority: 'normal', status: 'pending', notes: '' },
-];
+// Orders are auto-synced from inventory in initData() — no static defaults needed
 
 let orders = JSON.parse(localStorage.getItem('inv_orders') || '[]');
-if (orders.length === 0) {
-  orders = DEFAULT_ORDERS.map(d => ({ id: uid(), ...d, createdAt: new Date().toISOString() }));
+if (false) { // placeholder — sync happens in initData()
   localStorage.setItem('inv_orders', JSON.stringify(orders));
 }
 
@@ -2787,15 +2843,23 @@ function renderOrders() {
     return matchS && matchQ;
   });
 
-  // Sort: urgent → high → normal → low, then by status pending first
-  const priOrder = { urgent:0, high:1, normal:2, low:3 };
-  const stOrder  = { pending:0, ordered:1, received:2 };
-  filtered.sort((a,b) => stOrder[a.status] - stOrder[b.status] || priOrder[a.priority] - priOrder[b.priority]);
+  // Sort by custom category order, then alphabetically within each group
+  function orderGroupRank(name) {
+    const n = name.toLowerCase();
+    if (n.includes('metal pallet')) return 0;
+    if (n.includes('metal sheet') || n.includes('carbon metal')) return 1;
+    if (n.includes('coil')) return 2;
+    if (n.includes('bar chair') || n.includes('bar chairs')) return 3;
+    if (n.includes('timber')) return 4;
+    if (n.includes('cylinder')) return 5;
+    return 6;
+  }
+  filtered.sort((a,b) => orderGroupRank(a.name) - orderGroupRank(b.name) || a.name.localeCompare(b.name));
 
   const tbody = document.getElementById('orderBody');
   if (!tbody) return;
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:48px;font-weight:500;">No items found</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:48px;font-weight:500;">No items found</td></tr>`;
     return;
   }
   tbody.innerHTML = filtered.map(o => `
@@ -2807,12 +2871,6 @@ function renderOrders() {
           onblur="updateOrderQty('${o.id}', this.value)">
       </td>
       <td style="color:var(--muted);font-size:12px;font-weight:500;">${escHtml(o.unit)}</td>
-      <td><span class="priority-${o.priority}">${PRIORITY_LABELS[o.priority]}</span></td>
-      <td>
-        <button class="order-status-btn ${STATUS_CLASS[o.status]}" onclick="cycleOrderStatus('${o.id}')" title="Click to advance status">
-          ${STATUS_LABELS[o.status]}
-        </button>
-      </td>
       <td style="color:var(--muted);font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(o.notes) || '—'}</td>
       <td style="text-align:right;white-space:nowrap;">
         <button class="pwd-icon-btn" onclick="openEditOrderModal('${o.id}')" title="Edit" style="display:inline-flex;">✏️</button>
@@ -2896,10 +2954,71 @@ function saveEmailSettings() {
   toast('Email settings saved', 'success');
 }
 
-function sendOrderEmail() {
-  const toSend = orders.filter(o => o.status !== 'received');
+async function sendInventoryEmail() {
+  if (items.length === 0) { toast('No inventory items to send', 'error'); return; }
+
+  const dateStr = new Date().toLocaleDateString('en-AU', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  const catOrder = { 'Metal Pallet':0, 'Metal Sheet':1, 'Coil':2, 'Bar Chair':3, 'Timber Pallet':4, 'Equipment':5 };
+  const sorted = [...items].sort((a,b) => (catOrder[a.category]??99) - (catOrder[b.category]??99) || a.name.localeCompare(b.name));
+
+  function statusLabel(item) {
+    if (item.qty <= 0) return 'Out of Stock';
+    if (item.qty <= item.threshold) return 'Low Stock';
+    return 'In Stock';
+  }
+
+  let body = `Dear Team,\n\n`;
+  body += `Please find below the current inventory report from Masterform Systems as of ${dateStr}.\n\n`;
+  body += `${'─'.repeat(55)}\n`;
+  body += `INVENTORY STATUS REPORT\n`;
+  body += `${'─'.repeat(55)}\n\n`;
+
+  let currentCat = '';
+  sorted.forEach((item) => {
+    if (item.category !== currentCat) {
+      if (currentCat) body += '\n';
+      body += `[ ${item.category.toUpperCase()} ]\n`;
+      currentCat = item.category;
+    }
+    body += `  • ${item.name}\n`;
+    body += `    Quantity : ${item.qty} ${item.unit}  |  Status: ${statusLabel(item)}\n`;
+  });
+
+  body += `\n${'─'.repeat(55)}\n`;
+  body += `Total Items: ${items.length}  |  `;
+  body += `In Stock: ${items.filter(i=>i.qty>i.threshold).length}  |  `;
+  body += `Low Stock: ${items.filter(i=>i.qty>0&&i.qty<=i.threshold).length}  |  `;
+  body += `Out of Stock: ${items.filter(i=>i.qty<=0).length}\n\n`;
+  body += `Please review and advise if any immediate action is required.\n\n`;
+  body += `Kind regards,\n\nMasterform Systems\nEmail: masterformsystem@gmail.com`;
+
+  const subject = `Inventory Status Report — Masterform Systems — ${new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}`;
+
+  const sendBtn = document.querySelector('[onclick="sendInventoryEmail()"]');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ Sending…'; }
+
+  try {
+    const res = await fetch('/api/send-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: emailSettings.to, cc: emailSettings.cc || '', subject, body }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Send failed');
+    toast('✅ Inventory report sent!', 'success');
+  } catch (err) {
+    toast(`❌ ${err.message}`, 'error');
+  } finally {
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '✉ Send Inventory'; }
+  }
+}
+
+async function sendOrderEmail() {
+  // Only include items with qty > 0 (actually needed)
+  const toSend = orders.filter(o => o.status !== 'received' && o.qty > 0);
   if (toSend.length === 0) {
-    toast('No pending or ordered items to send', 'error');
+    toast('No items with quantity set. Add quantities before sending.', 'error');
     return;
   }
 
@@ -2907,29 +3026,38 @@ function sendOrderEmail() {
   const priOrder = { urgent:0, high:1, normal:2, low:3 };
   const sorted = [...toSend].sort((a,b) => priOrder[a.priority] - priOrder[b.priority]);
 
-  const STATUS_EMOJI = { pending: '⏳', ordered: '📦', received: '✅' };
-  const PRI_EMOJI    = { urgent: '🔴', high: '🟠', normal: '🟡', low: '⚪' };
+  // Use 'pallet' as unit for Metal Pallet items
+  function displayUnit(o) {
+    if (o.name && o.name.toLowerCase().includes('pallet')) return 'pallet';
+    return o.unit;
+  }
 
-  let body = `Hi,\n\nPlease find below the current order list from Masterform Systems as of ${dateStr}:\n\n`;
-  body += `${'─'.repeat(40)}\n`;
-  body += `ITEMS TO ORDER\n`;
-  body += `${'─'.repeat(40)}\n\n`;
+  let body = `Dear Supplier,\n\n`;
+  body += `I hope this message finds you well.\n\n`;
+  body += `Please find below our purchase order request from Masterform Systems dated ${dateStr}. `;
+  body += `We kindly ask that you review the following items and advise on availability, pricing, and estimated lead times at your earliest convenience.\n\n`;
+  body += `${'─'.repeat(50)}\n`;
+  body += `PURCHASE ORDER REQUEST\n`;
+  body += `${'─'.repeat(50)}\n\n`;
 
   sorted.forEach((o, i) => {
-    body += `${i + 1}. ${o.name}\n`;
-    body += `   Qty Needed : ${o.qty > 0 ? o.qty + ' ' + o.unit : 'TBC'}\n`;
-    body += `   Priority   : ${PRI_EMOJI[o.priority]} ${o.priority.charAt(0).toUpperCase() + o.priority.slice(1)}\n`;
-    body += `   Status     : ${STATUS_EMOJI[o.status]} ${o.status.charAt(0).toUpperCase() + o.status.slice(1)}\n`;
-    if (o.notes) body += `   Notes      : ${o.notes}\n`;
+    body += `  ${i + 1}. ${o.name}\n`;
+    body += `     Quantity Required : ${o.qty} ${displayUnit(o)}\n`;
+    if (o.notes) body += `     Additional Notes  : ${o.notes}\n`;
     body += '\n';
   });
 
-  body += `${'─'.repeat(40)}\n`;
-  body += `Total items listed: ${sorted.length}\n\n`;
-  body += `Please confirm receipt and advise on availability and lead times.\n\n`;
-  body += `Thank you,\nMasterform Systems`;
+  body += `${'─'.repeat(50)}\n`;
+  body += `Total Line Items: ${sorted.length}\n\n`;
+  body += `Please confirm receipt of this order request and provide a quotation or delivery schedule at your earliest convenience. `;
+  body += `Should you require any further information, please do not hesitate to contact us.\n\n`;
+  body += `Thank you for your continued support.\n\n`;
+  body += `Kind regards,\n\n`;
+  body += `Masterform Systems\n`;
+  body += `Tel: (02) XXXX XXXX\n`;
+  body += `Email: masterformsystem@gmail.com`;
 
-  const subject = `Masterform Order List — ${new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}`;
+  const subject = `Purchase Order Request — Masterform Systems — ${new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}`;
 
   // Send via backend API (one click — no compose window)
   const sendBtn = document.querySelector('[onclick="sendOrderEmail()"]');
