@@ -1195,8 +1195,76 @@
   /* ════════════════════════════════════
      HOME PAGE
   ════════════════════════════════════ */
+  /* ── VIDEO HERO ── */
+  .home-video-hero {
+    position: relative;
+    margin: -32px -28px 32px -28px;
+    height: 58vh;
+    min-height: 340px;
+    overflow: hidden;
+  }
+  .home-video-hero video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .home-video-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(10,12,20,0.72) 0%,
+      rgba(10,12,20,0.45) 60%,
+      rgba(10,12,20,0.65) 100%
+    );
+  }
+  .home-video-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 40px 40px 36px;
+  }
+  .home-video-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+  }
+  .home-video-title {
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .home-video-title span { color: var(--accent2); }
+  .home-video-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+  .home-video-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .home-video-actions .btn { font-size: 13px; padding: 9px 20px; }
+  @media (max-width: 768px) {
+    .home-video-hero { margin: -32px -16px 24px; height: 44vh; }
+    .home-video-content { padding: 24px 20px 20px; }
+  }
+
   .home-greeting {
     margin-bottom: 28px;
+    display: none; /* replaced by video hero */
   }
   .home-greeting h1 {
     font-size: 24px;
@@ -1775,9 +1843,21 @@
 
     <!-- ── HOME PAGE ── -->
     <div id="page-home">
-      <div class="home-greeting">
-        <h1>👋 Welcome back, Masterform</h1>
-        <p id="homeDate"></p>
+      <!-- Video Hero -->
+      <div class="home-video-hero">
+        <video autoplay muted loop playsinline>
+          <source src="REMOVED" type="video/mp4" />
+        </video>
+        <div class="home-video-overlay"></div>
+        <div class="home-video-content">
+          <div class="home-video-label">MASTERFORM SYSTEMS PTY. LTD</div>
+          <div class="home-video-title">Inventory <span>Manager</span></div>
+          <div class="home-video-sub" id="homeDate"></div>
+          <div class="home-video-actions">
+            <button class="btn btn-primary" onclick="openAddModal()">➕ Add Item</button>
+            <button class="btn btn-outline" onclick="openTransactionModal()">⇄ Stock In / Out</button>
+          </div>
+        </div>
       </div>
 
       <!-- Summary Cards -->
@@ -1785,8 +1865,6 @@
 
       <!-- Quick Actions -->
       <div class="home-quick-actions">
-        <button class="btn btn-primary" onclick="openAddModal()">➕ Add Item</button>
-        <button class="btn btn-outline" onclick="openTransactionModal()">⇄ Stock In / Out</button>
         <button class="btn btn-subtle" onclick="sidebarSwitchTab('inventory')">📦 View Inventory</button>
         <button class="btn btn-subtle" onclick="sidebarSwitchTab('log')">📋 View Log</button>
       </div>
