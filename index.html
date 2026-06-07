@@ -1197,12 +1197,13 @@
   ════════════════════════════════════ */
   /* ── VIDEO HERO ── */
   .home-video-hero {
-    position: relative;
-    margin: -32px -28px 32px -28px;
-    height: 220px;
-    min-height: 180px;
+    position: fixed;
+    inset: var(--topbar-h) 0 0 var(--sidebar-w);
     overflow: hidden;
+    z-index: 0;
+    transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
   }
+  .sidebar.collapsed ~ .layout .home-video-hero { left: var(--sidebar-coll-w); }
   .home-video-hero video {
     position: absolute;
     inset: 0;
@@ -1213,53 +1214,42 @@
   .home-video-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(10,12,20,0.72) 0%,
-      rgba(10,12,20,0.45) 60%,
-      rgba(10,12,20,0.65) 100%
-    );
+    background: rgba(8,10,16,0.52);
   }
   .home-video-content {
     position: absolute;
     inset: 0;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: 20px 32px 22px;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
   }
   .home-video-label {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: .18em;
+    letter-spacing: .22em;
     text-transform: uppercase;
     color: var(--accent2);
-    margin-bottom: 10px;
+    margin-bottom: 14px;
   }
   .home-video-title {
-    font-size: clamp(26px, 4vw, 42px);
+    font-size: clamp(36px, 6vw, 72px);
     font-weight: 800;
     letter-spacing: -0.03em;
     color: #fff;
-    line-height: 1.1;
-    margin-bottom: 8px;
+    line-height: 1.05;
+    text-align: center;
   }
   .home-video-title span { color: var(--accent2); }
-  .home-video-sub {
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    font-weight: 500;
-    margin-bottom: 24px;
-  }
-  .home-video-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .home-video-actions .btn { font-size: 13px; padding: 9px 20px; }
-  @media (max-width: 768px) {
-    .home-video-hero { margin: -32px -16px 24px; height: 160px; }
-    .home-video-content { padding: 14px 18px 16px; }
+  .home-video-sub { display: none; }
+  .home-video-actions { display: none; }
+  #page-home { height: calc(100vh - var(--topbar-h)); margin: -32px -28px; overflow: hidden; }
+  #page-home .summary-grid,
+  #page-home .home-quick-actions,
+  #page-home .home-cols { display: none; }
+  @media (max-width: 767px) {
+    .home-video-hero { left: 0; }
   }
 
   .home-greeting {
@@ -1852,11 +1842,6 @@
         <div class="home-video-content">
           <div class="home-video-label">MASTERFORM SYSTEMS PTY. LTD</div>
           <div class="home-video-title">Inventory <span>Manager</span></div>
-          <div class="home-video-sub" id="homeDate"></div>
-          <div class="home-video-actions">
-            <button class="btn btn-primary" onclick="openAddModal()">➕ Add Item</button>
-            <button class="btn btn-outline" onclick="openTransactionModal()">⇄ Stock In / Out</button>
-          </div>
         </div>
       </div>
 
