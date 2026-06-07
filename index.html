@@ -1541,9 +1541,95 @@
 }
 .login-btn:hover { background: var(--accent2); }
 .login-error { color: var(--red); font-size: 12px; margin-top: 10px; display: none; }
+
+/* ── CUSTOM CURSOR (desktop only) ── */
+@media (min-width: 1081px) {
+  *, *::before, *::after { cursor: none !important; }
+
+  #pointer {
+    height: 40px; width: 40px;
+    margin-top: -20px; margin-left: -20px;
+    background: rgba(255,255,255,.12);
+    border: 1.5px solid rgba(255,255,255,.35);
+    position: fixed; border-radius: 50%;
+    top: 0; left: 0; z-index: 99999;
+    pointer-events: none;
+    transform-origin: center center;
+    transition: width .2s ease-out, height .2s ease-out,
+                margin .2s ease-out, background .2s ease-out,
+                border .2s ease-out, opacity .2s ease-out;
+    will-change: transform;
+  }
+
+  /* dot in centre */
+  #pointer::after {
+    content: '';
+    position: absolute; inset: 0; margin: auto;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #fff;
+    transition: transform .2s ease-out, opacity .2s;
+  }
+
+  /* hover over buttons / CTAs → expand + accent colour */
+  #pointer.hover-btn {
+    width: 64px; height: 64px;
+    margin-top: -32px; margin-left: -32px;
+    background: rgba(204,0,0,.75);
+    border-color: rgba(204,0,0,.9);
+    box-shadow: 0 0 18px rgba(204,0,0,.45);
+  }
+  #pointer.hover-btn::after { transform: scale(0); opacity: 0; }
+
+  /* hover over sidebar nav items → medium ring */
+  #pointer.hover-nav {
+    width: 52px; height: 52px;
+    margin-top: -26px; margin-left: -26px;
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.6);
+  }
+
+  /* hover over table rows / cards → show "View" */
+  #pointer.hover-view {
+    width: 72px; height: 72px;
+    margin-top: -36px; margin-left: -36px;
+    background: rgba(204,0,0,.85);
+    border: none;
+    box-shadow: 0 0 20px rgba(204,0,0,.4);
+  }
+  #pointer.hover-view::after { display: none; }
+  #pointer.hover-view .ptr-label { opacity: 1; }
+
+  /* hover over inputs → thin crosshair style */
+  #pointer.hover-input {
+    width: 28px; height: 28px;
+    margin-top: -14px; margin-left: -14px;
+    background: transparent;
+    border-color: rgba(255,255,255,.5);
+  }
+
+  /* hidden when over login screen */
+  #pointer.hidden { opacity: 0; }
+
+  .ptr-label {
+    opacity: 0;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity .2s ease;
+    white-space: nowrap;
+  }
+}
 </style>
 </head>
 <body>
+
+<!-- Custom Cursor -->
+<div id="pointer"><span class="ptr-label">View</span></div>
 
 <!-- Login Screen -->
 <div id="loginScreen">
@@ -4876,6 +4962,76 @@ function chatReply(text) {
   chatBotMsg("Sorry, I didn't quite get that. Try asking:\n• \"What's low on stock?\"\n• \"Show me all stock levels\"\n• \"What needs to be ordered?\"\n• \"How do I add an item?\"");
   chatShowQuickReplies(QUICK_REPLIES);
 }
+
+// ── CUSTOM CURSOR (desktop only, mirrors  style) ──
+(function() {
+  if (window.innerWidth < 1081) return;
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) return;
+
+  const pointer = document.getElementById('pointer');
+  if (!pointer) return;
+
+  let mouseX = -200, mouseY = -200;
+
+  // Track mouse position
+  window.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  // rAF loop — same technique as 
+  (function loop() {
+    pointer.style.transform = 'matrix(1,0,0,1,' + mouseX + ',' + mouseY + ')';
+    requestAnimationFrame(loop);
+  })();
+
+  // Hide when mouse leaves window
+  document.addEventListener('mouseleave', () => pointer.classList.add('hidden'));
+  document.addEventListener('mouseenter', () => pointer.classList.remove('hidden'));
+
+  // Helper to toggle a class on hover
+  function bindHover(selector, cls) {
+    document.querySelectorAll(selector).forEach(el => {
+      el.addEventListener('mouseenter', () => pointer.classList.add(cls));
+      el.addEventListener('mouseleave', () => pointer.classList.remove(cls));
+    });
+  }
+
+  // Also handle dynamically added elements via delegation
+  function delegateHover(selector, cls) {
+    document.addEventListener('mouseover', function(e) {
+      if (e.target.closest(selector)) pointer.classList.add(cls);
+    });
+    document.addEventListener('mouseout', function(e) {
+      if (e.target.closest(selector)) pointer.classList.remove(cls);
+    });
+  }
+
+  // Buttons & CTAs → red expanded cursor
+  delegateHover('button, .btn, [type="submit"], .login-btn, .action-btn, .send-btn, .chat-send', 'hover-btn');
+
+  // Sidebar nav items → medium ring
+  delegateHover('.nav-item, .sidebar a, .sidebar button', 'hover-nav');
+
+  // Table rows & cards → "View" label
+  delegateHover('tbody tr, .stat-card, .inv-card, .client-card, .driver-card', 'hover-view');
+
+  // Text inputs & selects → thin input cursor
+  delegateHover('input, textarea, select', 'hover-input');
+
+  // Remove conflicting states on mouseout (clean up all)
+  document.addEventListener('mouseout', function(e) {
+    const el = e.target;
+    const isBtn = el.closest('button, .btn, [type="submit"], .login-btn, .action-btn, .send-btn, .chat-send');
+    const isNav = el.closest('.nav-item, .sidebar a, .sidebar button');
+    const isRow = el.closest('tbody tr, .stat-card, .inv-card, .client-card, .driver-card');
+    const isInput = el.closest('input, textarea, select');
+    if (!isBtn) pointer.classList.remove('hover-btn');
+    if (!isNav) pointer.classList.remove('hover-nav');
+    if (!isRow) pointer.classList.remove('hover-view');
+    if (!isInput) pointer.classList.remove('hover-input');
+  });
+})();
 </script>
 </body>
 </html>
