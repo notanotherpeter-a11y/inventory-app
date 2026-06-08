@@ -402,11 +402,16 @@
     text-transform: uppercase;
     white-space: nowrap;
   }
-  .topbar-divider {
-    width: 1px;
-    height: 20px;
-    background: rgba(255,255,255,0.15);
-    flex-shrink: 0;
+  .topbar-center-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    pointer-events: none;
+    white-space: nowrap;
   }
 
   /* ════════════════════════════════════
@@ -1714,8 +1719,7 @@ body.light-page .topbar { background: rgba(255,255,255,0.97) !important; border-
 body.light-page .topbar-title, body.light-page .topbar-date { color: #1a1d2e !important; }
 body.light-page .topbar-breadcrumb { color: #6b7280 !important; }
 body.light-page .topbar-mobile-logo-text { color: #1a1d2e !important; }
-body.light-page .topbar-divider { background: #d1d5db !important; }
-body.light-page #topbarTitle { color: #1a1d2e !important; }
+body.light-page .topbar-center-title { color: #1a1d2e !important; }
 body.light-page .toggle-btn { color: #374151 !important; border-color: #e2e6f0 !important; background: #f8fafc !important; }
 body.light-page .toggle-btn:hover { background: #c0392b !important; color: #fff !important; border-color: #c0392b !important; }
 
@@ -2179,14 +2183,14 @@ body.light-page #pointer .ptr-label { color: #fff; }
   <div class="topbar" style="position:relative;">
     <div class="topbar-left">
       <button class="mobile-menu-btn" onclick="openMobileSidebar()" title="Open menu">☰</button>
-      <!-- Mobile logo — sits right next to burger, clicks go to Home -->
+      <!-- Logo group -->
       <div class="topbar-mobile-logo" onclick="sidebarSwitchTab('home')" title="Go to Home">
         <img src="logo.png" alt="Masterform">
         <span class="topbar-mobile-logo-text">Masterform</span>
       </div>
-      <span class="topbar-divider"></span>
-      <span class="topbar-breadcrumb-page" id="topbarTitle">Home</span>
     </div>
+    <!-- Page title — absolutely centered -->
+    <span class="topbar-center-title" id="topbarTitle">Home</span>
     <div class="topbar-actions">
       <span class="sync-badge" id="syncStatus">⟳ Loading…</span>
       <span class="topbar-date" id="topbarDate"></span>
