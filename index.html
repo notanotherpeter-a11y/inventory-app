@@ -6,7 +6,7 @@
 <title>Masterform Inventory Manager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   :root {
@@ -54,18 +54,21 @@
   body.light-page .topbar *::selection { background: #c0392b !important; color: #fff !important; }
 
   /* ── Typography refinements ── */
-  h1, h2, h3, h4, h5, h6 { letter-spacing: -0.02em; font-weight: 700; }
+  h1, h2, h3, h4, h5, h6 { letter-spacing: -0.025em; font-weight: 700; line-height: 1.2; }
   strong { font-weight: 700; }
-  .section-title { letter-spacing: -0.025em; font-weight: 800; }
+  p { line-height: 1.6; }
+  .section-title { letter-spacing: -0.03em; font-weight: 800; font-size: 20px; }
   .sidebar-nav-item { letter-spacing: -0.01em; font-weight: 500; }
   .sidebar-nav-item.active { font-weight: 700; }
   .btn { letter-spacing: -0.01em; font-weight: 600; }
-  .topbar-title { letter-spacing: -0.02em; font-weight: 700; }
-  th { letter-spacing: 0.04em; font-weight: 700; }
-  td { font-weight: 450; }
+  .topbar-title { letter-spacing: -0.025em; font-weight: 700; font-size: 15px; }
+  th { letter-spacing: 0.05em; font-weight: 700; font-size: 11px; }
+  td { font-weight: 400; line-height: 1.4; }
+  input, select, textarea, button { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 500; }
+  label { font-weight: 500; }
 
   body {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -160,13 +163,13 @@
     display: flex;
     align-items: center;
     gap: 11px;
-    padding: 10px 12px;
-    border-radius: 10px;
+    padding: 9px 16px;
+    border-radius: 9px;
     cursor: pointer;
     border: none;
     background: transparent;
     color: var(--muted);
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 500;
     width: 100%;
@@ -174,25 +177,20 @@
     transition: background 0.2s cubic-bezier(0.4,0,0.2,1), color 0.2s cubic-bezier(0.4,0,0.2,1);
     white-space: nowrap;
     min-height: 42px;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
   }
   .nav-item:hover {
     background: rgba(255,255,255,0.05);
     color: var(--text);
   }
   .nav-item.active {
-    background: rgba(192,57,43,0.12);
-    color: var(--text);
-    font-weight: 600;
+    background: rgba(192,57,43,0.15);
+    color: #e74c3c;
+    font-weight: 700;
+    border-left: 3px solid #e74c3c;
   }
   .nav-item.active::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 50%;
-    transform: translateY(-50%);
-    width: 3px; height: 60%;
-    background: var(--accent);
-    border-radius: 0 3px 3px 0;
+    display: none;
   }
   .nav-item .nav-icon {
     font-size: 17px;
@@ -419,7 +417,7 @@
     border-radius: 9px;
     border: none;
     cursor: pointer;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 600;
     display: inline-flex;
@@ -559,7 +557,7 @@
     background: transparent;
     color: var(--muted);
     cursor: pointer;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 600;
     transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
@@ -731,7 +729,7 @@
     background: transparent;
     border: none;
     text-align: center;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 700;
     color: var(--text);
@@ -840,7 +838,7 @@
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px;
     color: var(--text);
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 14px;
     font-weight: 500;
     outline: none;
@@ -881,7 +879,7 @@
     border-radius: 10px;
     padding: 9px 14px;
     color: var(--text);
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 500;
     outline: none;
@@ -963,7 +961,7 @@
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 12px;
     padding: 13px 18px;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 500;
     display: flex;
@@ -1249,7 +1247,7 @@
   .home-video-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(8,10,16,0.52);
+    background: rgba(6,8,14,0.58);
   }
   .home-video-content {
     position: absolute;
@@ -1265,18 +1263,20 @@
     font-weight: 700;
     letter-spacing: .22em;
     text-transform: uppercase;
-    color: var(--accent2);
-    margin-bottom: 14px;
+    color: rgba(231,76,60,0.95);
+    margin-bottom: 16px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.5);
   }
   .home-video-title {
-    font-size: clamp(36px, 6vw, 72px);
+    font-size: clamp(42px, 7vw, 82px);
     font-weight: 800;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
     color: #fff;
-    line-height: 1.05;
+    line-height: 1.0;
     text-align: center;
+    text-shadow: 0 2px 24px rgba(0,0,0,0.5);
   }
-  .home-video-title span { color: var(--accent2); }
+  .home-video-title span { color: #e74c3c; }
   .home-video-sub { display: none; }
   .home-video-actions { display: none; }
   #page-home { height: calc(100vh - var(--topbar-h)); margin: -32px -28px; overflow: hidden; }
@@ -1461,7 +1461,7 @@
     border: 1px solid rgba(255,255,255,0.1);
     border-radius: 8px;
     color: var(--text);
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 13px;
     font-weight: 600;
     text-align: center;
@@ -1643,6 +1643,18 @@
 @media (max-width: 600px) { .clients-stats-bar { grid-template-columns: 1fr 1fr; } }
 
 /* ── Global Light Theme (all pages except home) ── */
+/* Override CSS variables for light mode */
+body.light-page {
+  --bg: #f0f2f7;
+  --surface: rgba(255,255,255,0.97);
+  --surface-border: #e2e6f0;
+  --surface-hover: rgba(245,247,255,0.97);
+  --text: #1a1d2e;
+  --muted: #6b7280;
+  --green: #059669;
+  --yellow: #d97706;
+  --red: #dc2626;
+}
 body.light-page .main {
   background: #f0f2f7;
 }
@@ -1735,6 +1747,56 @@ body.light-page .sidebar-footer { border-top: 1px solid #e2e6f0 !important; }
 /* Body bg */
 body.light-page { background: #f0f2f7 !important; }
 body.light-page::before { opacity: 0 !important; }
+
+/* Modals on light pages */
+body.light-page .modal-overlay { background: rgba(15,20,40,0.35) !important; }
+body.light-page .modal-box,
+body.light-page [class*="modal-box"],
+body.light-page [id*="Modal"] .modal-box { background: #fff !important; border-color: #e2e6f0 !important; }
+body.light-page .modal-title { color: #1a1d2e !important; }
+body.light-page .modal-box label { color: #374151 !important; }
+body.light-page .modal-footer { border-top: 1px solid #e2e6f0 !important; background: #f8fafc !important; }
+
+/* Summary cards light */
+body.light-page .summary-card {
+  background: #fff !important;
+  border: 1px solid #e2e6f0 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+  color: #1a1d2e !important;
+}
+body.light-page .summary-card-icon { opacity: 0.85; }
+body.light-page .stat-value { color: #1a1d2e !important; }
+body.light-page .stat-label { color: #6b7280 !important; }
+
+/* Item cards light */
+body.light-page .item-card {
+  background: #fff !important;
+  border: 1px solid #e2e6f0 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+  color: #1a1d2e !important;
+}
+body.light-page .item-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+  border-color: #c0392b !important;
+}
+body.light-page .item-name { color: #1a1d2e !important; }
+body.light-page .item-category { color: #6b7280 !important; }
+body.light-page .stock-bar { background: #e5e7eb !important; }
+
+/* Password cards light */
+body.light-page .pwd-card {
+  background: #fff !important;
+  border: 1px solid #e2e6f0 !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+}
+body.light-page .pwd-name { color: #1a1d2e !important; }
+body.light-page .pwd-username { color: #6b7280 !important; }
+body.light-page .pwd-icon-btn { background: #f0f2f7 !important; color: #374151 !important; border-color: #e2e6f0 !important; }
+body.light-page .pwd-icon-btn:hover { background: #e5e7eb !important; }
+
+/* Section headers light */
+body.light-page .section-header { border-bottom: none !important; }
+body.light-page .section-title { color: #1a1d2e !important; }
 
 /* ── Pointer: dark on light pages ── */
 body.light-page #pointer {
