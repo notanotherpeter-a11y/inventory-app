@@ -30,8 +30,20 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   /* ── Text selection ── */
-  ::selection { background: #c0392b; color: #fff; }
+  ::selection { background: #e74c3c; color: #fff; }
   body.light-page ::selection { background: #c0392b; color: #fff; }
+  /* Sidebar selection — needs high contrast on both dark and light sidebar */
+  .sidebar ::selection { background: #e74c3c; color: #fff !important; }
+  body.light-page .sidebar ::selection { background: #c0392b; color: #fff !important; }
+  /* Nav item text specifically */
+  .sidebar-nav-item::selection,
+  .sidebar-nav-item *::selection,
+  .sidebar-brand::selection,
+  .sidebar-brand *::selection,
+  .sidebar-section-label::selection,
+  .sidebar-section-label *::selection,
+  .sidebar-stat::selection,
+  .sidebar-stat *::selection { background: #e74c3c !important; color: #fff !important; }
 
   /* ── Typography refinements ── */
   h1, h2, h3, h4, h5, h6 { letter-spacing: -0.02em; font-weight: 700; }
