@@ -1230,13 +1230,13 @@
   ════════════════════════════════════ */
   /* ── VIDEO HERO ── */
   .home-video-hero {
-    position: relative;
-    margin: -32px -28px 28px -28px;
-    height: 200px;
-    min-height: 160px;
+    position: fixed;
+    inset: var(--topbar-h) 0 0 var(--sidebar-w);
     overflow: hidden;
-    border-radius: 0 0 16px 16px;
+    z-index: 0;
+    transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
   }
+  .sidebar.collapsed ~ .layout .home-video-hero { left: var(--sidebar-coll-w); }
   .home-video-hero video {
     position: absolute;
     inset: 0;
@@ -1279,9 +1279,12 @@
   .home-video-title span { color: #e74c3c; }
   .home-video-sub { display: none; }
   .home-video-actions { display: none; }
-  #page-home { height: auto; margin: 0; overflow: visible; }
+  #page-home { height: calc(100vh - var(--topbar-h)); margin: -32px -28px; overflow: hidden; }
+  #page-home .summary-grid,
+  #page-home .home-quick-actions,
+  #page-home .home-cols { display: none; }
   @media (max-width: 767px) {
-    .home-video-hero { margin: -20px -16px 20px; border-radius: 0 0 12px 12px; }
+    .home-video-hero { left: 0; }
   }
 
   .home-greeting {
