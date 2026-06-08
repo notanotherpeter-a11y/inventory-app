@@ -1663,8 +1663,43 @@ body.light-page [style*="background: var(--surface)"] { background: #fff !import
 body.light-page [style*="border: 1px solid var(--surface-border)"],
 body.light-page [style*="border:1px solid var(--surface-border)"] { border-color: #e2e6f0 !important; }
 /* Topbar light */
-body.light-page .topbar { background: rgba(255,255,255,0.95) !important; border-bottom: 1px solid #e2e6f0 !important; }
+body.light-page .topbar { background: rgba(255,255,255,0.97) !important; border-bottom: 1px solid #e2e6f0 !important; backdrop-filter: none !important; }
 body.light-page .topbar-title, body.light-page .topbar-date { color: #1a1d2e !important; }
+body.light-page .topbar-breadcrumb { color: #6b7280 !important; }
+body.light-page .sidebar-toggle { color: #374151 !important; }
+body.light-page .sidebar-toggle:hover { background: #f0f2f7 !important; }
+
+/* Sidebar light */
+body.light-page .sidebar {
+  background: #fff !important;
+  border-right: 1px solid #e2e6f0 !important;
+  backdrop-filter: none !important;
+}
+body.light-page .sidebar-brand {
+  border-bottom: 1px solid #e2e6f0 !important;
+}
+body.light-page .sidebar-brand-text { color: #6b7280 !important; }
+body.light-page .sidebar-nav-item {
+  color: #374151 !important;
+}
+body.light-page .sidebar-nav-item:hover {
+  background: #f0f2f7 !important;
+  color: #1a1d2e !important;
+}
+body.light-page .sidebar-nav-item.active {
+  background: rgba(192,57,43,0.08) !important;
+  color: #c0392b !important;
+}
+body.light-page .sidebar-nav-item.active .nav-icon { opacity: 1; }
+body.light-page .sidebar-section-label { color: #9ca3af !important; }
+body.light-page .sidebar-divider { border-color: #e2e6f0 !important; }
+body.light-page .sidebar-stat { color: #374151 !important; }
+body.light-page .sidebar-stat-label { color: #9ca3af !important; }
+body.light-page .sidebar-stat-value { color: #1a1d2e !important; }
+body.light-page .sidebar-footer { border-top: 1px solid #e2e6f0 !important; }
+/* Body bg */
+body.light-page { background: #f0f2f7 !important; }
+body.light-page::before { opacity: 0 !important; }
 
 /* ── Pointer: dark on light pages ── */
 body.light-page #pointer {
