@@ -1230,13 +1230,13 @@
   ════════════════════════════════════ */
   /* ── VIDEO HERO ── */
   .home-video-hero {
-    position: fixed;
-    inset: var(--topbar-h) 0 0 var(--sidebar-w);
+    position: relative;
+    margin: -32px -28px 28px -28px;
+    height: 200px;
+    min-height: 160px;
     overflow: hidden;
-    z-index: 0;
-    transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
+    border-radius: 0 0 16px 16px;
   }
-  .sidebar.collapsed ~ .layout .home-video-hero { left: var(--sidebar-coll-w); }
   .home-video-hero video {
     position: absolute;
     inset: 0;
@@ -1279,12 +1279,9 @@
   .home-video-title span { color: #e74c3c; }
   .home-video-sub { display: none; }
   .home-video-actions { display: none; }
-  #page-home { height: calc(100vh - var(--topbar-h)); margin: -32px -28px; overflow: hidden; }
-  #page-home .summary-grid,
-  #page-home .home-quick-actions,
-  #page-home .home-cols { display: none; }
+  #page-home { height: auto; margin: 0; overflow: visible; }
   @media (max-width: 767px) {
-    .home-video-hero { left: 0; }
+    .home-video-hero { margin: -20px -16px 20px; border-radius: 0 0 12px 12px; }
   }
 
   .home-greeting {
@@ -4040,8 +4037,8 @@ function sidebarSwitchTab(page) {
   if (page === 'drivers')   renderDrivers();
   if (page === 'users')     renderUsers();
 
-  // Light theme for all pages except home
-  document.body.classList.toggle('light-page', page !== 'home');
+  // Light theme for all pages including home
+  document.body.classList.add('light-page');
 
   closeMobileSidebar();
 }
@@ -4706,6 +4703,9 @@ function renderAll() {
   renderHome();
   updateSidebarStats();
 }
+
+// Apply light theme on startup
+document.body.classList.add('light-page');
 
 // Start the app — load from Supabase, open on Home page
 initData().then(() => {
