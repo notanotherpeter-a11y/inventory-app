@@ -1682,6 +1682,23 @@
     white-space: nowrap;
   }
 }
+
+/* ── CLIENT DOCUMENTS ── */
+.doc-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s;
+}
+.doc-card:hover { border-color: rgba(255,255,255,0.2); background: var(--surface-hover); }
+.doc-card-icon { font-size: 28px; line-height: 1; }
+.doc-card-name { font-size: 13px; font-weight: 600; color: var(--text); word-break: break-word; }
+.doc-card-meta { font-size: 11px; color: var(--muted); }
+.doc-card-actions { display: flex; gap: 6px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -2075,6 +2092,39 @@
     <!-- Clients Page -->
     <div id="page-clients" style="display:none;">
 
+      <!-- ── Documents Section ── -->
+      <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:16px;padding:24px;margin-bottom:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;">📄 Client Documents</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Upload a PDF — AI will auto-assign it to the right client</div>
+          </div>
+          <label class="btn btn-primary" style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+            ⬆️ Upload PDF
+            <input type="file" accept=".pdf" multiple style="display:none;" onchange="handleDocUpload(event)">
+          </label>
+        </div>
+
+        <!-- Drop zone -->
+        <div id="docDropZone" style="border:2px dashed rgba(255,255,255,0.12);border-radius:12px;padding:28px;text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px;transition:border-color .2s;"
+          ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
+          ondragleave="this.style.borderColor='rgba(255,255,255,0.12)'"
+          ondrop="event.preventDefault();this.style.borderColor='rgba(255,255,255,0.12)';handleDocDrop(event)">
+          Drag & drop PDF files here
+        </div>
+
+        <!-- Filter -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+          <input class="form-input" id="docSearch" placeholder="🔍 Search documents…" style="width:200px;padding:7px 12px;font-size:12px;" oninput="renderDocs()">
+          <select class="form-select" id="docClientFilter" style="width:180px;padding:7px 12px;font-size:12px;" onchange="renderDocs()">
+            <option value="">All Clients</option>
+          </select>
+        </div>
+
+        <!-- Doc list -->
+        <div id="docList"></div>
+      </div>
+
       <!-- Client List View -->
       <div id="clientListView">
         <div class="section-header">
@@ -2121,6 +2171,22 @@
             <tbody id="clientDeliveryBody"></tbody>
           </table>
           <div id="clientDeliveryEmpty" style="text-align:center;padding:32px;color:var(--muted);display:none;">No deliveries recorded for this client yet.</div>
+        </div>
+
+        <!-- Client Documents -->
+        <div style="margin-top:28px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div>
+              <div style="font-size:15px;font-weight:700;">📄 Documents</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px;">PDFs and files for this client</div>
+            </div>
+            <label class="btn btn-primary" style="cursor:pointer;font-size:13px;padding:8px 18px;">
+              ➕ Upload PDF
+              <input type="file" accept=".pdf,application/pdf" style="display:none;" onchange="uploadClientDoc(event)">
+            </label>
+          </div>
+          <div id="clientDocsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;"></div>
+          <div id="clientDocsEmpty" style="text-align:center;padding:32px;color:var(--muted);font-size:13px;display:none;">No documents uploaded for this client yet.</div>
         </div>
       </div>
 
@@ -4580,6 +4646,7 @@ function openClientDetail(id) {
     </div>`;
 
   renderClientDeliveries(c.name);
+  renderClientDocs();
 }
 
 function renderClientDeliveries(clientName) {
@@ -5095,6 +5162,230 @@ function chatReply(text) {
     if (!isInput) pointer.classList.remove('hover-input');
   });
 })();
+
+// ─── Client Documents ────────────────────────────────────────────────────────
+function getClientDocs(clientId) {
+  try { return JSON.parse(localStorage.getItem('inv_client_docs_' + clientId) || '[]'); }
+  catch { return []; }
+}
+function saveClientDocs(clientId, docs) {
+  localStorage.setItem('inv_client_docs_' + clientId, JSON.stringify(docs));
+}
+
+function renderClientDocs() {
+  if (!activeClientId) return;
+  const docs = getClientDocs(activeClientId);
+  const grid = document.getElementById('clientDocsGrid');
+  const empty = document.getElementById('clientDocsEmpty');
+  if (!grid) return;
+  if (docs.length === 0) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  grid.innerHTML = docs.map(doc => `
+    <div class="doc-card">
+      <div class="doc-card-icon">📄</div>
+      <div class="doc-card-name">${escHtml(doc.name)}</div>
+      <div class="doc-card-meta">Uploaded ${new Date(doc.uploadedAt).toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'})}</div>
+      <div class="doc-card-actions">
+        <button class="btn btn-subtle btn-sm" onclick="viewClientDoc('${activeClientId}','${doc.id}')" style="flex:1;font-size:12px;">👁 View</button>
+        <button class="btn btn-subtle btn-sm" onclick="downloadClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;">⬇</button>
+        <button class="btn btn-subtle btn-sm del" onclick="deleteClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;color:var(--red);">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function uploadClientDoc(event) {
+  if (!activeClientId) return;
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { showToast('File too large (max 10MB).', 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const docs = getClientDocs(activeClientId);
+    docs.push({
+      id: 'doc_' + Date.now(),
+      name: file.name,
+      data: e.target.result,
+      uploadedAt: new Date().toISOString()
+    });
+    saveClientDocs(activeClientId, docs);
+    renderClientDocs();
+    showToast('Document uploaded.', 'success');
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function viewClientDoc(clientId, docId) {
+  const docs = getClientDocs(clientId);
+  const doc = docs.find(d => d.id === docId);
+  if (!doc) return;
+  const win = window.open();
+  win.document.write(`<iframe src="${doc.data}" style="width:100%;height:100vh;border:none;"></iframe>`);
+}
+
+function downloadClientDoc(clientId, docId) {
+  const docs = getClientDocs(clientId);
+  const doc = docs.find(d => d.id === docId);
+  if (!doc) return;
+  const a = document.createElement('a');
+  a.href = doc.data;
+  a.download = doc.name;
+  a.click();
+}
+
+function deleteClientDoc(clientId, docId) {
+  if (!confirm('Delete this document?')) return;
+  const docs = getClientDocs(clientId).filter(d => d.id !== docId);
+  saveClientDocs(clientId, docs);
+  renderClientDocs();
+  showToast('Document deleted.', 'success');
+}
+
+// ─── Global Client Documents (Clients Page) ──────────────────────────────────
+const ALL_DOCS_KEY = 'inv_all_client_docs';
+
+function getAllDocs() {
+  try { return JSON.parse(localStorage.getItem(ALL_DOCS_KEY) || '[]'); } catch { return []; }
+}
+function saveAllDocs(docs) {
+  localStorage.setItem(ALL_DOCS_KEY, JSON.stringify(docs));
+}
+
+// AI auto-assign: match filename against client names using keyword scoring
+function autoAssignClient(filename) {
+  const name = filename.toLowerCase().replace(/[_\-\.]/g, ' ');
+  let best = null, bestScore = 0;
+  clients.forEach(c => {
+    const words = c.name.toLowerCase().split(/\s+/);
+    let score = 0;
+    words.forEach(w => { if (w.length > 2 && name.includes(w)) score += w.length; });
+    if (score > bestScore) { bestScore = score; best = c; }
+  });
+  return bestScore >= 3 ? best : null;
+}
+
+function processDocFile(file) {
+  if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+    showToast('Only PDF files are supported.', 'error'); return;
+  }
+  if (file.size > 15 * 1024 * 1024) { showToast(`${file.name} is too large (max 15MB).`, 'error'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const matched = autoAssignClient(file.name);
+    const docs = getAllDocs();
+    docs.unshift({
+      id: 'gdoc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      name: file.name,
+      data: e.target.result,
+      clientId: matched ? matched.id : null,
+      clientName: matched ? matched.name : 'Unassigned',
+      uploadedAt: new Date().toISOString()
+    });
+    saveAllDocs(docs);
+    renderDocs();
+    showToast(matched ? `📄 Assigned to ${matched.name}` : '📄 Uploaded — no client matched', matched ? 'success' : 'warning');
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleDocUpload(event) {
+  Array.from(event.target.files).forEach(processDocFile);
+  event.target.value = '';
+}
+
+function handleDocDrop(event) {
+  Array.from(event.dataTransfer.files).forEach(processDocFile);
+}
+
+function renderDocs() {
+  const search = (document.getElementById('docSearch')?.value || '').toLowerCase();
+  const clientFilter = document.getElementById('docClientFilter')?.value || '';
+  const docs = getAllDocs();
+
+  // Populate filter dropdown
+  const sel = document.getElementById('docClientFilter');
+  if (sel) {
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All Clients</option>';
+    const names = [...new Set(docs.map(d => d.clientName))].sort();
+    names.forEach(n => {
+      const o = document.createElement('option');
+      o.value = n; o.textContent = n;
+      if (n === current) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+
+  const filtered = docs.filter(d => {
+    const matchSearch = !search || d.name.toLowerCase().includes(search) || d.clientName.toLowerCase().includes(search);
+    const matchClient = !clientFilter || d.clientName === clientFilter;
+    return matchSearch && matchClient;
+  });
+
+  const el = document.getElementById('docList');
+  if (!el) return;
+  if (filtered.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:28px;color:var(--muted);font-size:13px;">No documents yet. Upload a PDF above.</div>`;
+    return;
+  }
+
+  el.innerHTML = `<table class="inv-table"><thead><tr>
+    <th>Document</th><th>Client</th><th>Uploaded</th><th style="text-align:right;">Actions</th>
+  </tr></thead><tbody>${filtered.map(doc => `
+    <tr>
+      <td style="font-weight:600;font-size:13px;">📄 ${escHtml(doc.name)}</td>
+      <td>
+        <span style="background:${doc.clientId ? 'rgba(192,57,43,0.15)' : 'rgba(100,100,100,0.15)'};color:${doc.clientId ? 'var(--accent2)' : 'var(--muted)'};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">
+          ${doc.clientId ? '🏢' : '❓'} ${escHtml(doc.clientName)}
+        </span>
+      </td>
+      <td style="color:var(--muted);font-size:12px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td style="text-align:right;white-space:nowrap;">
+        <button class="btn btn-subtle btn-sm" onclick="viewGlobalDoc('${doc.id}')" style="font-size:12px;margin-right:4px;">👁 View</button>
+        <button class="btn btn-subtle btn-sm" onclick="reassignDoc('${doc.id}')" style="font-size:12px;margin-right:4px;">🔀 Reassign</button>
+        <button class="btn btn-subtle btn-sm" onclick="deleteGlobalDoc('${doc.id}')" style="font-size:12px;color:var(--red);">🗑</button>
+      </td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function viewGlobalDoc(docId) {
+  const doc = getAllDocs().find(d => d.id === docId);
+  if (!doc) return;
+  const win = window.open();
+  win.document.write(`<title>${doc.name}</title><iframe src="${doc.data}" style="width:100%;height:100vh;border:none;"></iframe>`);
+}
+
+function deleteGlobalDoc(docId) {
+  if (!confirm('Delete this document?')) return;
+  saveAllDocs(getAllDocs().filter(d => d.id !== docId));
+  renderDocs();
+  showToast('Document deleted.', 'success');
+}
+
+function reassignDoc(docId) {
+  const docs = getAllDocs();
+  const doc = docs.find(d => d.id === docId);
+  if (!doc) return;
+  const opts = clients.map(c => `${c.name}`).join('\n');
+  const choice = prompt(`Reassign "${doc.name}" to which client?\n\nAvailable clients:\n${opts}\n\nType client name:`);
+  if (!choice) return;
+  const matched = clients.find(c => c.name.toLowerCase().includes(choice.toLowerCase()));
+  if (!matched) { showToast('Client not found.', 'error'); return; }
+  doc.clientId = matched.id;
+  doc.clientName = matched.name;
+  saveAllDocs(docs);
+  renderDocs();
+  showToast(`Reassigned to ${matched.name}`, 'success');
+}
+
+// Init docs on clients page load
+const _origRenderClients = renderClients;
+renderClients = function() { _origRenderClients(); renderDocs(); };
 </script>
 </body>
 </html>
