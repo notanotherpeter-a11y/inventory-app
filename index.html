@@ -1456,6 +1456,111 @@
     color: var(--muted);
   }
   .order-summary-pill span { font-weight: 800; font-size: 16px; }
+
+/* ── Clients Page Redesign ── */
+.clients-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.clients-stat-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.clients-stat-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.clients-stat-val { font-size: 22px; font-weight: 800; line-height: 1; }
+.clients-stat-lbl { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; }
+.client-table-wrap { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 14px; overflow: hidden; }
+.client-table { width: 100%; border-collapse: collapse; }
+.client-table thead th {
+  padding: 11px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--surface-border);
+  white-space: nowrap;
+}
+.client-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.client-table tbody tr:last-child { border-bottom: none; }
+.client-table tbody tr:hover { background: rgba(255,255,255,0.04); }
+.client-table td { padding: 13px 16px; font-size: 13px; vertical-align: middle; }
+.client-avatar {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: rgba(192,57,43,0.15);
+  border: 1px solid rgba(192,57,43,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: var(--accent);
+  flex-shrink: 0;
+}
+.client-name-cell { display: flex; align-items: center; gap: 12px; }
+.client-name-text { font-weight: 700; font-size: 13px; }
+.client-contact-text { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+.status-pill.active { background: rgba(245,158,11,0.15); color: #f59e0b; }
+.status-pill.none { background: rgba(107,114,128,0.12); color: var(--muted); }
+/* Detail view */
+.client-detail-header {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.client-detail-avatar {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: rgba(192,57,43,0.15);
+  border: 1.5px solid rgba(192,57,43,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 22px; color: var(--accent);
+  flex-shrink: 0;
+}
+.client-detail-meta { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 10px; }
+.client-detail-meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.client-detail-meta-item strong { color: var(--text); font-weight: 600; }
+/* Doc section */
+.doc-upload-zone {
+  border: 2px dashed rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  transition: border-color .2s, background .2s;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+.doc-upload-zone:hover { border-color: var(--accent2); background: rgba(231,76,60,0.04); }
+.doc-table { width: 100%; border-collapse: collapse; }
+.doc-table th {
+  padding: 9px 14px; text-align: left;
+  font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--surface-border);
+}
+.doc-table td { padding: 11px 14px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+.doc-table tr:last-child td { border-bottom: none; }
+@media (max-width: 900px) { .clients-stats-bar { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 600px) { .clients-stats-bar { grid-template-columns: 1fr 1fr; } }
 </style>
 <style>
 /* ─── Chatbot ─── */
@@ -2092,102 +2197,152 @@
     <!-- Clients Page -->
     <div id="page-clients" style="display:none;">
 
-      <!-- ── Documents Section ── -->
-      <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:16px;padding:24px;margin-bottom:28px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
-          <div>
-            <div style="font-size:15px;font-weight:700;">📄 Client Documents</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Upload a PDF — AI will auto-assign it to the right client</div>
-          </div>
-          <label class="btn btn-primary" style="cursor:pointer;display:flex;align-items:center;gap:6px;">
-            ⬆️ Upload PDF
-            <input type="file" accept=".pdf" multiple style="display:none;" onchange="handleDocUpload(event)">
-          </label>
+      <!-- Stats Bar -->
+      <div class="clients-stats-bar" id="clientsStatsBar">
+        <div class="clients-stat-card">
+          <div class="clients-stat-icon" style="background:rgba(59,130,246,0.12);">🏢</div>
+          <div><div class="clients-stat-val" id="statTotalClients">0</div><div class="clients-stat-lbl">Total Clients</div></div>
         </div>
-
-        <!-- Drop zone -->
-        <div id="docDropZone" style="border:2px dashed rgba(255,255,255,0.12);border-radius:12px;padding:28px;text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px;transition:border-color .2s;"
-          ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
-          ondragleave="this.style.borderColor='rgba(255,255,255,0.12)'"
-          ondrop="event.preventDefault();this.style.borderColor='rgba(255,255,255,0.12)';handleDocDrop(event)">
-          Drag & drop PDF files here
+        <div class="clients-stat-card">
+          <div class="clients-stat-icon" style="background:rgba(245,158,11,0.12);">📦</div>
+          <div><div class="clients-stat-val" id="statActiveJobs">0</div><div class="clients-stat-lbl">Active Jobs</div></div>
         </div>
-
-        <!-- Filter -->
-        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
-          <input class="form-input" id="docSearch" placeholder="🔍 Search documents…" style="width:200px;padding:7px 12px;font-size:12px;" oninput="renderDocs()">
-          <select class="form-select" id="docClientFilter" style="width:180px;padding:7px 12px;font-size:12px;" onchange="renderDocs()">
-            <option value="">All Clients</option>
-          </select>
+        <div class="clients-stat-card">
+          <div class="clients-stat-icon" style="background:rgba(16,185,129,0.12);">✅</div>
+          <div><div class="clients-stat-val" id="statDelivered">0</div><div class="clients-stat-lbl">Delivered</div></div>
         </div>
-
-        <!-- Doc list -->
-        <div id="docList"></div>
+        <div class="clients-stat-card">
+          <div class="clients-stat-icon" style="background:rgba(139,92,246,0.12);">📄</div>
+          <div><div class="clients-stat-val" id="statDocs">0</div><div class="clients-stat-lbl">Documents</div></div>
+        </div>
       </div>
 
       <!-- Client List View -->
       <div id="clientListView">
-        <div class="section-header">
+
+        <!-- Toolbar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
           <div>
-            <div class="section-title" style="font-size:18px;">🏢 Clients</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Client profiles and delivery history</div>
+            <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;">Client Directory</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">Manage accounts and delivery history</div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input class="form-input" id="clientSearch" placeholder="🔍 Search client…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderClients()">
-            <button class="btn btn-primary" onclick="openClientModal()">➕ Add Client</button>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input class="form-input" id="clientSearch" placeholder="Search clients…" style="width:200px;padding:8px 14px;font-size:13px;" oninput="renderClients()">
+            <button class="btn btn-primary" onclick="openClientModal()" style="display:flex;align-items:center;gap:6px;white-space:nowrap;">+ New Client</button>
           </div>
         </div>
-        <div id="clientGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:4px;"></div>
-        <div id="clientEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">No clients found.</div>
-      </div>
 
-      <!-- Client Detail View (hidden until a client is selected) -->
-      <div id="clientDetailView" style="display:none;">
-        <div class="section-header" style="margin-bottom:16px;">
-          <button class="btn btn-subtle btn-sm" onclick="closeClientDetail()" style="display:flex;align-items:center;gap:6px;">← Back to Clients</button>
-          <button class="btn btn-primary" onclick="openDeliveryModalForClient()">➕ Add Delivery</button>
-        </div>
-
-        <!-- Client Info Card -->
-        <div id="clientInfoCard" style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:24px;margin-bottom:20px;"></div>
-
-        <!-- Client Delivery Stats -->
-        <div id="clientDeliveryStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
-
-        <!-- Client Delivery Table -->
-        <div class="table-wrap">
-          <table class="inv-table">
+        <!-- Client Table -->
+        <div class="client-table-wrap">
+          <table class="client-table">
             <thead>
               <tr>
-                <th>Job #</th>
-                <th>Items</th>
-                <th>Order Date</th>
-                <th>Expected Delivery</th>
-                <th>Status</th>
-                <th>Notes</th>
-                <th>Actions</th>
+                <th>Client</th>
+                <th>Contact</th>
+                <th>Phone</th>
+                <th>Active Jobs</th>
+                <th>Total</th>
+                <th>Last Delivery</th>
+                <th style="text-align:right;">Actions</th>
               </tr>
             </thead>
-            <tbody id="clientDeliveryBody"></tbody>
+            <tbody id="clientGrid"></tbody>
           </table>
-          <div id="clientDeliveryEmpty" style="text-align:center;padding:32px;color:var(--muted);display:none;">No deliveries recorded for this client yet.</div>
+          <div id="clientEmpty" style="text-align:center;padding:48px;color:var(--muted);font-size:13px;display:none;">No clients found. Click <strong>+ New Client</strong> to get started.</div>
+        </div>
+      </div>
+
+      <!-- Client Detail View -->
+      <div id="clientDetailView" style="display:none;">
+
+        <!-- Back + Actions -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-subtle btn-sm" onclick="closeClientDetail()" style="display:flex;align-items:center;gap:6px;font-weight:600;">← Back to Directory</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="openClientModal(activeClientId)" style="font-size:13px;">✏ Edit</button>
+            <button class="btn btn-primary" onclick="openDeliveryModalForClient()">+ Add Delivery</button>
+          </div>
         </div>
 
-        <!-- Client Documents -->
-        <div style="margin-top:28px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-            <div>
-              <div style="font-size:15px;font-weight:700;">📄 Documents</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:2px;">PDFs and files for this client</div>
-            </div>
-            <label class="btn btn-primary" style="cursor:pointer;font-size:13px;padding:8px 18px;">
-              ➕ Upload PDF
-              <input type="file" accept=".pdf,application/pdf" style="display:none;" onchange="uploadClientDoc(event)">
-            </label>
-          </div>
-          <div id="clientDocsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;"></div>
-          <div id="clientDocsEmpty" style="text-align:center;padding:32px;color:var(--muted);font-size:13px;display:none;">No documents uploaded for this client yet.</div>
+        <!-- Client Header Card -->
+        <div class="client-detail-header" id="clientInfoCard"></div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:0;border-bottom:1px solid var(--surface-border);margin-bottom:20px;">
+          <button id="tabDeliveries" onclick="switchClientTab('deliveries')" style="padding:10px 20px;font-size:13px;font-weight:600;background:none;border:none;color:var(--accent2);border-bottom:2px solid var(--accent2);cursor:pointer;">Deliveries</button>
+          <button id="tabDocs" onclick="switchClientTab('docs')" style="padding:10px 20px;font-size:13px;font-weight:600;background:none;border:none;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;">Documents</button>
         </div>
+
+        <!-- Delivery Stats -->
+        <div id="clientDeliveryStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
+
+        <!-- Deliveries Panel -->
+        <div id="clientTabDeliveries">
+          <div class="table-wrap">
+            <table class="inv-table">
+              <thead><tr>
+                <th>Job #</th><th>Items</th><th>Order Date</th><th>Expected Delivery</th><th>Status</th><th>Notes</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="clientDeliveryBody"></tbody>
+            </table>
+            <div id="clientDeliveryEmpty" style="text-align:center;padding:32px;color:var(--muted);display:none;">No deliveries recorded for this client yet.</div>
+          </div>
+        </div>
+
+        <!-- Documents Panel -->
+        <div id="clientTabDocs" style="display:none;">
+          <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:24px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div style="font-size:14px;font-weight:700;">Uploaded Documents</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px;">PDFs and files for this client</div>
+              </div>
+              <label class="btn btn-primary btn-sm" style="cursor:pointer;font-size:13px;">
+                + Upload PDF
+                <input type="file" accept=".pdf,application/pdf" style="display:none;" onchange="uploadClientDoc(event)">
+              </label>
+            </div>
+            <div class="doc-upload-zone" id="clientDocDrop"
+              ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
+              ondragleave="this.style.borderColor=''"
+              ondrop="event.preventDefault();this.style.borderColor='';handleClientDocDrop(event)">
+              <div style="font-size:28px;margin-bottom:8px;">📂</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Drop PDF files here</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;">or use the Upload button above</div>
+            </div>
+            <div id="clientDocsGrid"></div>
+            <div id="clientDocsEmpty" style="text-align:center;padding:32px;color:var(--muted);font-size:13px;display:none;">No documents uploaded yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Global Documents Section -->
+      <div id="globalDocsSection" style="display:none;margin-top:28px;background:var(--surface);border:1px solid var(--surface-border);border-radius:16px;padding:24px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;">All Client Documents</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Upload a PDF — AI will auto-assign it to the right client</div>
+          </div>
+          <label class="btn btn-primary" style="cursor:pointer;display:flex;align-items:center;gap:6px;">
+            + Upload PDF
+            <input type="file" accept=".pdf" multiple style="display:none;" onchange="handleDocUpload(event)">
+          </label>
+        </div>
+        <div id="docDropZone" class="doc-upload-zone"
+          ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
+          ondragleave="this.style.borderColor=''"
+          ondrop="event.preventDefault();this.style.borderColor='';handleDocDrop(event)">
+          <div style="font-size:28px;margin-bottom:8px;">📂</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">Drag & drop PDF files here</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">AI will auto-categorize by client name</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
+          <input class="form-input" id="docSearch" placeholder="Search documents…" style="width:200px;padding:7px 12px;font-size:12px;" oninput="renderDocs()">
+          <select class="form-select" id="docClientFilter" style="width:180px;padding:7px 12px;font-size:12px;" onchange="renderDocs()">
+            <option value="">All Clients</option>
+          </select>
+        </div>
+        <div id="docList"></div>
       </div>
 
     </div>
@@ -4573,45 +4728,42 @@ function renderClients() {
   }
   empty.style.display = 'none';
 
+  // Update stats bar
+  const totalActive = deliveries.filter(d => d.status !== 'Delivered' && d.status !== 'Cancelled').length;
+  const totalDelivered = deliveries.filter(d => d.status === 'Delivered').length;
+  const totalDocs = getAllDocs().length;
+  const sc = id => document.getElementById(id);
+  if (sc('statTotalClients')) sc('statTotalClients').textContent = clients.length;
+  if (sc('statActiveJobs')) sc('statActiveJobs').textContent = totalActive;
+  if (sc('statDelivered')) sc('statDelivered').textContent = totalDelivered;
+  if (sc('statDocs')) sc('statDocs').textContent = totalDocs;
+
   grid.innerHTML = list.map(c => {
     const cDeliveries = deliveries.filter(d => d.client === c.name);
     const active = cDeliveries.filter(d => d.status !== 'Delivered' && d.status !== 'Cancelled').length;
     const delivered = cDeliveries.filter(d => d.status === 'Delivered').length;
     const last = cDeliveries.filter(d => d.deliveryDate).sort((a,b) => b.deliveryDate.localeCompare(a.deliveryDate))[0];
     const initials = c.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    return `
-      <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:20px;cursor:pointer;transition:border-color 0.2s,transform 0.15s;"
-           onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.borderColor='var(--surface-border)';this.style.transform=''"
-           onclick="openClientDetail('${c.id}')">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:var(--accent);flex-shrink:0;">${initials}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
-            <div style="font-size:11px;color:var(--muted);">${c.contact || 'No contact set'}</div>
-          </div>
-          <div style="display:flex;gap:4px;">
-            <button class="btn btn-subtle btn-sm" onclick="event.stopPropagation();openClientModal('${c.id}')" title="Edit">✏</button>
-            <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="event.stopPropagation();deleteClient('${c.id}')" title="Delete">🗑</button>
+    return `<tr onclick="openClientDetail('${c.id}')">
+      <td>
+        <div class="client-name-cell">
+          <div class="client-avatar">${initials}</div>
+          <div>
+            <div class="client-name-text">${escHtml(c.name)}</div>
+            ${c.notes ? `<div class="client-contact-text">${escHtml(c.notes)}</div>` : ''}
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
-          <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px;">
-            <div style="font-size:18px;font-weight:800;">${cDeliveries.length}</div>
-            <div style="font-size:10px;color:var(--muted);">Total</div>
-          </div>
-          <div style="background:rgba(245,158,11,0.1);border-radius:8px;padding:8px;">
-            <div style="font-size:18px;font-weight:800;color:#f59e0b;">${active}</div>
-            <div style="font-size:10px;color:var(--muted);">Active</div>
-          </div>
-          <div style="background:rgba(16,185,129,0.1);border-radius:8px;padding:8px;">
-            <div style="font-size:18px;font-weight:800;color:#10b981;">${delivered}</div>
-            <div style="font-size:10px;color:var(--muted);">Delivered</div>
-          </div>
-        </div>
-        ${c.phone ? `<div style="font-size:11px;color:var(--muted);margin-top:12px;">📞 ${c.phone}</div>` : ''}
-        ${last ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">🕐 Last: ${fmtDate(last.deliveryDate)}</div>` : ''}
-      </div>`;
+      </td>
+      <td style="color:var(--muted);font-size:12px;">${escHtml(c.contact || '—')}</td>
+      <td style="color:var(--muted);font-size:12px;">${escHtml(c.phone || '—')}</td>
+      <td>${active > 0 ? `<span class="status-pill active">${active} active</span>` : `<span class="status-pill none">—</span>`}</td>
+      <td style="font-weight:600;">${cDeliveries.length}</td>
+      <td style="color:var(--muted);font-size:12px;">${last ? fmtDate(last.deliveryDate) : '—'}</td>
+      <td style="text-align:right;white-space:nowrap;" onclick="event.stopPropagation()">
+        <button class="btn btn-subtle btn-sm" onclick="openClientModal('${c.id}')" title="Edit" style="margin-right:4px;">✏</button>
+        <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="deleteClient('${c.id}')" title="Delete">🗑</button>
+      </td>
+    </tr>`;
   }).join('');
 }
 
@@ -4628,25 +4780,49 @@ function openClientDetail(id) {
   if (titleEl) titleEl.textContent = c.name;
 
   // Client info card
+  const initials = c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const cDels = deliveries.filter(d => d.client === c.name);
+  const cActive = cDels.filter(d => d.status !== 'Delivered' && d.status !== 'Cancelled').length;
   document.getElementById('clientInfoCard').innerHTML = `
-    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-      <div style="width:56px;height:56px;border-radius:14px;background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:var(--accent);">
-        ${c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
-      </div>
-      <div style="flex:1;">
-        <div style="font-size:22px;font-weight:800;">${c.name}</div>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;">
-          ${c.contact ? `<span style="font-size:13px;color:var(--muted);">👤 ${c.contact}</span>` : ''}
-          ${c.phone   ? `<span style="font-size:13px;color:var(--muted);">📞 ${c.phone}</span>` : ''}
-          ${c.email   ? `<span style="font-size:13px;color:var(--muted);">✉ ${c.email}</span>` : ''}
-          ${c.notes   ? `<span style="font-size:13px;color:var(--muted);">📝 ${c.notes}</span>` : ''}
+    <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+      <div class="client-detail-avatar">${initials}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em;">${escHtml(c.name)}</div>
+        <div class="client-detail-meta">
+          ${c.contact ? `<div class="client-detail-meta-item"><span>👤</span><strong>${escHtml(c.contact)}</strong></div>` : ''}
+          ${c.phone   ? `<div class="client-detail-meta-item"><span>📞</span><strong>${escHtml(c.phone)}</strong></div>` : ''}
+          ${c.email   ? `<div class="client-detail-meta-item"><span>✉</span><strong>${escHtml(c.email)}</strong></div>` : ''}
+          ${c.notes   ? `<div class="client-detail-meta-item"><span>📝</span><span>${escHtml(c.notes)}</span></div>` : ''}
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+          <div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 18px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;">${cDels.length}</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">Total Jobs</div>
+          </div>
+          <div style="background:rgba(245,158,11,0.1);border-radius:10px;padding:10px 18px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#f59e0b;">${cActive}</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">Active</div>
+          </div>
+          <div style="background:rgba(139,92,246,0.1);border-radius:10px;padding:10px 18px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#8b5cf6;">${getClientDocs(activeClientId).length}</div>
+            <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;">Documents</div>
+          </div>
         </div>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="openClientModal('${c.id}')">✏ Edit Profile</button>
     </div>`;
 
   renderClientDeliveries(c.name);
-  renderClientDocs();
+  switchClientTab('deliveries');
+}
+
+function switchClientTab(tab) {
+  document.getElementById('clientTabDeliveries').style.display = tab === 'deliveries' ? '' : 'none';
+  document.getElementById('clientTabDocs').style.display = tab === 'docs' ? '' : 'none';
+  const tD = document.getElementById('tabDeliveries');
+  const tDoc = document.getElementById('tabDocs');
+  if (tD) { tD.style.color = tab==='deliveries' ? 'var(--accent2)' : 'var(--muted)'; tD.style.borderBottomColor = tab==='deliveries' ? 'var(--accent2)' : 'transparent'; }
+  if (tDoc) { tDoc.style.color = tab==='docs' ? 'var(--accent2)' : 'var(--muted)'; tDoc.style.borderBottomColor = tab==='docs' ? 'var(--accent2)' : 'transparent'; }
+  if (tab === 'docs') renderClientDocs();
 }
 
 function renderClientDeliveries(clientName) {
@@ -5184,18 +5360,18 @@ function renderClientDocs() {
     return;
   }
   if (empty) empty.style.display = 'none';
-  grid.innerHTML = docs.map(doc => `
-    <div class="doc-card">
-      <div class="doc-card-icon">📄</div>
-      <div class="doc-card-name">${escHtml(doc.name)}</div>
-      <div class="doc-card-meta">Uploaded ${new Date(doc.uploadedAt).toLocaleDateString('en-AU', {day:'numeric',month:'short',year:'numeric'})}</div>
-      <div class="doc-card-actions">
-        <button class="btn btn-subtle btn-sm" onclick="viewClientDoc('${activeClientId}','${doc.id}')" style="flex:1;font-size:12px;">👁 View</button>
-        <button class="btn btn-subtle btn-sm" onclick="downloadClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;">⬇</button>
-        <button class="btn btn-subtle btn-sm del" onclick="deleteClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;color:var(--red);">🗑</button>
-      </div>
-    </div>
-  `).join('');
+  grid.innerHTML = `<table class="doc-table"><thead><tr>
+    <th>Document</th><th>Uploaded</th><th style="text-align:right;">Actions</th>
+  </tr></thead><tbody>${docs.map(doc => `
+    <tr>
+      <td style="font-weight:600;">📄 ${escHtml(doc.name)}</td>
+      <td style="color:var(--muted);font-size:12px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td style="text-align:right;white-space:nowrap;">
+        <button class="btn btn-subtle btn-sm" onclick="viewClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;margin-right:4px;">View</button>
+        <button class="btn btn-subtle btn-sm" onclick="downloadClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;margin-right:4px;">↓</button>
+        <button class="btn btn-subtle btn-sm" onclick="deleteClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;color:var(--red);">Delete</button>
+      </td>
+    </tr>`).join('')}</tbody></table>`;
 }
 
 function uploadClientDoc(event) {
@@ -5218,6 +5394,14 @@ function uploadClientDoc(event) {
   };
   reader.readAsDataURL(file);
   event.target.value = '';
+}
+
+function handleClientDocDrop(event) {
+  if (!activeClientId) return;
+  Array.from(event.dataTransfer.files).forEach(file => {
+    const fakeEvt = { target: { files: [file], value: '' } };
+    uploadClientDoc(fakeEvt);
+  });
 }
 
 function viewClientDoc(clientId, docId) {
