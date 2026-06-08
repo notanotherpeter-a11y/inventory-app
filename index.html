@@ -1715,12 +1715,7 @@ body.light-page [style*="background:var(--surface)"],
 body.light-page [style*="background: var(--surface)"] { background: #fff !important; border-color: #e2e6f0 !important; }
 body.light-page [style*="border: 1px solid var(--surface-border)"],
 body.light-page [style*="border:1px solid var(--surface-border)"] { border-color: #e2e6f0 !important; }
-/* Topbar light */
-body.light-page .topbar { background: rgba(255,255,255,0.97) !important; border-bottom: 1px solid #e2e6f0 !important; backdrop-filter: none !important; }
-body.light-page .topbar-title, body.light-page .topbar-date { color: #1a1d2e !important; }
-body.light-page .topbar-breadcrumb { color: #6b7280 !important; }
-body.light-page .topbar-mobile-logo-text { color: #1a1d2e !important; }
-body.light-page .topbar-center-title { color: #1a1d2e !important; }
+/* Topbar stays dark always — logo white text stays visible */
 body.light-page .toggle-btn { color: #374151 !important; border-color: #e2e6f0 !important; background: #f8fafc !important; }
 body.light-page .toggle-btn:hover { background: #c0392b !important; color: #fff !important; border-color: #c0392b !important; }
 
@@ -2187,7 +2182,6 @@ body.light-page #pointer .ptr-label { color: #fff; }
       <!-- Logo group -->
       <div class="topbar-mobile-logo" onclick="sidebarSwitchTab('home')" title="Go to Home">
         <img src="logo.png" alt="Masterform">
-        <span class="topbar-mobile-logo-text">Masterform</span>
       </div>
     </div>
     <!-- Page title — absolutely centered -->
