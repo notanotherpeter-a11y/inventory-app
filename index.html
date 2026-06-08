@@ -44,6 +44,14 @@
   .sidebar-section-label *::selection,
   .sidebar-stat::selection,
   .sidebar-stat *::selection { background: #e74c3c !important; color: #fff !important; }
+  /* Topbar / navbar selection */
+  .topbar::selection,
+  .topbar *::selection,
+  .topbar-title::selection,
+  .topbar-date::selection,
+  .topbar-breadcrumb::selection { background: #e74c3c !important; color: #fff !important; }
+  body.light-page .topbar::selection,
+  body.light-page .topbar *::selection { background: #c0392b !important; color: #fff !important; }
 
   /* ── Typography refinements ── */
   h1, h2, h3, h4, h5, h6 { letter-spacing: -0.02em; font-weight: 700; }
