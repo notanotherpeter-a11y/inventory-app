@@ -118,24 +118,14 @@
 
   /* Brand */
   .sidebar-brand {
-    position: relative;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 20px 0 16px;
+    justify-content: flex-end;
+    padding: 10px 10px;
     border-bottom: 1px solid rgba(255,255,255,0.06);
     flex-shrink: 0;
-    gap: 8px;
-    min-height: 96px;
   }
-  .sidebar-brand img {
-    height: 36px;
-    width: auto;
-    object-fit: contain;
-    flex-shrink: 0;
-    transition: opacity 0.15s;
-  }
+  .sidebar.collapsed .sidebar-brand { justify-content: center; }
   .sidebar-brand-text {
     font-size: 11px;
     font-weight: 600;
@@ -297,13 +287,6 @@
     color: #fff;
     border-color: var(--accent);
   }
-  /* Top hamburger — absolutely positioned so logo stays centered */
-  .sidebar-brand-top {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-  }
-  .sidebar.collapsed .sidebar-brand-top { right: 50%; transform: translateX(50%); }
 
   /* ════════════════════════════════════
      LAYOUT SHELL
@@ -2101,11 +2084,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
 
   <!-- Brand -->
   <div class="sidebar-brand">
-    <div class="sidebar-brand-top">
-      <button class="toggle-btn" onclick="toggleSidebar()" title="Collapse sidebar" id="toggleBtn">☰</button>
-    </div>
-    <img src="logo.png" alt="Masterform logo">
-    <div class="sidebar-brand-text">Masterform<br>Inventory Manager</div>
+    <button class="toggle-btn" onclick="toggleSidebar()" title="Collapse sidebar" id="toggleBtn">☰</button>
   </div>
 
   <!-- Nav -->
