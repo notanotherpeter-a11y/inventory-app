@@ -265,16 +265,10 @@
   .sidebar.collapsed .sidebar-stat-label { opacity: 0; width: 0; overflow: hidden; }
   .sidebar.collapsed .sidebar-stat { justify-content: center; padding: 8px 0; }
 
-  /* Collapse Toggle */
+  /* Collapse Toggle — now lives at top of sidebar-brand */
   .sidebar-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 12px 14px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    flex-shrink: 0;
+    display: none; /* moved to brand area */
   }
-  .sidebar.collapsed .sidebar-toggle { justify-content: center; padding: 12px 0; }
   .toggle-btn {
     width: 32px; height: 32px;
     border-radius: 8px;
@@ -292,6 +286,15 @@
     color: #fff;
     border-color: var(--accent);
   }
+  /* Top hamburger row inside brand */
+  .sidebar-brand-top {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 0 10px 6px;
+  }
+  .sidebar.collapsed .sidebar-brand-top { justify-content: center; padding: 0 0 6px; }
 
   /* ════════════════════════════════════
      LAYOUT SHELL
@@ -1713,8 +1716,8 @@ body.light-page [style*="border:1px solid var(--surface-border)"] { border-color
 body.light-page .topbar { background: rgba(255,255,255,0.97) !important; border-bottom: 1px solid #e2e6f0 !important; backdrop-filter: none !important; }
 body.light-page .topbar-title, body.light-page .topbar-date { color: #1a1d2e !important; }
 body.light-page .topbar-breadcrumb { color: #6b7280 !important; }
-body.light-page .sidebar-toggle { color: #374151 !important; }
-body.light-page .sidebar-toggle:hover { background: #f0f2f7 !important; }
+body.light-page .toggle-btn { color: #374151 !important; border-color: #e2e6f0 !important; background: #f8fafc !important; }
+body.light-page .toggle-btn:hover { background: #c0392b !important; color: #fff !important; border-color: #c0392b !important; }
 
 /* Sidebar light */
 body.light-page .sidebar {
@@ -2087,6 +2090,9 @@ body.light-page #pointer .ptr-label { color: #fff; }
 
   <!-- Brand -->
   <div class="sidebar-brand">
+    <div class="sidebar-brand-top">
+      <button class="toggle-btn" onclick="toggleSidebar()" title="Collapse sidebar" id="toggleBtn">☰</button>
+    </div>
     <img src="logo.png" alt="Masterform logo">
     <div class="sidebar-brand-text">Masterform<br>Inventory Manager</div>
   </div>
@@ -2163,10 +2169,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
     </button>
   </div>
 
-  <!-- Collapse Toggle -->
-  <div class="sidebar-toggle">
-    <button class="toggle-btn" onclick="toggleSidebar()" title="Collapse sidebar" id="toggleBtn">☰</button>
-  </div>
+  <!-- Collapse Toggle (moved to top of sidebar-brand) -->
 
 </aside>
 
@@ -4029,6 +4032,17 @@ function sidebarSwitchTab(page) {
   // Update topbar title
   const titleEl = document.getElementById('topbarTitle');
   if (titleEl) titleEl.textContent = PAGE_TITLES[page] || page;
+
+  // Auto-collapse sidebar on Home
+  if (page === 'home') {
+    const sidebar = document.getElementById('sidebar');
+    const layout  = document.getElementById('layout');
+    const btn     = document.getElementById('toggleBtn');
+    sidebar.classList.add('collapsed');
+    layout.classList.add('collapsed');
+    if (btn) { btn.textContent = '▶'; btn.title = 'Expand sidebar'; }
+    localStorage.setItem('sidebar_collapsed', '1');
+  }
 
   // Page-specific render
   if (page === 'home')      renderHome();
