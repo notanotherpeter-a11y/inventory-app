@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
 <style>
   :root {
     --bg:             #080a10;
@@ -197,6 +198,9 @@
     flex-shrink: 0;
     width: 22px;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     line-height: 1;
   }
   .nav-item .nav-label {
@@ -204,6 +208,11 @@
     transition: opacity 0.15s;
     flex: 1;
   }
+  .nav-icon svg { width: 18px; height: 18px; stroke-width: 2; }
+  .summary-card-icon svg { width: 22px; height: 22px; stroke-width: 2; }
+  .clients-stat-icon svg { width: 20px; height: 20px; stroke-width: 2; }
+  .pwd-icon-btn svg { width: 14px; height: 14px; stroke-width: 2; }
+  button svg, .btn svg { vertical-align: middle; }
   .sidebar.collapsed .nav-item .nav-label { opacity: 0; pointer-events: none; width: 0; }
   .sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; gap: 0; }
   .sidebar.collapsed .nav-item.active::before { display: none; }
@@ -2077,7 +2086,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
       <div class="pw-wrap">
         <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password"
           onkeydown="if(event.key==='Enter') doLogin()">
-        <button type="button" class="pw-toggle" onclick="toggleLoginPw()" id="pwToggleBtn" title="Show/hide password">👁</button>
+        <button type="button" class="pw-toggle" onclick="toggleLoginPw()" id="pwToggleBtn" title="Show/hide password"><i data-feather="eye" style="width:16px;height:16px;"></i></button>
       </div>
     </div>
     <button class="login-btn" onclick="doLogin()">Sign In</button>
@@ -2100,46 +2109,46 @@ body.light-page #pointer .ptr-label { color: #fff; }
   <!-- Nav -->
   <nav class="sidebar-nav">
     <button class="nav-item active" id="nav-home" onclick="sidebarSwitchTab('home')">
-      <span class="nav-icon">🏠</span>
+      <span class="nav-icon"><i data-feather="home"></i></span>
       <span class="nav-label">Home</span>
     </button>
     <button class="nav-item" id="nav-inventory" onclick="sidebarSwitchTab('inventory')">
-      <span class="nav-icon">📦</span>
+      <span class="nav-icon"><i data-feather="package"></i></span>
       <span class="nav-label">Inventory</span>
     </button>
     <button class="nav-item" id="nav-log" onclick="sidebarSwitchTab('log')">
-      <span class="nav-icon">📋</span>
+      <span class="nav-icon"><i data-feather="clipboard"></i></span>
       <span class="nav-label">Transaction Log</span>
     </button>
 
     <div class="sidebar-divider" style="margin: 8px 4px;"></div>
 
     <button class="nav-item" id="nav-passwords" onclick="sidebarSwitchTab('passwords')">
-      <span class="nav-icon">🔐</span>
+      <span class="nav-icon"><i data-feather="lock"></i></span>
       <span class="nav-label">Password Lists</span>
     </button>
     <button class="nav-item" id="nav-orders" onclick="sidebarSwitchTab('orders')">
-      <span class="nav-icon">🛒</span>
+      <span class="nav-icon"><i data-feather="shopping-cart"></i></span>
       <span class="nav-label">Order List</span>
     </button>
     <button class="nav-item" id="nav-laser" onclick="sidebarSwitchTab('laser')">
-      <span class="nav-icon">⚡</span>
+      <span class="nav-icon"><i data-feather="zap"></i></span>
       <span class="nav-label">Laser Instructions</span>
     </button>
     <button class="nav-item" id="nav-delivery" onclick="sidebarSwitchTab('delivery')">
-      <span class="nav-icon">🚚</span>
+      <span class="nav-icon"><i data-feather="truck"></i></span>
       <span class="nav-label">Delivery Status</span>
     </button>
     <button class="nav-item" id="nav-clients" onclick="sidebarSwitchTab('clients')">
-      <span class="nav-icon">🏢</span>
+      <span class="nav-icon"><i data-feather="briefcase"></i></span>
       <span class="nav-label">Clients</span>
     </button>
     <button class="nav-item" id="nav-drivers" onclick="sidebarSwitchTab('drivers')">
-      <span class="nav-icon">🚗</span>
+      <span class="nav-icon"><i data-feather="navigation"></i></span>
       <span class="nav-label">Drivers</span>
     </button>
     <button class="nav-item" id="nav-users" onclick="sidebarSwitchTab('users')" style="display:none;">
-      <span class="nav-icon">👥</span>
+      <span class="nav-icon"><i data-feather="users"></i></span>
       <span class="nav-label">Users</span>
     </button>
 
@@ -2164,7 +2173,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
   <!-- Sign Out -->
   <div style="padding: 8px 10px 4px;">
     <button class="nav-item" onclick="signOut()" style="width:100%; color:#ef4444;">
-      <span class="nav-icon">🚪</span>
+      <span class="nav-icon"><i data-feather="log-out"></i></span>
       <span class="nav-label">Sign Out</span>
     </button>
   </div>
@@ -2223,8 +2232,8 @@ body.light-page #pointer .ptr-label { color: #fff; }
 
       <!-- Quick Actions -->
       <div class="home-quick-actions">
-        <button class="btn btn-subtle" onclick="sidebarSwitchTab('inventory')">📦 View Inventory</button>
-        <button class="btn btn-subtle" onclick="sidebarSwitchTab('log')">📋 View Log</button>
+        <button class="btn btn-subtle" onclick="sidebarSwitchTab('inventory')">View Inventory</button>
+        <button class="btn btn-subtle" onclick="sidebarSwitchTab('log')">View Log</button>
       </div>
 
       <!-- Two-col panels -->
@@ -2232,7 +2241,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
         <!-- Low Stock Alerts -->
         <div class="home-panel">
           <div class="home-panel-title">
-            <span>⚠️ Stock Alerts</span>
+            <span>Stock Alerts</span>
             <a onclick="sidebarSwitchTab('inventory')">View all →</a>
           </div>
           <div id="homeAlerts"></div>
@@ -2241,7 +2250,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
         <!-- Recent Activity -->
         <div class="home-panel">
           <div class="home-panel-title">
-            <span>🕐 Recent Activity</span>
+            <span>Recent Activity</span>
             <a onclick="sidebarSwitchTab('log')">View all →</a>
           </div>
           <div id="homeActivity"></div>
@@ -2262,8 +2271,8 @@ body.light-page #pointer .ptr-label { color: #fff; }
           </select>
         </div>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-outline btn-sm" onclick="sendInventoryEmail()">✉ Send Inventory</button>
-          <button class="btn btn-subtle btn-sm" onclick="openTransactionModal()">⇄ Stock In / Out</button>
+          <button class="btn btn-outline btn-sm" onclick="sendInventoryEmail()">Send Inventory</button>
+          <button class="btn btn-subtle btn-sm" onclick="openTransactionModal()">Stock In / Out</button>
         </div>
       </div>
       <div class="inventory-grid" id="inventoryGrid"></div>
@@ -2280,7 +2289,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
           <option value="ADJUST">Adjustment</option>
           <option value="ADD">Item Added</option>
         </select>
-        <button class="btn btn-ghost btn-sm" onclick="clearLog()">🗑 Clear Log</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearLog()">Clear Log</button>
       </div>
       <div class="log-table-wrap">
         <table>
@@ -2303,13 +2312,13 @@ body.light-page #pointer .ptr-label { color: #fff; }
     <div id="page-passwords" style="display:none;">
       <div class="passwords-header">
         <div>
-          <div class="section-title" style="font-size:18px;">🔐 Password Lists</div>
+          <div class="section-title" style="font-size:18px;">Password Lists</div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;">Credentials saved on this device only</div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="openAddPasswordModal()">＋ Add Password</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddPasswordModal()">+ Add Password</button>
       </div>
       <div class="page-banner">
-        ⚠️ Passwords are stored locally in your browser. They do not sync to the cloud.
+        Passwords are stored locally in your browser. They do not sync to the cloud.
       </div>
       <div class="passwords-search">
         <input class="search-box" id="pwdSearch" placeholder="Search service or username…" oninput="renderPasswords()">
@@ -2330,13 +2339,13 @@ body.light-page #pointer .ptr-label { color: #fff; }
     <div id="page-orders" style="display:none;">
       <div class="order-header">
         <div>
-          <div class="section-title" style="font-size:18px;">🛒 Order List</div>
+          <div class="section-title" style="font-size:18px;">Order List</div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;">Track items that need to be ordered</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn btn-subtle btn-sm" onclick="openEmailSettingsModal()" title="Email Settings">⚙ Email</button>
-          <button class="btn btn-outline btn-sm" onclick="sendOrderEmail()">✉ Send Order</button>
-          <button class="btn btn-primary btn-sm" onclick="openAddOrderModal()">＋ Add Item</button>
+          <button class="btn btn-subtle btn-sm" onclick="openEmailSettingsModal()" title="Email Settings">Email</button>
+          <button class="btn btn-outline btn-sm" onclick="sendOrderEmail()">Send Order</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddOrderModal()">+ Add Item</button>
         </div>
       </div>
 
@@ -2375,7 +2384,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
     <div id="page-laser" style="display:none;">
       <div class="section-header">
         <div>
-          <div class="section-title" style="font-size:18px;">⚡ Laser Instructions</div>
+          <div class="section-title" style="font-size:18px;">Laser Instructions</div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;">Machine operating procedures and guidelines</div>
         </div>
         <div style="display:flex;gap:8px;">
@@ -2401,11 +2410,11 @@ body.light-page #pointer .ptr-label { color: #fff; }
     <div id="page-delivery" style="display:none;">
       <div class="section-header">
         <div>
-          <div class="section-title" style="font-size:18px;">🚚 Delivery Status</div>
+          <div class="section-title" style="font-size:18px;">Delivery Status</div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;">Track client deliveries and order fulfilment</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <input class="form-input" id="deliverySearch" placeholder="🔍 Search client or job…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderDelivery()">
+          <input class="form-input" id="deliverySearch" placeholder="Search client or job…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderDelivery()">
           <select class="form-input" id="deliveryFilter" style="width:150px;padding:8px 12px;font-size:13px;" onchange="renderDelivery()">
             <option value="">All Status</option>
             <option value="Pending">Pending</option>
@@ -2414,7 +2423,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
             <option value="Delivered">Delivered</option>
             <option value="Cancelled">Cancelled</option>
           </select>
-          <button class="btn btn-primary" onclick="openDeliveryModal()">➕ Add Delivery</button>
+          <button class="btn btn-primary" onclick="openDeliveryModal()">+ Add Delivery</button>
         </div>
       </div>
 
@@ -2440,7 +2449,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
           <tbody id="deliveryBody"></tbody>
         </table>
         <div id="deliveryEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">
-          No deliveries found. Click <strong>➕ Add Delivery</strong> to get started.
+          No deliveries found. Click <strong>+ Add Delivery</strong> to get started.
         </div>
       </div>
     </div>
@@ -2451,19 +2460,19 @@ body.light-page #pointer .ptr-label { color: #fff; }
       <!-- Stats Bar -->
       <div class="clients-stats-bar" id="clientsStatsBar">
         <div class="clients-stat-card">
-          <div class="clients-stat-icon" style="background:rgba(59,130,246,0.12);">🏢</div>
+          <div class="clients-stat-icon" style="background:rgba(59,130,246,0.12);"><i data-feather="briefcase"></i></div>
           <div><div class="clients-stat-val" id="statTotalClients">0</div><div class="clients-stat-lbl">Total Clients</div></div>
         </div>
         <div class="clients-stat-card">
-          <div class="clients-stat-icon" style="background:rgba(245,158,11,0.12);">📦</div>
+          <div class="clients-stat-icon" style="background:rgba(245,158,11,0.12);"><i data-feather="package"></i></div>
           <div><div class="clients-stat-val" id="statActiveJobs">0</div><div class="clients-stat-lbl">Active Jobs</div></div>
         </div>
         <div class="clients-stat-card">
-          <div class="clients-stat-icon" style="background:rgba(16,185,129,0.12);">✅</div>
+          <div class="clients-stat-icon" style="background:rgba(16,185,129,0.12);"><i data-feather="check-circle"></i></div>
           <div><div class="clients-stat-val" id="statDelivered">0</div><div class="clients-stat-lbl">Delivered</div></div>
         </div>
         <div class="clients-stat-card">
-          <div class="clients-stat-icon" style="background:rgba(139,92,246,0.12);">📄</div>
+          <div class="clients-stat-icon" style="background:rgba(139,92,246,0.12);"><i data-feather="file-text"></i></div>
           <div><div class="clients-stat-val" id="statDocs">0</div><div class="clients-stat-lbl">Documents</div></div>
         </div>
       </div>
@@ -2510,7 +2519,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
           <button class="btn btn-subtle btn-sm" onclick="closeClientDetail()" style="display:flex;align-items:center;gap:6px;font-weight:600;">← Back to Directory</button>
           <div style="display:flex;gap:8px;">
-            <button class="btn btn-outline btn-sm" onclick="openClientModal(activeClientId)" style="font-size:13px;">✏ Edit</button>
+            <button class="btn btn-outline btn-sm" onclick="openClientModal(activeClientId)" style="font-size:13px;">Edit</button>
             <button class="btn btn-primary" onclick="openDeliveryModalForClient()">+ Add Delivery</button>
           </div>
         </div>
@@ -2605,16 +2614,16 @@ body.light-page #pointer .ptr-label { color: #fff; }
       <div id="driverListView">
         <div class="section-header">
           <div>
-            <div class="section-title" style="font-size:18px;">🚗 Drivers</div>
+            <div class="section-title" style="font-size:18px;">Drivers</div>
             <div style="font-size:12px;color:var(--muted);margin-top:4px;">Driver profiles and assigned deliveries</div>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <input class="form-input" id="driverSearch" placeholder="🔍 Search driver…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderDrivers()">
-            <button class="btn btn-primary" onclick="openDriverModal()">➕ Add Driver</button>
+            <input class="form-input" id="driverSearch" placeholder="Search driver…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderDrivers()">
+            <button class="btn btn-primary" onclick="openDriverModal()">+ Add Driver</button>
           </div>
         </div>
         <div id="driverGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:4px;"></div>
-        <div id="driverEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">No drivers found. Click <strong>➕ Add Driver</strong> to get started.</div>
+        <div id="driverEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">No drivers found. Click <strong>+ Add Driver</strong> to get started.</div>
       </div>
 
       <!-- Driver Detail View -->
@@ -2656,10 +2665,10 @@ body.light-page #pointer .ptr-label { color: #fff; }
     <div id="page-users" style="display:none;">
       <div class="section-header">
         <div>
-          <div class="section-title" style="font-size:18px;">👥 Users</div>
+          <div class="section-title" style="font-size:18px;">Users</div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;">Manage app login accounts for clients and drivers</div>
         </div>
-        <button class="btn btn-primary" onclick="openUserModal()">➕ Add User</button>
+        <button class="btn btn-primary" onclick="openUserModal()">+ Add User</button>
       </div>
       <div class="table-wrap" style="margin-top:8px;">
         <table class="inv-table">
@@ -2674,7 +2683,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
           </thead>
           <tbody id="usersBody"></tbody>
         </table>
-        <div id="usersEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">No users yet. Click <strong>➕ Add User</strong> to create a client or driver login.</div>
+        <div id="usersEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">No users yet. Click <strong>+ Add User</strong> to create a client or driver login.</div>
       </div>
     </div>
 
@@ -2692,7 +2701,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
           <div style="font-size:11px;color:var(--muted);">Delivery Status Portal</div>
         </div>
       </div>
-      <button class="btn btn-subtle btn-sm" onclick="signOut()" style="color:#ef4444;">🚪 Sign Out</button>
+      <button class="btn btn-subtle btn-sm" onclick="signOut()" style="color:#ef4444;">Sign Out</button>
     </div>
     <div id="portalClientStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
     <div class="table-wrap">
@@ -2718,7 +2727,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
           <div style="font-size:11px;color:var(--muted);">Driver Delivery Portal</div>
         </div>
       </div>
-      <button class="btn btn-subtle btn-sm" onclick="signOut()" style="color:#ef4444;">🚪 Sign Out</button>
+      <button class="btn btn-subtle btn-sm" onclick="signOut()" style="color:#ef4444;">Sign Out</button>
     </div>
     <div id="portalDriverStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
     <div class="table-wrap">
@@ -2944,7 +2953,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
       <div style="display:flex;gap:8px;">
         <button class="btn btn-success" style="flex:1" onclick="setTxType('IN',this)">⬆ Stock In</button>
         <button class="btn btn-subtle" style="flex:1" onclick="setTxType('OUT',this)" id="txOutBtn">⬇ Stock Out</button>
-        <button class="btn btn-subtle" style="flex:1" onclick="setTxType('ADJUST',this)" id="txAdjBtn">⚙ Adjust</button>
+        <button class="btn btn-subtle" style="flex:1" onclick="setTxType('ADJUST',this)" id="txAdjBtn">Adjust</button>
       </div>
     </div>
     <div class="form-group">
@@ -2983,7 +2992,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
     </div>
     <div class="modal-divider"></div>
     <div class="modal-footer" style="margin-top:0;">
-      <button class="btn btn-danger btn-sm" onclick="deleteItem()">🗑 Delete</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteItem()">Delete</button>
       <div style="flex:1;"></div>
       <button class="btn btn-subtle" onclick="closeModal('editModal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
@@ -2994,7 +3003,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
 <!-- Email Settings Modal -->
 <div class="modal-overlay" id="emailSettingsModal">
   <div class="modal">
-    <div class="modal-title">✉ Email Settings</div>
+    <div class="modal-title">Email Settings</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
       Emails are sent directly from your Gmail account via the backend. Your email and App Password are stored securely in Vercel — never in the app.
     </div>
@@ -3083,7 +3092,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
       <label class="form-label">Password</label>
       <div class="pwd-vis-wrap">
         <input class="form-input" id="pwdPassword" type="password" placeholder="password" autocomplete="off">
-        <button type="button" class="pwd-vis-toggle" id="pwdVisBtn" onclick="togglePwdInputVis()">👁</button>
+        <button type="button" class="pwd-vis-toggle" id="pwdVisBtn" onclick="togglePwdInputVis()"><i data-feather="eye" style="width:16px;height:16px;"></i></button>
       </div>
     </div>
     <div class="form-group">
@@ -3102,7 +3111,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
 </div>
 
 <!-- Chatbot -->
-<button id="chatToggle" onclick="chatToggleOpen()" title="Chat with MF Assistant">💬</button>
+<button id="chatToggle" onclick="chatToggleOpen()" title="Chat with MF Assistant"><i data-feather="message-circle"></i></button>
 <div id="chatWindow" class="hidden">
   <div class="chat-header">
     <div class="chat-header-dot"></div>
@@ -3288,7 +3297,7 @@ function renderDriverPortal(driverName) {
       <td style="font-size:12px;">${d.deliveryDate?fmtDate(d.deliveryDate):'—'}${overdueFlag}</td>
       <td>${badge}</td>
       <td style="font-size:12px;color:var(--muted);">${escHtml(d.notes||'—')}</td>
-      <td>${canDeliver ? `<button class="btn btn-primary btn-sm" onclick="markDelivered('${d.id}','${escHtml(driverName)}')">✅ Mark Delivered</button>` : ''}</td>
+      <td>${canDeliver ? `<button class="btn btn-primary btn-sm" onclick="markDelivered('${d.id}','${escHtml(driverName)}')">Mark Delivered</button>` : ''}</td>
     </tr>`;
   }).join('');
 }
@@ -3304,8 +3313,9 @@ function markDelivered(id, driverName) {
 function toggleLoginPw() {
   const inp = document.getElementById('loginPass');
   const btn = document.getElementById('pwToggleBtn');
-  if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
-  else { inp.type = 'password'; btn.textContent = '👁'; }
+  if (inp.type === 'password') { inp.type = 'text'; btn.innerHTML = `<i data-feather="eye-off" style="width:16px;height:16px;"></i>`; }
+  else { inp.type = 'password'; btn.innerHTML = `<i data-feather="eye" style="width:16px;height:16px;"></i>`; }
+  if (window.feather) feather.replace();
 }
 
 function signOut() {
@@ -3336,8 +3346,8 @@ function renderUsers() {
       <td style="font-family:monospace;font-size:12px;color:var(--muted);">••••••••</td>
       <td>
         <div style="display:flex;gap:6px;">
-          <button class="btn btn-subtle btn-sm" onclick="openUserModal('${u.id}')">✏ Edit</button>
-          <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="deleteUser('${u.id}')">🗑</button>
+          <button class="btn btn-subtle btn-sm" onclick="openUserModal('${u.id}')">Edit</button>
+          <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="deleteUser('${u.id}')">Delete</button>
         </div>
       </td>
     </tr>`;
@@ -3451,8 +3461,8 @@ function setSyncStatus(s) {
   const el = document.getElementById('syncStatus');
   if (!el) return;
   if (s === 'syncing') { el.textContent = '⟳ Syncing'; el.style.color = 'var(--yellow)'; }
-  if (s === 'synced')  { el.textContent = '✓ Synced';  el.style.color = 'var(--green)';  }
-  if (s === 'offline') { el.textContent = '⚡ Offline'; el.style.color = 'var(--muted)';  }
+  if (s === 'synced')  { el.innerHTML = fi('check-circle',13)+' Synced'; el.style.color = 'var(--green)'; }
+  if (s === 'offline') { el.innerHTML = fi('wifi-off',13)+' Offline'; el.style.color = 'var(--muted)'; }
   if (s === 'error')   { el.textContent = '✗ Error';   el.style.color = 'var(--red)';    }
 }
 
@@ -3624,14 +3634,14 @@ async function dbSaveLog(log, qtyBefore) {
 // ─── Icons & Colors ─────────────────────────────────────────────────────────
 function categoryStyle(cat) {
   const map = {
-    'Bar Chair':     { icon: '🪑', bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
-    'Metal Pallet':  { icon: '🔩', bg: 'rgba(192,57,43,0.15)', color: '#c0392b' },
-    'Timber Pallet': { icon: '🪵', bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
-    'Metal Sheet':   { icon: '🔧', bg: 'rgba(20,184,166,0.15)',   color: '#14b8a6' },
-    'Equipment':     { icon: '⛽', bg: 'rgba(249,115,22,0.15)',   color: '#f97316' },
-    'Coil':          { icon: '🌀', bg: 'rgba(139,92,246,0.15)',  color: '#8b5cf6' },
+    'Bar Chair':     { icon: fi('grid', 20),       bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
+    'Metal Pallet':  { icon: fi('layers', 20),     bg: 'rgba(192,57,43,0.15)', color: '#c0392b' },
+    'Timber Pallet': { icon: fi('box', 20),        bg: 'rgba(245,158,11,0.15)', color: '#f59e0b' },
+    'Metal Sheet':   { icon: fi('tool', 20),       bg: 'rgba(20,184,166,0.15)',   color: '#14b8a6' },
+    'Equipment':     { icon: fi('zap', 20),        bg: 'rgba(249,115,22,0.15)',   color: '#f97316' },
+    'Coil':          { icon: fi('refresh-cw', 20), bg: 'rgba(139,92,246,0.15)',  color: '#8b5cf6' },
   };
-  return map[cat] || { icon: '📦', bg: 'rgba(255,255,255,0.08)', color: '#6b7280' };
+  return map[cat] || { icon: fi('package', 20), bg: 'rgba(255,255,255,0.08)', color: '#6b7280' };
 }
 
 function stockStatus(item) {
@@ -3664,6 +3674,14 @@ function updateSidebarStats() {
   if (elUnits) elUnits.textContent = totalUnits.toLocaleString();
 }
 
+// ─── Feather Icon Helper ─────────────────────────────────────────────────────
+function fi(name, size = 16) {
+  if (window.feather && feather.icons[name]) {
+    return feather.icons[name].toSvg({ width: size, height: size, 'stroke-width': 2 });
+  }
+  return '';
+}
+
 // ─── Render Summary ──────────────────────────────────────────────────────────
 function renderSummary() {
   const total   = items.length;
@@ -3674,31 +3692,31 @@ function renderSummary() {
 
   document.getElementById('summaryGrid').innerHTML = `
     <div class="summary-card accent">
-      <div class="summary-card-icon" style="background:rgba(59,130,246,0.12);">📦</div>
+      <div class="summary-card-icon" style="background:rgba(59,130,246,0.12);">${fi('package', 22)}</div>
       <div class="label">Total Items</div>
       <div class="value" style="color:#3b82f6">${total}</div>
       <div class="sub">product types tracked</div>
     </div>
     <div class="summary-card green">
-      <div class="summary-card-icon" style="background:rgba(16,185,129,0.12);">✅</div>
+      <div class="summary-card-icon" style="background:rgba(16,185,129,0.12);">${fi('check-circle', 22)}</div>
       <div class="label">In Stock</div>
       <div class="value" style="color:var(--green)">${inStock}</div>
       <div class="sub">above threshold</div>
     </div>
     <div class="summary-card yellow">
-      <div class="summary-card-icon" style="background:rgba(245,158,11,0.12);">⚠️</div>
+      <div class="summary-card-icon" style="background:rgba(245,158,11,0.12);">${fi('alert-triangle', 22)}</div>
       <div class="label">Low Stock</div>
       <div class="value" style="color:var(--yellow)">${low}</div>
       <div class="sub">needs attention</div>
     </div>
     <div class="summary-card red">
-      <div class="summary-card-icon" style="background:rgba(239,68,68,0.12);">🚨</div>
+      <div class="summary-card-icon" style="background:rgba(239,68,68,0.12);">${fi('x-circle', 22)}</div>
       <div class="label">Out of Stock</div>
       <div class="value" style="color:var(--red)">${out}</div>
       <div class="sub">restock required</div>
     </div>
     <div class="summary-card white">
-      <div class="summary-card-icon" style="background:rgba(255,255,255,0.06);">📊</div>
+      <div class="summary-card-icon" style="background:rgba(255,255,255,0.06);">${fi('bar-chart-2', 22)}</div>
       <div class="label">Total Units</div>
       <div class="value" style="color:var(--text)">${totalQty.toLocaleString()}</div>
       <div class="sub">across all items</div>
@@ -3715,7 +3733,7 @@ function renderInventory() {
   if (filtered.length === 0) {
     document.getElementById('inventoryGrid').innerHTML = `
       <div class="empty" style="grid-column:1/-1">
-        <div class="icon">📭</div>
+        <div class="icon" style="font-size:52px;opacity:0.3;">—</div>
         <p>No items found. Add some inventory!</p>
       </div>`;
     return;
@@ -3730,7 +3748,7 @@ function renderInventory() {
     const status = stockStatus(item);
     const maxBar = Math.max(item.qty, item.threshold * 2, 1);
     const fillPct = Math.min((item.qty / maxBar) * 100, 100);
-    const varChip = item.variation ? `<span class="chip">📐 ${item.variation}</span>` : '';
+    const varChip = item.variation ? `<span class="chip">${item.variation}</span>` : '';
 
     return `
     <div class="item-card ${status}" id="card-${item.id}">
@@ -3981,7 +3999,7 @@ function renderLog() {
     const typeMap = {
       IN:     `<span class="tx-badge tx-in">⬆ IN</span>`,
       OUT:    `<span class="tx-badge tx-out">⬇ OUT</span>`,
-      ADJUST: `<span class="tx-badge tx-adjust">⚙ ADJUST</span>`,
+      ADJUST: `<span class="tx-badge tx-adjust">ADJUST</span>`,
       ADD:    `<span class="tx-badge tx-add">✦ ADDED</span>`,
     };
     const changeStr = l.change >= 0
@@ -4059,6 +4077,7 @@ function sidebarSwitchTab(page) {
   document.body.classList.add('light-page');
 
   closeMobileSidebar();
+  setTimeout(() => feather.replace(), 50);
 }
 
 // Legacy alias kept so any old calls still work
@@ -4147,12 +4166,12 @@ if (passwords.length === 0) {
 const pwdRevealSet = new Set();
 
 const PWD_CAT_STYLE = {
-  'Machine Login': { bg: 'rgba(192,57,43,0.12)',  color: '#e74c3c', border: 'rgba(192,57,43,0.25)',  icon: '⚙️' },
-  'Software':      { bg: 'rgba(59,130,246,0.12)',  color: '#3b82f6', border: 'rgba(59,130,246,0.25)',  icon: '💻' },
-  'Website':       { bg: 'rgba(16,185,129,0.12)',  color: '#10b981', border: 'rgba(16,185,129,0.25)',  icon: '🌐' },
-  'WiFi':          { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b', border: 'rgba(245,158,11,0.25)',  icon: '📶' },
-  'Email':         { bg: 'rgba(139,92,246,0.12)',  color: '#8b5cf6', border: 'rgba(139,92,246,0.25)',  icon: '✉️' },
-  'Other':         { bg: 'rgba(107,114,128,0.12)', color: '#9ca3af', border: 'rgba(107,114,128,0.25)', icon: '🔑' },
+  'Machine Login': { bg: 'rgba(192,57,43,0.12)',  color: '#e74c3c', border: 'rgba(192,57,43,0.25)',  icon: 'settings' },
+  'Software':      { bg: 'rgba(59,130,246,0.12)',  color: '#3b82f6', border: 'rgba(59,130,246,0.25)',  icon: 'monitor' },
+  'Website':       { bg: 'rgba(16,185,129,0.12)',  color: '#10b981', border: 'rgba(16,185,129,0.25)',  icon: 'globe' },
+  'WiFi':          { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b', border: 'rgba(245,158,11,0.25)',  icon: 'wifi' },
+  'Email':         { bg: 'rgba(139,92,246,0.12)',  color: '#8b5cf6', border: 'rgba(139,92,246,0.25)',  icon: 'mail' },
+  'Other':         { bg: 'rgba(107,114,128,0.12)', color: '#9ca3af', border: 'rgba(107,114,128,0.25)', icon: 'key' },
 };
 
 function savePwds() {
@@ -4175,7 +4194,7 @@ function renderPasswords() {
   if (!grid) return;
 
   if (filtered.length === 0) {
-    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="icon">🔐</div><p>${passwords.length === 0 ? 'No passwords saved yet. Add your first one!' : 'No results found.'}</p></div>`;
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="icon" style="font-size:52px;opacity:0.3;">${fi('lock', 40)}</div><p>${passwords.length === 0 ? 'No passwords saved yet. Add your first one!' : 'No results found.'}</p></div>`;
     return;
   }
 
@@ -4188,28 +4207,28 @@ function renderPasswords() {
       <div class="pwd-field">
         <span class="pwd-field-label">User</span>
         <span class="pwd-field-value">${escHtml(p.username)}</span>
-        <button class="pwd-icon-btn" onclick="copyPwdField('${p.id}','user')" title="Copy username">📋</button>
+        <button class="pwd-icon-btn" onclick="copyPwdField('${p.id}','user')" title="Copy username">${fi('copy', 14)}</button>
       </div>` : '';
-    const urlRow = p.url ? `<a class="pwd-url" href="${escHtml(p.url)}" target="_blank" rel="noopener noreferrer">🔗 ${escHtml(p.url)}</a>` : '';
+    const urlRow = p.url ? `<a class="pwd-url" href="${escHtml(p.url)}" target="_blank" rel="noopener noreferrer">${escHtml(p.url)}</a>` : '';
     const noteRow = p.notes ? `<div class="pwd-note">${escHtml(p.notes)}</div>` : '';
     return `
     <div class="pwd-card" id="pwdcard-${p.id}">
       <div class="pwd-card-header">
         <div style="min-width:0;flex:1;">
           <div class="pwd-service">${escHtml(p.service)}</div>
-          <span class="pwd-cat-chip" style="background:${style.bg};color:${style.color};border:1px solid ${style.border};">${style.icon} ${p.category}</span>
+          <span class="pwd-cat-chip" style="background:${style.bg};color:${style.color};border:1px solid ${style.border};">${fi(style.icon, 12)} ${p.category}</span>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;">
-          <button class="pwd-icon-btn" onclick="openEditPasswordModal('${p.id}')" title="Edit">✏️</button>
-          <button class="pwd-icon-btn del" onclick="deletePwd('${p.id}')" title="Delete">🗑</button>
+          <button class="pwd-icon-btn" onclick="openEditPasswordModal('${p.id}')" title="Edit">${fi('edit-2', 14)}</button>
+          <button class="pwd-icon-btn del" onclick="deletePwd('${p.id}')" title="Delete">${fi('trash-2', 14)}</button>
         </div>
       </div>
       ${userRow}
       <div class="pwd-field">
         <span class="pwd-field-label">Pass</span>
         <span class="pwd-field-value ${revealed ? '' : 'masked'}" id="pwdv-${p.id}">${revealed ? escHtml(p.password || '') : maskedPwd}</span>
-        <button class="pwd-icon-btn" onclick="togglePwdReveal('${p.id}')" title="${revealed ? 'Hide' : 'Show'}" id="pwdrevealbtn-${p.id}">${revealed ? '🙈' : '👁'}</button>
-        <button class="pwd-icon-btn" onclick="copyPwdField('${p.id}','pass')" title="Copy password">📋</button>
+        <button class="pwd-icon-btn" onclick="togglePwdReveal('${p.id}')" title="${revealed ? 'Hide' : 'Show'}" id="pwdrevealbtn-${p.id}">${revealed ? fi('eye-off', 14) : fi('eye', 14)}</button>
+        <button class="pwd-icon-btn" onclick="copyPwdField('${p.id}','pass')" title="Copy password">${fi('copy', 14)}</button>
       </div>
       ${urlRow}
       ${noteRow}
@@ -4233,7 +4252,7 @@ function togglePwdReveal(id) {
     el.textContent = revealed ? (p.password || '') : '•'.repeat(Math.min((p.password || '').length || 8, 14));
     el.classList.toggle('masked', !revealed);
   }
-  if (btn) btn.textContent = revealed ? '🙈' : '👁';
+  if (btn) btn.innerHTML = revealed ? fi('eye-off', 14) : fi('eye', 14);
 }
 
 function copyPwdField(id, field) {
@@ -4254,11 +4273,11 @@ function openAddPasswordModal() {
   document.getElementById('pwdUsername').value = '';
   document.getElementById('pwdPassword').value = '';
   document.getElementById('pwdPassword').type = 'password';
-  document.getElementById('pwdVisBtn').textContent = '👁';
+  document.getElementById('pwdVisBtn').innerHTML = `<i data-feather="eye" style="width:16px;height:16px;"></i>`;
   document.getElementById('pwdUrl').value = '';
   document.getElementById('pwdNotes').value = '';
   openModal('pwdModal');
-  setTimeout(() => document.getElementById('pwdService').focus(), 200);
+  setTimeout(() => { document.getElementById('pwdService').focus(); if (window.feather) feather.replace(); }, 200);
 }
 
 function openEditPasswordModal(id) {
@@ -4271,17 +4290,19 @@ function openEditPasswordModal(id) {
   document.getElementById('pwdUsername').value = p.username || '';
   document.getElementById('pwdPassword').value = p.password || '';
   document.getElementById('pwdPassword').type = 'password';
-  document.getElementById('pwdVisBtn').textContent = '👁';
+  document.getElementById('pwdVisBtn').innerHTML = `<i data-feather="eye" style="width:16px;height:16px;"></i>`;
   document.getElementById('pwdUrl').value = p.url || '';
   document.getElementById('pwdNotes').value = p.notes || '';
   openModal('pwdModal');
+  setTimeout(() => { if (window.feather) feather.replace(); }, 50);
 }
 
 function togglePwdInputVis() {
   const input = document.getElementById('pwdPassword');
   const btn   = document.getElementById('pwdVisBtn');
-  if (input.type === 'password') { input.type = 'text';     btn.textContent = '🙈'; }
-  else                           { input.type = 'password'; btn.textContent = '👁'; }
+  if (input.type === 'password') { input.type = 'text';     btn.innerHTML = `<i data-feather="eye-off" style="width:16px;height:16px;"></i>`; }
+  else                           { input.type = 'password'; btn.innerHTML = `<i data-feather="eye" style="width:16px;height:16px;"></i>`; }
+  if (window.feather) feather.replace();
 }
 
 function savePwd() {
@@ -4406,7 +4427,7 @@ if (false) { // placeholder — sync happens in initData()
 function saveOrders() { localStorage.setItem('inv_orders', JSON.stringify(orders)); }
 
 const STATUS_CYCLE = { pending: 'ordered', ordered: 'received', received: 'pending' };
-const STATUS_LABELS = { pending: '⏳ Pending', ordered: '📦 Ordered', received: '✅ Received' };
+const STATUS_LABELS = { pending: 'Pending', ordered: 'Ordered', received: 'Received' };
 const STATUS_CLASS  = { pending: 'status-pending', ordered: 'status-ordered', received: 'status-received' };
 const PRIORITY_LABELS = { low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' };
 
@@ -4435,9 +4456,9 @@ function renderOrderSummary() {
   const ordered  = orders.filter(o => o.status === 'ordered').length;
   const received = orders.filter(o => o.status === 'received').length;
   bar.innerHTML = `
-    <div class="order-summary-pill">⏳ Pending <span style="color:#9ca3af">${pending}</span></div>
-    <div class="order-summary-pill">📦 Ordered <span style="color:#3b82f6">${ordered}</span></div>
-    <div class="order-summary-pill">✅ Received <span style="color:var(--green)">${received}</span></div>
+    <div class="order-summary-pill">Pending <span style="color:#9ca3af">${pending}</span></div>
+    <div class="order-summary-pill">Ordered <span style="color:#3b82f6">${ordered}</span></div>
+    <div class="order-summary-pill">Received <span style="color:var(--green)">${received}</span></div>
     <div class="order-summary-pill">Total <span style="color:var(--text)">${orders.length}</span></div>
   `;
 }
@@ -4482,8 +4503,8 @@ function renderOrders() {
       <td style="color:var(--muted);font-size:12px;font-weight:500;">${escHtml(o.unit)}</td>
       <td style="color:var(--muted);font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(o.notes) || '—'}</td>
       <td style="text-align:right;white-space:nowrap;">
-        <button class="pwd-icon-btn" onclick="openEditOrderModal('${o.id}')" title="Edit" style="display:inline-flex;">✏️</button>
-        <button class="pwd-icon-btn del" onclick="deleteOrder('${o.id}')" title="Delete" style="display:inline-flex;margin-left:4px;">🗑</button>
+        <button class="pwd-icon-btn" onclick="openEditOrderModal('${o.id}')" title="Edit" style="display:inline-flex;">${fi('edit-2', 14)}</button>
+        <button class="pwd-icon-btn del" onclick="deleteOrder('${o.id}')" title="Delete" style="display:inline-flex;margin-left:4px;">${fi('trash-2', 14)}</button>
       </td>
     </tr>`).join('');
 }
@@ -4605,7 +4626,7 @@ async function sendInventoryEmail() {
   const subject = `Inventory Status Report — Masterform Systems — ${new Date().toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}`;
 
   const sendBtn = document.querySelector('[onclick="sendInventoryEmail()"]');
-  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ Sending…'; }
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Sending…'; }
 
   try {
     const res = await fetch('/api/send-order', {
@@ -4615,11 +4636,11 @@ async function sendInventoryEmail() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Send failed');
-    toast('✅ Inventory report sent!', 'success');
+    toast('Inventory report sent!', 'success');
   } catch (err) {
-    toast(`❌ ${err.message}`, 'error');
+    toast(err.message, 'error');
   } finally {
-    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '✉ Send Inventory'; }
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Inventory'; }
   }
 }
 
@@ -4670,7 +4691,7 @@ async function sendOrderEmail() {
 
   // Send via backend API (one click — no compose window)
   const sendBtn = document.querySelector('[onclick="sendOrderEmail()"]');
-  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ Sending…'; }
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Sending…'; }
 
   try {
     const res = await fetch('/api/send-order', {
@@ -4697,12 +4718,12 @@ async function sendOrderEmail() {
     });
     saveOrders();
     renderOrders();
-    toast('✅ Order sent! Quantities reset to zero.', 'success');
+    toast('Order sent! Quantities reset to zero.', 'success');
 
   } catch (err) {
-    toast(`❌ ${err.message}`, 'error');
+    toast(err.message, 'error');
   } finally {
-    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = '✉ Send Order'; }
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Order'; }
   }
 }
 
@@ -4732,6 +4753,7 @@ initData().then(() => {
   const entity = sessionStorage.getItem('mf_entity') || '';
   if (role === 'client') renderClientPortal(entity);
   if (role === 'driver') renderDriverPortal(entity);
+  if (typeof feather !== 'undefined') feather.replace();
 });
 
 // ─── Drivers ─────────────────────────────────────────────────────────────────
@@ -4786,8 +4808,8 @@ function renderDrivers() {
             <div style="font-size:11px;color:var(--muted);">${d.vehicle || 'No vehicle set'}</div>
           </div>
           <div style="display:flex;gap:4px;">
-            <button class="btn btn-subtle btn-sm" onclick="event.stopPropagation();openDriverModal('${d.id}')" title="Edit">✏</button>
-            <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="event.stopPropagation();deleteDriver('${d.id}')" title="Delete">🗑</button>
+            <button class="btn btn-subtle btn-sm" onclick="event.stopPropagation();openDriverModal('${d.id}')" title="Edit">Edit</button>
+            <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="event.stopPropagation();deleteDriver('${d.id}')" title="Delete">Delete</button>
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
@@ -4804,7 +4826,7 @@ function renderDrivers() {
             <div style="font-size:10px;color:var(--muted);">Delivered</div>
           </div>
         </div>
-        ${d.phone ? `<div style="font-size:11px;color:var(--muted);margin-top:12px;">📞 ${d.phone}</div>` : ''}
+        ${d.phone ? `<div style="font-size:11px;color:var(--muted);margin-top:12px;">${d.phone}</div>` : ''}
       </div>`;
   }).join('');
 }
@@ -4827,12 +4849,12 @@ function openDriverDetail(id) {
       <div style="flex:1;">
         <div style="font-size:22px;font-weight:800;">${d.name}</div>
         <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;">
-          ${d.phone   ? `<span style="font-size:13px;color:var(--muted);">📞 ${d.phone}</span>` : ''}
-          ${d.vehicle ? `<span style="font-size:13px;color:var(--muted);">🚗 ${d.vehicle}</span>` : ''}
-          ${d.notes   ? `<span style="font-size:13px;color:var(--muted);">📝 ${d.notes}</span>` : ''}
+          ${d.phone   ? `<span style="font-size:13px;color:var(--muted);">${d.phone}</span>` : ''}
+          ${d.vehicle ? `<span style="font-size:13px;color:var(--muted);">${fi('navigation',13)} ${d.vehicle}</span>` : ''}
+          ${d.notes   ? `<span style="font-size:13px;color:var(--muted);">${d.notes}</span>` : ''}
         </div>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="openDriverModal('${d.id}')">✏ Edit Profile</button>
+      <button class="btn btn-outline btn-sm" onclick="openDriverModal('${d.id}')">Edit Profile</button>
     </div>`;
 
   renderDriverDeliveries(d.name);
@@ -5057,10 +5079,10 @@ function openClientDetail(id) {
       <div style="flex:1;min-width:0;">
         <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em;">${escHtml(c.name)}</div>
         <div class="client-detail-meta">
-          ${c.contact ? `<div class="client-detail-meta-item"><span>👤</span><strong>${escHtml(c.contact)}</strong></div>` : ''}
-          ${c.phone   ? `<div class="client-detail-meta-item"><span>📞</span><strong>${escHtml(c.phone)}</strong></div>` : ''}
-          ${c.email   ? `<div class="client-detail-meta-item"><span>✉</span><strong>${escHtml(c.email)}</strong></div>` : ''}
-          ${c.notes   ? `<div class="client-detail-meta-item"><span>📝</span><span>${escHtml(c.notes)}</span></div>` : ''}
+          ${c.contact ? `<div class="client-detail-meta-item"><strong>${escHtml(c.contact)}</strong></div>` : ''}
+          ${c.phone   ? `<div class="client-detail-meta-item"><strong>${escHtml(c.phone)}</strong></div>` : ''}
+          ${c.email   ? `<div class="client-detail-meta-item"><strong>${escHtml(c.email)}</strong></div>` : ''}
+          ${c.notes   ? `<div class="client-detail-meta-item"><span>${escHtml(c.notes)}</span></div>` : ''}
         </div>
         <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
           <div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:10px 18px;text-align:center;">
@@ -5216,11 +5238,11 @@ function openDeliveryModalForClient() {
 let deliveries = JSON.parse(localStorage.getItem('inv_deliveries') || '[]');
 
 const DLV_STATUS = {
-  'Pending':    { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.3)',  icon: '🕐' },
-  'Processing': { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.3)',  icon: '⚙️' },
-  'Dispatched': { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',  border: 'rgba(139,92,246,0.3)',  icon: '🚚' },
-  'Delivered':  { color: '#10b981', bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.3)',  icon: '✅' },
-  'Cancelled':  { color: '#6b7280', bg: 'rgba(107,114,128,0.12)', border: 'rgba(107,114,128,0.3)', icon: '❌' },
+  'Pending':    { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.3)',  icon: '' },
+  'Processing': { color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  border: 'rgba(59,130,246,0.3)',  icon: '' },
+  'Dispatched': { color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)',  border: 'rgba(139,92,246,0.3)',  icon: '' },
+  'Delivered':  { color: '#10b981', bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.3)',  icon: '' },
+  'Cancelled':  { color: '#6b7280', bg: 'rgba(107,114,128,0.12)', border: 'rgba(107,114,128,0.3)', icon: '' },
 };
 
 const DLV_STATUS_ORDER = ['Pending', 'Processing', 'Dispatched', 'Delivered', 'Cancelled'];
@@ -5410,7 +5432,9 @@ const QUICK_REPLIES = [
 function chatToggleOpen() {
   chatOpen = !chatOpen;
   document.getElementById('chatWindow').classList.toggle('hidden', !chatOpen);
-  document.getElementById('chatToggle').textContent = chatOpen ? '✕' : '💬';
+  const toggleBtn = document.getElementById('chatToggle');
+  toggleBtn.innerHTML = chatOpen ? '<i data-feather="x"></i>' : '<i data-feather="message-circle"></i>';
+  if (window.feather) feather.replace();
   if (chatOpen && document.getElementById('chatMessages').children.length === 0) {
     chatBotMsg("Hi! I'm the MF Assistant 👋\nI can help you check stock levels, see what needs ordering, or navigate the app.\n\nWhat would you like to know?");
     chatShowQuickReplies(QUICK_REPLIES);
