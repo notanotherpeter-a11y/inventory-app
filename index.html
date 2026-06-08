@@ -400,17 +400,17 @@
 
   /* Mobile logo in topbar */
   .topbar-mobile-logo {
-    display: none;
+    display: flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
     text-decoration: none;
   }
   .topbar-mobile-logo img {
-    height: 28px;
+    height: 32px;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 0 8px rgba(192,57,43,0.6));
+    filter: drop-shadow(0 0 8px rgba(192,57,43,0.5));
   }
   .topbar-mobile-logo-text {
     font-size: 13px;
@@ -1725,6 +1725,8 @@ body.light-page [style*="border:1px solid var(--surface-border)"] { border-color
 body.light-page .topbar { background: rgba(255,255,255,0.97) !important; border-bottom: 1px solid #e2e6f0 !important; backdrop-filter: none !important; }
 body.light-page .topbar-title, body.light-page .topbar-date { color: #1a1d2e !important; }
 body.light-page .topbar-breadcrumb { color: #6b7280 !important; }
+body.light-page .topbar-mobile-logo-text { color: #1a1d2e !important; }
+body.light-page .topbar-mobile-logo img { filter: drop-shadow(0 0 6px rgba(192,57,43,0.3)) !important; }
 body.light-page .toggle-btn { color: #374151 !important; border-color: #e2e6f0 !important; background: #f8fafc !important; }
 body.light-page .toggle-btn:hover { background: #c0392b !important; color: #fff !important; border-color: #c0392b !important; }
 
@@ -2197,6 +2199,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
         <img src="logo.png" alt="Masterform">
         <span class="topbar-mobile-logo-text">Masterform</span>
       </div>
+      <span style="width:1px;height:20px;background:rgba(255,255,255,0.12);flex-shrink:0;"></span>
       <div class="topbar-breadcrumb">
         <span class="topbar-breadcrumb-root">Masterform</span>
         <span class="topbar-breadcrumb-sep">/</span>
