@@ -385,23 +385,28 @@
   .topbar-mobile-logo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
     cursor: pointer;
     text-decoration: none;
   }
   .topbar-mobile-logo img {
-    height: 32px;
+    height: 30px;
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 0 8px rgba(192,57,43,0.5));
   }
   .topbar-mobile-logo-text {
-    font-size: 13px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 800;
     color: var(--text);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     white-space: nowrap;
+  }
+  .topbar-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
   }
 
   /* ════════════════════════════════════
@@ -1709,7 +1714,8 @@ body.light-page .topbar { background: rgba(255,255,255,0.97) !important; border-
 body.light-page .topbar-title, body.light-page .topbar-date { color: #1a1d2e !important; }
 body.light-page .topbar-breadcrumb { color: #6b7280 !important; }
 body.light-page .topbar-mobile-logo-text { color: #1a1d2e !important; }
-body.light-page .topbar-mobile-logo img { filter: drop-shadow(0 0 6px rgba(192,57,43,0.3)) !important; }
+body.light-page .topbar-divider { background: #d1d5db !important; }
+body.light-page #topbarTitle { color: #1a1d2e !important; }
 body.light-page .toggle-btn { color: #374151 !important; border-color: #e2e6f0 !important; background: #f8fafc !important; }
 body.light-page .toggle-btn:hover { background: #c0392b !important; color: #fff !important; border-color: #c0392b !important; }
 
@@ -2178,12 +2184,8 @@ body.light-page #pointer .ptr-label { color: #fff; }
         <img src="logo.png" alt="Masterform">
         <span class="topbar-mobile-logo-text">Masterform</span>
       </div>
-      <span style="width:1px;height:20px;background:rgba(255,255,255,0.12);flex-shrink:0;"></span>
-      <div class="topbar-breadcrumb">
-        <span class="topbar-breadcrumb-root">Masterform</span>
-        <span class="topbar-breadcrumb-sep">/</span>
-        <span class="topbar-breadcrumb-page" id="topbarTitle">Home</span>
-      </div>
+      <span class="topbar-divider"></span>
+      <span class="topbar-breadcrumb-page" id="topbarTitle">Home</span>
     </div>
     <div class="topbar-actions">
       <span class="sync-badge" id="syncStatus">⟳ Loading…</span>
