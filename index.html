@@ -2786,7 +2786,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <input class="form-input" id="clientSearch" placeholder="Search clients…" style="width:200px;padding:8px 14px;font-size:13px;" oninput="renderClients()">
             <button class="btn btn-subtle" onclick="document.getElementById('globalPdfInput').click()" style="white-space:nowrap;">+ Upload PDF</button>
-            <input type="file" id="globalPdfInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" multiple style="display:none;" onchange="handleDocUpload(event)">
+            <input type="file" id="globalPdfInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" multiple style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;" onchange="handleDocUpload(event)">
             <button class="btn btn-primary" onclick="openClientModal()" style="display:flex;align-items:center;gap:6px;white-space:nowrap;">+ New Client</button>
           </div>
         </div>
@@ -2857,7 +2857,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
                 <div style="font-size:12px;color:var(--muted);margin-top:2px;">PDFs and files for this client</div>
               </div>
               <button class="btn btn-primary btn-sm" onclick="document.getElementById('clientPdfInput').click()" style="font-size:13px;">+ Upload PDF</button>
-              <input type="file" id="clientPdfInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" style="display:none;" onchange="uploadClientDoc(event)">
+              <input type="file" id="clientPdfInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;" onchange="uploadClientDoc(event)">
             </div>
             <div class="doc-upload-zone" id="clientDocDrop"
               ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
@@ -2881,7 +2881,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
             <div style="font-size:12px;color:var(--muted);margin-top:3px;">Upload a PDF — AI will auto-assign it to the right client</div>
           </div>
           <button class="btn btn-primary" onclick="document.getElementById('globalPdfInput2').click()">+ Upload PDF</button>
-          <input type="file" id="globalPdfInput2" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" multiple style="display:none;" onchange="handleDocUpload(event)">
+          <input type="file" id="globalPdfInput2" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" multiple style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;" onchange="handleDocUpload(event)">
         </div>
         <div id="docDropZone" class="doc-upload-zone"
           ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
@@ -6300,10 +6300,11 @@ function processDocFile(file) {
 }
 
 function handleDocUpload(event) {
-  const files = Array.from(event.target.files);
-  if (!files.length) return;
+  const files = Array.from(event.target.files || []);
+  if (!files.length) { showToast('No file selected.', 'error'); return; }
+  showToast(`Reading ${files[0].name}…`, 'success');
   files.forEach(processDocFile);
-  event.target.value = '';
+  try { event.target.value = ''; } catch(e) {}
 }
 
 function handleDocDrop(event) {
