@@ -2204,7 +2204,16 @@ body.light-page #pointer .ptr-label { color: #fff; }
   box-shadow: 0 8px 40px rgba(0,0,0,0.10);
   text-align: center;
 }
-.login-logo { height: 56px; margin-bottom: 16px; }
+.login-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0f18;
+  border-radius: 12px;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+}
+.login-logo { height: 32px; display: block; }
 .login-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; color: #1a1d2e; letter-spacing: -0.025em; }
 .login-sub { font-size: 13px; color: #6b7280; margin-bottom: 32px; font-weight: 500; }
 .login-field { margin-bottom: 16px; text-align: left; }
@@ -2347,7 +2356,9 @@ body.light-page #pointer .ptr-label { color: #fff; }
 <!-- Login Screen -->
 <div id="loginScreen">
   <div class="login-card">
-    <img src="logo.png" alt="Masterform logo" class="login-logo">
+    <div class="login-logo-wrap">
+      <img src="logo.png" alt="Masterform logo" class="login-logo">
+    </div>
     <div class="login-title">Masterform Systems</div>
     <div class="login-sub">Inventory Manager — Sign In</div>
     <div class="login-field">
