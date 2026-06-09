@@ -2785,8 +2785,6 @@ body.light-page #pointer .ptr-label { color: #fff; }
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <input class="form-input" id="clientSearch" placeholder="Search clients…" style="width:200px;padding:8px 14px;font-size:13px;" oninput="renderClients()">
-            <button class="btn btn-subtle" onclick="document.getElementById('globalPdfInput').click()" style="white-space:nowrap;">+ Upload PDF</button>
-            <input type="file" id="globalPdfInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" multiple style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;" onchange="handleDocUpload(event)">
             <button class="btn btn-primary" onclick="openClientModal()" style="display:flex;align-items:center;gap:6px;white-space:nowrap;">+ New Client</button>
           </div>
         </div>
@@ -2848,56 +2846,35 @@ body.light-page #pointer .ptr-label { color: #fff; }
           </div>
         </div>
 
-        <!-- Documents Panel -->
+        <!-- Documents Panel — read-only, synced from Drivers page -->
         <div id="clientTabDocs" style="display:none;">
           <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:24px;">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
               <div>
-                <div style="font-size:14px;font-weight:700;">Uploaded Documents</div>
-                <div style="font-size:12px;color:var(--muted);margin-top:2px;">PDFs and files for this client</div>
+                <div style="font-size:14px;font-weight:700;">Delivery Documents</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px;">Documents uploaded by drivers — AI categorized</div>
               </div>
-              <button class="btn btn-primary btn-sm" onclick="document.getElementById('clientPdfInput').click()" style="font-size:13px;">+ Upload PDF</button>
-              <input type="file" id="clientPdfInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;" onchange="uploadClientDoc(event)">
-            </div>
-            <div class="doc-upload-zone" id="clientDocDrop"
-              ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
-              ondragleave="this.style.borderColor=''"
-              ondrop="event.preventDefault();this.style.borderColor='';handleClientDocDrop(event)">
-              <div style="margin-bottom:8px;opacity:0.4;"><i data-feather="folder" style="width:28px;height:28px;"></i></div>
-              <div style="font-size:13px;font-weight:600;color:var(--text);">Drop PDF files here</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:4px;">or use the Upload button above</div>
             </div>
             <div id="clientDocsGrid"></div>
-            <div id="clientDocsEmpty" style="text-align:center;padding:32px;color:var(--muted);font-size:13px;display:none;">No documents uploaded yet.</div>
           </div>
         </div>
       </div>
 
-      <!-- Global Documents Section -->
-      <div id="globalDocsSection" style="margin-top:28px;background:var(--surface);border:1px solid var(--surface-border);border-radius:16px;padding:24px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <!-- Driver Documents — professional grouped card view -->
+      <div id="globalDocsSection" style="margin-top:28px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
           <div>
-            <div style="font-size:15px;font-weight:700;">All Client Documents</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:3px;">Upload a PDF — AI will auto-assign it to the right client</div>
+            <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:#1a1d2e;">Delivery Documents</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:3px;">Uploaded by drivers · AI-categorized by client</div>
           </div>
-          <button class="btn btn-primary" onclick="document.getElementById('globalPdfInput2').click()">+ Upload PDF</button>
-          <input type="file" id="globalPdfInput2" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" multiple style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;" onchange="handleDocUpload(event)">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input class="form-input" id="docSearch" placeholder="Search documents…" style="width:180px;padding:7px 12px;font-size:12px;" oninput="renderClientDocsByDriver()">
+            <select class="form-select" id="docClientFilter" style="width:160px;padding:7px 12px;font-size:12px;" onchange="renderClientDocsByDriver()">
+              <option value="">All Clients</option>
+            </select>
+          </div>
         </div>
-        <div id="docDropZone" class="doc-upload-zone"
-          ondragover="event.preventDefault();this.style.borderColor='var(--accent2)'"
-          ondragleave="this.style.borderColor=''"
-          ondrop="event.preventDefault();this.style.borderColor='';handleDocDrop(event)">
-          <div style="margin-bottom:8px;opacity:0.4;"><i data-feather="folder" style="width:28px;height:28px;"></i></div>
-          <div style="font-size:13px;font-weight:600;color:var(--text);">Drag & drop PDF files here</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:4px;">AI will auto-categorize by client name</div>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
-          <input class="form-input" id="docSearch" placeholder="Search documents…" style="width:200px;padding:7px 12px;font-size:12px;" oninput="renderDocs()">
-          <select class="form-select" id="docClientFilter" style="width:180px;padding:7px 12px;font-size:12px;" onchange="renderDocs()">
-            <option value="">All Clients</option>
-          </select>
-        </div>
-        <div id="docList"></div>
+        <div id="clientDocsByDriver"></div>
       </div>
 
     </div>
@@ -2992,6 +2969,21 @@ body.light-page #pointer .ptr-label { color: #fff; }
             <tbody id="driverDeliveryBody"></tbody>
           </table>
           <div id="driverDeliveryEmpty" style="text-align:center;padding:32px;color:#6b7280;display:none;">No deliveries assigned to this driver yet.</div>
+        </div>
+
+        <!-- Driver Documents Section -->
+        <div style="margin-top:28px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+            <div>
+              <div style="font-size:15px;font-weight:800;letter-spacing:-0.02em;color:#1a1d2e;">Documents</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:2px;">Upload delivery dockets — AI will extract client &amp; job details</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="document.getElementById('driverPdfInput').click()" style="display:flex;align-items:center;gap:6px;">
+              <i data-feather="upload" style="width:14px;height:14px;"></i> Upload Document
+            </button>
+            <input type="file" id="driverPdfInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" multiple style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;" onchange="uploadDriverDoc(event)">
+          </div>
+          <div id="driverDocsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
         </div>
       </div>
 
@@ -4541,7 +4533,7 @@ function sidebarSwitchTab(page) {
   if (page === 'passwords') renderPasswords();
   if (page === 'orders')    renderOrders();
   if (page === 'delivery')  renderDelivery();
-  if (page === 'clients')   { renderClients(); renderDocs(); }
+  if (page === 'clients')   { renderClients(); renderClientDocsByDriver(); }
   if (page === 'drivers')   renderDrivers();
   if (page === 'users')     renderUsers();
 
@@ -5364,6 +5356,7 @@ function openDriverDetail(id) {
     </div>`;
 
   renderDriverDeliveries(d.name);
+  renderDriverDocs();
 }
 
 let activeDriverId = null;
@@ -6157,38 +6150,51 @@ function saveClientDocs(clientId, docs) {
   }
 }
 
+// renderClientDocs — shows driver-uploaded docs filtered to the active client
 function renderClientDocs() {
   if (!activeClientId) return;
-  const docs = getClientDocs(activeClientId);
+  const client = clients.find(c => c.id === activeClientId);
   const grid = document.getElementById('clientDocsGrid');
-  const empty = document.getElementById('clientDocsEmpty');
   if (!grid) return;
-  if (docs.length === 0) {
-    grid.innerHTML = '';
-    if (empty) empty.style.display = '';
+  const allDriverDocs = getDriverDocs();
+  const docs = allDriverDocs.filter(d => d.clientId === activeClientId || d.clientName === client?.name);
+  if (!docs.length) {
+    grid.innerHTML = `<div style="text-align:center;padding:32px;color:#6b7280;font-size:13px;">
+      <div style="margin-bottom:8px;opacity:0.4;">${fi('file-text',28)}</div>
+      No documents for this client yet.<br>
+      <span style="font-size:11px;color:#9ca3af;">Upload dockets from a Driver's page — AI will categorize them here.</span>
+    </div>`;
     return;
   }
-  if (empty) empty.style.display = 'none';
-  grid.innerHTML = `<table class="doc-table"><thead><tr>
-    <th>Document</th><th>Uploaded</th><th style="text-align:right;">Actions</th>
-  </tr></thead><tbody>${docs.map(doc => `
-    <tr>
-      <td style="font-weight:600;">
-        ${escHtml(doc.name)}
-        ${doc.analysis ? `<div style="font-size:11px;color:#6b7280;margin-top:3px;">
-          ${doc.analysis.client ? `<span style="color:#10b981;">👤 ${escHtml(doc.analysis.client)}</span>  ` : ''}
-          ${doc.analysis.jobNumber ? `<span>🔖 ${escHtml(doc.analysis.jobNumber)}</span>  ` : ''}
-          ${doc.analysis.date ? `<span>📅 ${escHtml(doc.analysis.date)}</span>  ` : ''}
-          ${doc.analysis.items ? `<span>📦 ${escHtml(doc.analysis.items)}</span>` : ''}
-        </div>` : '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">Awaiting AI analysis…</div>'}
-      </td>
-      <td style="color:var(--muted);font-size:12px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</td>
-      <td style="text-align:right;white-space:nowrap;">
-        <button class="btn btn-subtle btn-sm" onclick="viewClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;margin-right:4px;">View</button>
-        <button class="btn btn-subtle btn-sm" onclick="downloadClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;margin-right:4px;">↓</button>
-        <button class="btn btn-subtle btn-sm" onclick="deleteClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;color:var(--red);">Delete</button>
-      </td>
-    </tr>`).join('')}</tbody></table>`;
+  const driverColors = { 'Tony':'#3b82f6','Mutteeb':'#10b981','Gene Carlo':'#f59e0b' };
+  const getColor = name => driverColors[name] || '#8b5cf6';
+  grid.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">${docs.map(doc => {
+    const url = getBlobUrl(doc.id);
+    const isImg = /\.(png|jpg|jpeg)$/i.test(doc.name);
+    const color = getColor(doc.driverName);
+    return `<div style="background:#fff;border:1px solid #e2e6f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+      <div style="height:3px;background:${color};"></div>
+      <div style="padding:14px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+          <div style="width:38px;height:38px;background:#f8fafc;border:1px solid #e2e6f0;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#6b7280;">${fi(isImg?'image':'file-text',17)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:#1a1d2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(doc.name)}">${escHtml(doc.name)}</div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:1px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</div>
+          </div>
+        </div>
+        ${doc.analysis ? `<div style="background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;color:#374151;line-height:1.8;margin-bottom:10px;">
+          ${doc.analysis.jobNumber?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">JOB</span>  ${escHtml(doc.analysis.jobNumber)}</div>`:''}
+          ${doc.analysis.date?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">DATE</span>  ${escHtml(doc.analysis.date)}</div>`:''}
+          ${doc.analysis.items?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">ITEMS</span>  ${escHtml(doc.analysis.items)}</div>`:''}
+          ${doc.analysis.amount?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">AMT</span>  ${escHtml(doc.analysis.amount)}</div>`:''}
+        </div>` : `<div style="background:#fafafa;border-radius:8px;padding:7px 10px;font-size:11px;color:#9ca3af;text-align:center;margin-bottom:10px;">Awaiting AI analysis…</div>`}
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="display:inline-flex;align-items:center;gap:4px;background:${color}18;color:${color};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;">${fi('navigation',10)} ${escHtml(doc.driverName)}</span>
+          ${url?`<button class="btn btn-subtle btn-sm" onclick="window.open('${url}','_blank')" style="font-size:11px;padding:3px 10px;">View</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 function uploadClientDoc(event) {
@@ -6256,7 +6262,215 @@ function storeBlobUrl(id, file) {
 function getBlobUrl(id) { return _blobUrls[id]?.url || null; }
 function revokeBlobUrl(id) { if (_blobUrls[id]) { URL.revokeObjectURL(_blobUrls[id].url); delete _blobUrls[id]; } }
 
-// ─── Global Client Documents (Clients Page) ──────────────────────────────────
+// ─── Driver Documents ─────────────────────────────────────────────────────────
+const DRIVER_DOCS_KEY = 'inv_driver_docs';
+function getDriverDocs() { try { return JSON.parse(localStorage.getItem(DRIVER_DOCS_KEY)) || []; } catch(e) { return []; } }
+function saveDriverDocs(docs) { localStorage.setItem(DRIVER_DOCS_KEY, JSON.stringify(docs)); }
+
+function uploadDriverDoc(event) {
+  if (!activeDriverId) { showToast('Open a driver first.', 'error'); return; }
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+  const driver = drivers.find(d => d.id === activeDriverId);
+  const allowedExts = ['.pdf', '.png', '.jpg', '.jpeg'];
+  files.forEach(file => {
+    if (!allowedExts.some(ext => file.name.toLowerCase().endsWith(ext))) {
+      showToast(`${file.name}: unsupported format.`, 'error'); return;
+    }
+    const id = 'ddoc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+    storeBlobUrl(id, file);
+    const doc = { id, name: file.name, driverId: activeDriverId, driverName: driver?.name || 'Unknown', clientId: null, clientName: 'Unassigned', uploadedAt: new Date().toISOString(), analysis: null };
+    const docs = getDriverDocs();
+    docs.unshift(doc);
+    saveDriverDocs(docs);
+    renderDriverDocs();
+    showToast(`Uploaded: ${file.name}`, 'success');
+    analyzeDriverDoc(id, file);
+  });
+  try { event.target.value = ''; } catch(e) {}
+}
+
+async function analyzeDriverDoc(docId, file) {
+  try {
+    showToast('AI analyzing document…', 'success');
+    const { data, mimeType } = await resizeImageForAI(file);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    let resp;
+    try {
+      resp = await fetch('/api/analyze-doc', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data, mimeType }), signal: controller.signal });
+    } finally { clearTimeout(timer); }
+    const json = await resp.json();
+    if (json.success && json.analysis) {
+      const docs = getDriverDocs();
+      const doc = docs.find(d => d.id === docId);
+      if (doc) {
+        doc.analysis = json.analysis;
+        // Auto-assign client from AI result
+        if (json.analysis.client) {
+          const matched = clients.find(c =>
+            c.name.toLowerCase().includes(json.analysis.client.toLowerCase()) ||
+            json.analysis.client.toLowerCase().includes(c.name.toLowerCase())
+          );
+          if (matched) { doc.clientId = matched.id; doc.clientName = matched.name; }
+          else { doc.clientName = json.analysis.client; }
+        }
+        saveDriverDocs(docs);
+        renderDriverDocs();
+        // Refresh clients page if visible
+        if (document.getElementById('page-clients')?.style.display !== 'none') renderClientDocsByDriver();
+      }
+      const summary = [json.analysis.client, json.analysis.jobNumber, json.analysis.date].filter(Boolean).join(' · ');
+      if (summary) showToast(`AI: ${summary}`, 'success');
+      else showToast('AI: document analyzed.', 'success');
+    } else { showToast('AI: could not extract info.', 'warning'); }
+  } catch(err) {
+    if (err.name === 'AbortError') showToast('AI timed out — try a smaller image.', 'error');
+    else { showToast('AI analysis failed.', 'error'); console.warn('analyzeDriverDoc error:', err); }
+  }
+}
+
+function renderDriverDocs() {
+  const el = document.getElementById('driverDocsGrid');
+  if (!el) return;
+  if (!activeDriverId) return;
+  const docs = getDriverDocs().filter(d => d.driverId === activeDriverId);
+  const driverColors = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444'];
+  const driverIdx = drivers.findIndex(d => d.id === activeDriverId);
+  const color = driverColors[driverIdx % driverColors.length] || '#3b82f6';
+  if (!docs.length) {
+    el.innerHTML = `<div style="background:#fff;border:1px dashed #e2e6f0;border-radius:12px;padding:32px;text-align:center;color:#9ca3af;font-size:13px;grid-column:1/-1;">
+      No documents uploaded yet.<br><span style="font-size:11px;">Upload delivery dockets — AI will extract client &amp; job details.</span>
+    </div>`;
+    return;
+  }
+  el.innerHTML = docs.map(doc => {
+    const url = getBlobUrl(doc.id);
+    const isImg = /\.(png|jpg|jpeg)$/i.test(doc.name);
+    return `<div style="background:#fff;border:1px solid #e2e6f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+      <div style="height:3px;background:${color};"></div>
+      <div style="padding:14px 16px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+          <div style="width:40px;height:40px;background:#f8fafc;border:1px solid #e2e6f0;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#6b7280;">${fi(isImg?'image':'file-text',18)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:700;color:#1a1d2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(doc.name)}">${escHtml(doc.name)}</div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:1px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</div>
+          </div>
+        </div>
+        ${doc.analysis ? `<div style="background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;color:#374151;line-height:1.8;margin-bottom:10px;">
+          ${doc.clientName!=='Unassigned'?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">CLIENT</span>  <span style="color:#c0392b;font-weight:600;">${escHtml(doc.clientName)}</span></div>`:''}
+          ${doc.analysis.jobNumber?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">JOB</span>  ${escHtml(doc.analysis.jobNumber)}</div>`:''}
+          ${doc.analysis.date?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">DATE</span>  ${escHtml(doc.analysis.date)}</div>`:''}
+          ${doc.analysis.items?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">ITEMS</span>  ${escHtml(doc.analysis.items)}</div>`:''}
+        </div>` : `<div style="background:#fafafa;border-radius:8px;padding:7px 10px;font-size:11px;color:#9ca3af;text-align:center;margin-bottom:10px;">Awaiting AI analysis…</div>`}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+          ${doc.clientName!=='Unassigned'?`<span style="background:rgba(192,57,43,0.1);color:#c0392b;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;">${escHtml(doc.clientName)}</span>`:`<span style="background:#f0f2f7;color:#9ca3af;padding:2px 8px;border-radius:20px;font-size:10px;">Unassigned</span>`}
+          <div style="display:flex;gap:4px;">
+            ${url?`<button class="btn btn-subtle btn-sm" onclick="window.open('${url}','_blank')" style="font-size:11px;padding:3px 10px;">View</button>`:''}
+            <button class="btn btn-subtle btn-sm" onclick="deleteDriverDoc('${doc.id}')" style="font-size:11px;padding:3px 10px;color:#ef4444;">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteDriverDoc(docId) {
+  revokeBlobUrl(docId);
+  saveDriverDocs(getDriverDocs().filter(d => d.id !== docId));
+  renderDriverDocs();
+  renderClientDocsByDriver();
+  showToast('Document deleted.', 'success');
+}
+
+// ─── Clients Page — Professional Document View (from Driver Uploads) ──────────
+function renderClientDocsByDriver() {
+  const el = document.getElementById('clientDocsByDriver');
+  if (!el) return;
+
+  const search = (document.getElementById('docSearch')?.value || '').toLowerCase();
+  const clientFilter = document.getElementById('docClientFilter')?.value || '';
+  let docs = getDriverDocs();
+
+  // Populate filter dropdown
+  const sel = document.getElementById('docClientFilter');
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">All Clients</option>';
+    const names = [...new Set(docs.map(d => d.clientName))].sort();
+    names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; if (n === cur) o.selected = true; sel.appendChild(o); });
+  }
+
+  if (search) docs = docs.filter(d => d.name.toLowerCase().includes(search) || d.clientName.toLowerCase().includes(search) || d.driverName.toLowerCase().includes(search) || (d.analysis?.jobNumber||'').toLowerCase().includes(search));
+  if (clientFilter) docs = docs.filter(d => d.clientName === clientFilter);
+
+  if (!docs.length) {
+    el.innerHTML = `<div style="background:#fff;border:1px solid #e2e6f0;border-radius:16px;padding:48px;text-align:center;">
+      <div style="margin-bottom:14px;color:#d1d5db;">${fi('folder',40)}</div>
+      <div style="font-size:15px;font-weight:700;color:#374151;margin-bottom:6px;">No documents yet</div>
+      <div style="font-size:13px;color:#9ca3af;max-width:320px;margin:0 auto;">Go to a <strong>Driver's profile</strong> and upload delivery dockets — AI will automatically categorize them by client here.</div>
+    </div>`;
+    return;
+  }
+
+  // Group by client
+  const groups = {};
+  docs.forEach(doc => { const k = doc.clientName || 'Unassigned'; if (!groups[k]) groups[k] = []; groups[k].push(doc); });
+  const sorted = Object.keys(groups).sort((a,b) => { if (a==='Unassigned') return 1; if (b==='Unassigned') return -1; return a.localeCompare(b); });
+
+  // Per-driver color map
+  const palette = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4'];
+  const driverColorMap = {};
+  [...new Set(docs.map(d => d.driverName))].forEach((n,i) => { driverColorMap[n] = palette[i % palette.length]; });
+
+  el.innerHTML = sorted.map(clientName => {
+    const grpDocs = groups[clientName];
+    const client = clients.find(c => c.name === clientName);
+    const initials = clientName === 'Unassigned' ? '?' : clientName.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const headerColor = clientName === 'Unassigned' ? '#9ca3af' : '#c0392b';
+    const headerBg = clientName === 'Unassigned' ? '#f0f2f7' : 'rgba(192,57,43,0.08)';
+    return `<div style="margin-bottom:32px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #e2e6f0;">
+        <div style="width:34px;height:34px;border-radius:8px;background:${headerBg};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:${headerColor};">${initials}</div>
+        <div style="flex:1;">
+          <span style="font-size:15px;font-weight:800;color:#1a1d2e;">${escHtml(clientName)}</span>
+          <span style="font-size:12px;color:#9ca3af;margin-left:8px;">${grpDocs.length} doc${grpDocs.length!==1?'s':''}</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+        ${grpDocs.map(doc => {
+          const url = getBlobUrl(doc.id);
+          const isImg = /\.(png|jpg|jpeg)$/i.test(doc.name);
+          const dColor = driverColorMap[doc.driverName] || '#6b7280';
+          return `<div style="background:#fff;border:1px solid #e2e6f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:box-shadow 0.15s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.10)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,0.06)';this.style.transform=''">
+            <div style="height:3px;background:${dColor};"></div>
+            <div style="padding:14px 16px;">
+              <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+                <div style="width:40px;height:40px;background:#f8fafc;border:1px solid #e2e6f0;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#6b7280;">${fi(isImg?'image':'file-text',18)}</div>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:12px;font-weight:700;color:#1a1d2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(doc.name)}">${escHtml(doc.name)}</div>
+                  <div style="font-size:11px;color:#9ca3af;margin-top:1px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</div>
+                </div>
+              </div>
+              ${doc.analysis ? `<div style="background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;color:#374151;line-height:1.85;margin-bottom:10px;">
+                ${doc.analysis.jobNumber?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">JOB</span>  ${escHtml(doc.analysis.jobNumber)}</div>`:''}
+                ${doc.analysis.date?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">DATE</span>  ${escHtml(doc.analysis.date)}</div>`:''}
+                ${doc.analysis.items?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">ITEMS</span>  ${escHtml(doc.analysis.items)}</div>`:''}
+                ${doc.analysis.amount?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">AMT</span>  ${escHtml(doc.analysis.amount)}</div>`:''}
+              </div>` : `<div style="background:#fafafa;border-radius:8px;padding:7px 10px;font-size:11px;color:#9ca3af;text-align:center;margin-bottom:10px;">Awaiting AI analysis…</div>`}
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${dColor}18;color:${dColor};">${fi('navigation',10)} ${escHtml(doc.driverName)}</span>
+                ${url?`<button class="btn btn-subtle btn-sm" onclick="window.open('${url}','_blank')" style="font-size:11px;padding:3px 10px;">View</button>`:''}
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Global Client Documents (legacy — kept for storage compat) ──────────────
 const ALL_DOCS_KEY = 'inv_all_client_docs';
 
 // Clean up any legacy base64 data bloating localStorage
