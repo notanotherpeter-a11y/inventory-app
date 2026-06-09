@@ -2392,11 +2392,11 @@ body.light-page #pointer .ptr-label { color: #fff; }
 </div>
 
 <!-- Sidebar -->
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar" id="sidebar" onclick="toggleSidebar()">
 
   <!-- Brand -->
   <div class="sidebar-brand">
-    <button class="toggle-btn" onclick="toggleSidebar()" title="Collapse sidebar" id="toggleBtn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <button class="toggle-btn" onclick="event.stopPropagation();toggleSidebar()" title="Collapse sidebar" id="toggleBtn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   </div>
 
   <!-- Nav -->
