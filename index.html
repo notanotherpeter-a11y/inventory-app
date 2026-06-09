@@ -3755,6 +3755,17 @@ function saveUser() {
     showToast('User created.', 'success');
   }
   if (saved) sbSaveUser(saved); else saveAppUsers();
+
+  // Auto-sync to Password List
+  const pwLabel = `App Login — ${saved.username} (${saved.role})`;
+  const existingPwdIdx = passwords.findIndex(p => p.username === saved.username && p.category === 'Website');
+  if (existingPwdIdx !== -1) {
+    passwords[existingPwdIdx] = { ...passwords[existingPwdIdx], password: saved.password, service: pwLabel };
+  } else {
+    passwords.push({ id: uid(), service: pwLabel, category: 'Website', username: saved.username, password: saved.password, note: `Role: ${saved.role}${saved.entity ? ', Entity: ' + saved.entity : ''}` });
+  }
+  savePwds();
+
   closeModal('userModal');
   renderUsers();
 }
