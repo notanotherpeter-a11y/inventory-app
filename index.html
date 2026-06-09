@@ -3716,7 +3716,7 @@ function openUserModal(id) {
     const u = appUsers.find(x => x.id === id);
     document.getElementById('usrEntity').value = u?.entity || '';
   }
-  document.getElementById('userModal').classList.add('active');
+  document.getElementById('userModal').classList.add('open');
 }
 
 function saveUser() {
@@ -5365,7 +5365,7 @@ function openDriverModal(id) {
   } else {
     ['drvName','drvPhone','drvVehicle','drvNotes'].forEach(f => document.getElementById(f).value = '');
   }
-  document.getElementById('driverModal').classList.add('active');
+  document.getElementById('driverModal').classList.add('open');
 }
 
 function saveDriver() {
@@ -5619,7 +5619,7 @@ function openClientModal(id) {
   } else {
     ['cltName','cltContact','cltPhone','cltEmail','cltNotes'].forEach(f => document.getElementById(f).value = '');
   }
-  document.getElementById('clientModal').classList.add('active');
+  document.getElementById('clientModal').classList.add('open');
 }
 
 function saveClient() {
@@ -5810,7 +5810,7 @@ function openDeliveryModal(id) {
     document.getElementById('dlvDriver').value = '';
     document.getElementById('dlvNotes').value = '';
   }
-  document.getElementById('deliveryModal').classList.add('active');
+  document.getElementById('deliveryModal').classList.add('open');
 }
 
 function editDelivery(id) { openDeliveryModal(id); }
