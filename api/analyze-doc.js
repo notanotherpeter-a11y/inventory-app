@@ -50,9 +50,10 @@ Extract the following information and return ONLY valid JSON (no markdown, no ex
       let body = '';
       const req2 = https.request(options, r => {
         r.on('data', d => body += d);
-        r.on('end', () => resolve(JSON.parse(body)));
+        r.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { reject(new Error('Invalid JSON from Gemini: ' + body.slice(0,200))); } });
       });
       req2.on('error', reject);
+      req2.setTimeout(25000, () => { req2.destroy(); reject(new Error('Gemini API timeout')); });
       req2.write(payload);
       req2.end();
     });
