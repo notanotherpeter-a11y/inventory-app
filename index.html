@@ -2677,109 +2677,134 @@ body.light-page #pointer .ptr-label { color: #fff; }
     <!-- ── LASER INSTRUCTIONS PAGE ── -->
     <div id="page-laser" style="display:none;">
 
-      <!-- Page Header -->
-      <div class="section-header">
-        <div>
-          <div class="section-title" style="font-size:18px;">Laser Instructions</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:4px;">HAN'S LASER G3015HF Expert &amp; Intermach — Operating Procedures</div>
+      <!-- Stats Bar -->
+      <div class="clients-stats-bar">
+        <div class="clients-stat-card">
+          <div class="clients-stat-icon" style="background:rgba(192,57,43,0.12);"><i data-feather="book-open"></i></div>
+          <div><div class="clients-stat-val">2</div><div class="clients-stat-lbl">Procedures</div></div>
         </div>
-        <div style="display:flex;gap:8px;">
-          <a id="laserOpenBtn" href="/laser-startup.pdf" target="_blank" class="btn btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;"><i data-feather="external-link"></i> Open PDF</a>
-          <a id="laserDownloadBtn" href="/laser-startup.pdf" download class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;"><i data-feather="download"></i> Download</a>
+        <div class="clients-stat-card">
+          <div class="clients-stat-icon" style="background:rgba(59,130,246,0.12);"><i data-feather="cpu"></i></div>
+          <div><div class="clients-stat-val">2</div><div class="clients-stat-lbl">Machines</div></div>
+        </div>
+        <div class="clients-stat-card">
+          <div class="clients-stat-icon" style="background:rgba(16,185,129,0.12);"><i data-feather="power"></i></div>
+          <div><div class="clients-stat-val">SBW-150</div><div class="clients-stat-lbl">Voltage Stabilizer</div></div>
+        </div>
+        <div class="clients-stat-card">
+          <div class="clients-stat-icon" style="background:rgba(245,158,11,0.12);"><i data-feather="shield"></i></div>
+          <div><div class="clients-stat-val">Safety</div><div class="clients-stat-lbl">Follow all steps strictly</div></div>
         </div>
       </div>
 
-      <!-- Machine Info Cards -->
-      <div class="clients-stats-bar" style="margin-top:16px;">
-        <div class="clients-stat-card">
-          <div class="clients-stat-icon" style="background:rgba(192,57,43,0.10);color:#c0392b;"><i data-feather="zap"></i></div>
+      <!-- List View -->
+      <div id="laserListView">
+        <!-- Toolbar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
           <div>
-            <div class="clients-stat-val" style="font-size:14px;font-weight:700;">HAN'S LASER</div>
-            <div class="clients-stat-lbl">G3015HF Expert — Machine 2</div>
+            <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;">Procedure Directory</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">Machine operating procedures and safety guidelines</div>
           </div>
         </div>
-        <div class="clients-stat-card">
-          <div class="clients-stat-icon" style="background:rgba(59,130,246,0.10);color:#3b82f6;"><i data-feather="cpu"></i></div>
-          <div>
-            <div class="clients-stat-val" style="font-size:14px;font-weight:700;">Intermach</div>
-            <div class="clients-stat-lbl">Fiber Laser — Machine 1</div>
-          </div>
-        </div>
-        <div class="clients-stat-card">
-          <div class="clients-stat-icon" style="background:rgba(16,185,129,0.10);color:#059669;"><i data-feather="power"></i></div>
-          <div>
-            <div class="clients-stat-val" style="font-size:14px;font-weight:700;">SBW-150 KVA</div>
-            <div class="clients-stat-lbl">KIBO Voltage Stabilizer</div>
-          </div>
-        </div>
-        <div class="clients-stat-card">
-          <div class="clients-stat-icon" style="background:rgba(245,158,11,0.10);color:#d97706;"><i data-feather="alert-triangle"></i></div>
-          <div>
-            <div class="clients-stat-val" style="font-size:14px;font-weight:700;">Safety First</div>
-            <div class="clients-stat-lbl">Follow procedures strictly</div>
-          </div>
+
+        <!-- Procedures Table -->
+        <div class="client-table-wrap">
+          <table class="client-table">
+            <thead>
+              <tr>
+                <th>Procedure</th>
+                <th>Machines</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="openLaserDetail('startup')" style="cursor:pointer;">
+                <td>
+                  <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="client-avatar" style="background:linear-gradient(135deg,#c0392b,#e74c3c);font-size:16px;display:flex;align-items:center;justify-content:center;">
+                      <i data-feather="play-circle" style="width:18px;height:18px;stroke:#fff;"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight:700;color:var(--text);font-size:14px;">Startup Procedure</div>
+                      <div style="font-size:11px;color:var(--muted);margin-top:1px;">Power on sequence</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size:13px;color:var(--text);">HAN'S LASER G3015HF + Intermach</td>
+                <td style="font-size:13px;color:var(--muted);">Machine 2 first, then Machine 1</td>
+                <td><span class="status-pill" style="background:rgba(16,185,129,0.12);color:#059669;">Start-Up</span></td>
+                <td style="text-align:right;">
+                  <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openLaserDetail('startup')" style="font-size:12px;">View PDF</button>
+                </td>
+              </tr>
+              <tr onclick="openLaserDetail('shutdown')" style="cursor:pointer;">
+                <td>
+                  <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="client-avatar" style="background:linear-gradient(135deg,#374151,#6b7280);font-size:16px;display:flex;align-items:center;justify-content:center;">
+                      <i data-feather="power" style="width:18px;height:18px;stroke:#fff;"></i>
+                    </div>
+                    <div>
+                      <div style="font-weight:700;color:var(--text);font-size:14px;">Shutdown Procedure</div>
+                      <div style="font-size:11px;color:var(--muted);margin-top:1px;">End-of-day power-off</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size:13px;color:var(--text);">HAN'S LASER G3015HF + Intermach</td>
+                <td style="font-size:13px;color:var(--muted);">Safe sequence for closing shift</td>
+                <td><span class="status-pill" style="background:rgba(107,114,128,0.12);color:#4b5563;">Shut-Down</span></td>
+                <td style="text-align:right;">
+                  <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openLaserDetail('shutdown')" style="font-size:12px;">View PDF</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- Procedure Selector Cards -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
-        <div id="laserCardStartup" onclick="switchLaserTab('startup')" style="background:#fff;border:2px solid #c0392b;border-radius:14px;padding:20px 22px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(192,57,43,0.10);transition:box-shadow 0.15s;">
-          <div style="width:44px;height:44px;border-radius:12px;background:rgba(192,57,43,0.10);display:flex;align-items:center;justify-content:center;color:#c0392b;flex-shrink:0;"><i data-feather="play-circle" style="width:22px;height:22px;"></i></div>
-          <div>
-            <div style="font-size:14px;font-weight:800;color:#1a1d2e;">Startup Procedure</div>
-            <div style="font-size:11px;color:#6b7280;margin-top:2px;">Power on sequence — Machine 2 then Machine 1</div>
-          </div>
-          <div style="margin-left:auto;"><span style="background:#c0392b;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">ACTIVE</span></div>
-        </div>
-        <div id="laserCardShutdown" onclick="switchLaserTab('shutdown')" style="background:#fff;border:2px solid #e2e6f0;border-radius:14px;padding:20px 22px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:box-shadow 0.15s;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#f0f2f7;display:flex;align-items:center;justify-content:center;color:#6b7280;flex-shrink:0;"><i data-feather="power" style="width:22px;height:22px;"></i></div>
-          <div>
-            <div style="font-size:14px;font-weight:800;color:#1a1d2e;">Shutdown Procedure</div>
-            <div style="font-size:11px;color:#6b7280;margin-top:2px;">Safe power-off sequence for end of day</div>
-          </div>
-          <div style="margin-left:auto;"><span style="background:#e2e6f0;color:#6b7280;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;">TAP</span></div>
-        </div>
-      </div>
-
-      <!-- PDF Viewer Panel -->
-      <div style="margin-top:16px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-        <!-- Viewer Header -->
-        <div style="padding:14px 20px;border-bottom:1px solid #e2e6f0;display:flex;align-items:center;gap:10px;">
-          <div id="laserViewerIcon" style="width:32px;height:32px;border-radius:8px;background:rgba(192,57,43,0.10);display:flex;align-items:center;justify-content:center;color:#c0392b;flex-shrink:0;"><i data-feather="file-text" style="width:16px;height:16px;"></i></div>
-          <div>
-            <div id="laserViewerTitle" style="font-size:13px;font-weight:700;color:#1a1d2e;">Startup Procedure</div>
-            <div id="laserViewerSub" style="font-size:11px;color:#6b7280;">HAN'S LASER G3015HF Expert &amp; Intermach</div>
+      <!-- Detail View -->
+      <div id="laserDetailView" style="display:none;">
+        <!-- Back + Actions -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-subtle btn-sm" onclick="closeLaserDetail()" style="display:flex;align-items:center;gap:6px;font-weight:600;">← Back to Procedures</button>
+          <div style="display:flex;gap:8px;">
+            <a id="laserOpenBtn" href="/laser-startup.pdf" target="_blank" class="btn btn-outline btn-sm" style="display:flex;align-items:center;gap:6px;"><i data-feather="external-link"></i> Open PDF</a>
+            <a id="laserDownloadBtn" href="/laser-startup.pdf" download class="btn btn-primary btn-sm" style="display:flex;align-items:center;gap:6px;"><i data-feather="download"></i> Download</a>
           </div>
         </div>
 
-        <!-- Startup PDF -->
-        <div id="laserTabStartup">
-          <object data="/laser-startup.pdf" type="application/pdf" style="width:100%;height:82vh;border:none;display:block;">
-            <div style="padding:64px 48px;text-align:center;">
-              <div style="width:64px;height:64px;border-radius:16px;background:rgba(192,57,43,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#c0392b;"><i data-feather="file-text" style="width:28px;height:28px;"></i></div>
-              <div style="font-size:16px;font-weight:700;color:#1a1d2e;margin-bottom:8px;">PDF viewer not supported</div>
-              <div style="font-size:13px;color:#6b7280;margin-bottom:24px;">Use the buttons below to open or download.</div>
-              <div style="display:flex;gap:10px;justify-content:center;">
-                <a href="/laser-startup.pdf" target="_blank" class="btn btn-outline btn-sm">Open in New Tab</a>
-                <a href="/laser-startup.pdf" download class="btn btn-primary btn-sm">Download PDF</a>
+        <!-- Procedure Header Card (like client-detail-header) -->
+        <div class="client-detail-header" id="laserDetailHeader" style="margin-bottom:20px;"></div>
+
+        <!-- PDF Viewer -->
+        <div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div id="laserTabStartup">
+            <object data="/laser-startup.pdf" type="application/pdf" style="width:100%;height:82vh;border:none;display:block;">
+              <div style="padding:64px 48px;text-align:center;">
+                <div style="width:64px;height:64px;border-radius:16px;background:rgba(192,57,43,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#c0392b;"><i data-feather="file-text" style="width:28px;height:28px;"></i></div>
+                <div style="font-size:15px;font-weight:700;color:#1a1d2e;margin-bottom:8px;">PDF viewer not supported</div>
+                <div style="font-size:13px;color:#6b7280;margin-bottom:24px;">Use the buttons above to open or download.</div>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                  <a href="/laser-startup.pdf" target="_blank" class="btn btn-outline btn-sm">Open in New Tab</a>
+                  <a href="/laser-startup.pdf" download class="btn btn-primary btn-sm">Download PDF</a>
+                </div>
               </div>
-            </div>
-          </object>
-        </div>
-
-        <!-- Shutdown PDF -->
-        <div id="laserTabShutdown" style="display:none;">
-          <object data="/laser-shutdown.pdf" type="application/pdf" style="width:100%;height:82vh;border:none;display:block;">
-            <div style="padding:64px 48px;text-align:center;">
-              <div style="width:64px;height:64px;border-radius:16px;background:rgba(192,57,43,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#c0392b;"><i data-feather="file-text" style="width:28px;height:28px;"></i></div>
-              <div style="font-size:16px;font-weight:700;color:#1a1d2e;margin-bottom:8px;">PDF viewer not supported</div>
-              <div style="font-size:13px;color:#6b7280;margin-bottom:24px;">Use the buttons below to open or download.</div>
-              <div style="display:flex;gap:10px;justify-content:center;">
-                <a href="/laser-shutdown.pdf" target="_blank" class="btn btn-outline btn-sm">Open in New Tab</a>
-                <a href="/laser-shutdown.pdf" download class="btn btn-primary btn-sm">Download PDF</a>
+            </object>
+          </div>
+          <div id="laserTabShutdown" style="display:none;">
+            <object data="/laser-shutdown.pdf" type="application/pdf" style="width:100%;height:82vh;border:none;display:block;">
+              <div style="padding:64px 48px;text-align:center;">
+                <div style="width:64px;height:64px;border-radius:16px;background:rgba(55,65,81,0.08);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:#4b5563;"><i data-feather="file-text" style="width:28px;height:28px;"></i></div>
+                <div style="font-size:15px;font-weight:700;color:#1a1d2e;margin-bottom:8px;">PDF viewer not supported</div>
+                <div style="font-size:13px;color:#6b7280;margin-bottom:24px;">Use the buttons above to open or download.</div>
+                <div style="display:flex;gap:10px;justify-content:center;">
+                  <a href="/laser-shutdown.pdf" target="_blank" class="btn btn-outline btn-sm">Open in New Tab</a>
+                  <a href="/laser-shutdown.pdf" download class="btn btn-primary btn-sm">Download PDF</a>
+                </div>
               </div>
-            </div>
-          </object>
+            </object>
+          </div>
         </div>
       </div>
 
@@ -5477,51 +5502,60 @@ function openDriverDetail(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function switchLaserTab(tab) {
+function openLaserDetail(tab) {
   const isStartup = tab === 'startup';
   const pdf = isStartup ? '/laser-startup.pdf' : '/laser-shutdown.pdf';
   const label = isStartup ? 'Startup Procedure' : 'Shutdown Procedure';
+  const sublabel = isStartup ? 'Power on sequence — Machine 2 first, then Machine 1' : 'Safe end-of-day power-off sequence';
+  const accentColor = isStartup ? '#c0392b' : '#4b5563';
+  const accentBg = isStartup ? 'rgba(192,57,43,0.10)' : 'rgba(75,85,99,0.10)';
+  const iconName = isStartup ? 'play-circle' : 'power';
 
-  // Show/hide PDF panes
-  const startupPane = document.getElementById('laserTabStartup');
-  const shutdownPane = document.getElementById('laserTabShutdown');
-  if (startupPane) startupPane.style.display = isStartup ? '' : 'none';
-  if (shutdownPane) shutdownPane.style.display = isStartup ? 'none' : '';
+  // Show detail, hide list
+  document.getElementById('laserListView').style.display = 'none';
+  document.getElementById('laserDetailView').style.display = '';
 
-  // Update selector cards
-  const cardStartup = document.getElementById('laserCardStartup');
-  const cardShutdown = document.getElementById('laserCardShutdown');
-  if (cardStartup) {
-    cardStartup.style.borderColor = isStartup ? '#c0392b' : '#e2e6f0';
-    cardStartup.style.boxShadow = isStartup ? '0 2px 8px rgba(192,57,43,0.10)' : '0 1px 4px rgba(0,0,0,0.06)';
-    cardStartup.querySelector('span').textContent = isStartup ? 'ACTIVE' : 'TAP';
-    cardStartup.querySelector('span').style.background = isStartup ? '#c0392b' : '#e2e6f0';
-    cardStartup.querySelector('span').style.color = isStartup ? '#fff' : '#6b7280';
-    const icon = cardStartup.querySelector('div');
-    icon.style.background = isStartup ? 'rgba(192,57,43,0.10)' : '#f0f2f7';
-    icon.style.color = isStartup ? '#c0392b' : '#6b7280';
+  // Show correct PDF pane
+  document.getElementById('laserTabStartup').style.display = isStartup ? '' : 'none';
+  document.getElementById('laserTabShutdown').style.display = isStartup ? 'none' : '';
+
+  // Build header card (like client-detail-header)
+  const header = document.getElementById('laserDetailHeader');
+  if (header) {
+    header.innerHTML = `
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+        <div style="width:64px;height:64px;border-radius:16px;background:${accentBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-feather="${iconName}" style="width:28px;height:28px;color:${accentColor};stroke:${accentColor};"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:20px;font-weight:800;color:var(--text);letter-spacing:-0.02em;">${label}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px;">${sublabel}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            <span style="background:${accentBg};color:${accentColor};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">HAN'S LASER G3015HF Expert</span>
+            <span style="background:#f0f2f7;color:#374151;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">Intermach Fiber Laser</span>
+            <span style="background:#f0f2f7;color:#374151;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">SBW-150 KVA Stabilizer</span>
+          </div>
+        </div>
+      </div>`;
+    if (typeof feather !== 'undefined') setTimeout(() => feather.replace(), 30);
   }
-  if (cardShutdown) {
-    cardShutdown.style.borderColor = !isStartup ? '#c0392b' : '#e2e6f0';
-    cardShutdown.style.boxShadow = !isStartup ? '0 2px 8px rgba(192,57,43,0.10)' : '0 1px 4px rgba(0,0,0,0.06)';
-    cardShutdown.querySelector('span').textContent = !isStartup ? 'ACTIVE' : 'TAP';
-    cardShutdown.querySelector('span').style.background = !isStartup ? '#c0392b' : '#e2e6f0';
-    cardShutdown.querySelector('span').style.color = !isStartup ? '#fff' : '#6b7280';
-    const icon = cardShutdown.querySelector('div');
-    icon.style.background = !isStartup ? 'rgba(192,57,43,0.10)' : '#f0f2f7';
-    icon.style.color = !isStartup ? '#c0392b' : '#6b7280';
-  }
 
-  // Update viewer header
-  const viewerTitle = document.getElementById('laserViewerTitle');
-  if (viewerTitle) viewerTitle.textContent = label;
-
-  // Update top buttons
+  // Update Open / Download buttons
   const openBtn = document.getElementById('laserOpenBtn');
   const dlBtn = document.getElementById('laserDownloadBtn');
   if (openBtn) openBtn.href = pdf;
   if (dlBtn)   dlBtn.href = pdf;
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+function closeLaserDetail() {
+  document.getElementById('laserDetailView').style.display = 'none';
+  document.getElementById('laserListView').style.display = '';
+}
+
+// Legacy alias (kept for backward compatibility)
+function switchLaserTab(tab) { openLaserDetail(tab); }
 
 function switchDriverTab(tab) {
   const deliveriesEl = document.getElementById('driverTabDeliveries');
