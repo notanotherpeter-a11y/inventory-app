@@ -2392,7 +2392,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
 </div>
 
 <!-- Sidebar -->
-<aside class="sidebar" id="sidebar" onclick="toggleSidebar()">
+<aside class="sidebar" id="sidebar">
 
   <!-- Brand -->
   <div class="sidebar-brand">
@@ -2400,7 +2400,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
   </div>
 
   <!-- Nav -->
-  <nav class="sidebar-nav" onclick="event.stopPropagation()">
+  <nav class="sidebar-nav">
     <button class="nav-item active" id="nav-home" onclick="sidebarSwitchTab('home')">
       <span class="nav-icon"><i data-feather="home"></i></span>
       <span class="nav-label">Home</span>
@@ -2451,7 +2451,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
   <div class="sidebar-divider"></div>
 
   <!-- Quick Stats -->
-  <div class="sidebar-stats" onclick="event.stopPropagation()">
+  <div class="sidebar-stats">
     <div class="sidebar-stats-title">Quick Stats</div>
     <div class="sidebar-stat">
       <span class="sidebar-stat-label">Total Items</span>
@@ -2471,7 +2471,8 @@ body.light-page #pointer .ptr-label { color: #fff; }
     </button>
   </div>
 
-  <!-- Collapse Toggle (moved to top of sidebar-brand) -->
+  <!-- Collapse zone — click below sign-out to toggle sidebar -->
+  <div onclick="toggleSidebar()" title="Click to expand/collapse" style="flex:1;min-height:24px;cursor:pointer;"></div>
 
 </aside>
 
