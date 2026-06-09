@@ -2785,6 +2785,10 @@ body.light-page #pointer .ptr-label { color: #fff; }
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <input class="form-input" id="clientSearch" placeholder="Search clients…" style="width:200px;padding:8px 14px;font-size:13px;" oninput="renderClients()">
+            <label class="btn btn-subtle" style="cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;" title="Upload PDF — auto-assigned to matching client">
+              + Upload PDF
+              <input type="file" accept=".pdf" multiple style="display:none;" onchange="handleDocUpload(event);renderDocs();">
+            </label>
             <button class="btn btn-primary" onclick="openClientModal()" style="display:flex;align-items:center;gap:6px;white-space:nowrap;">+ New Client</button>
           </div>
         </div>
@@ -2874,7 +2878,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
       </div>
 
       <!-- Global Documents Section -->
-      <div id="globalDocsSection" style="display:none;margin-top:28px;background:var(--surface);border:1px solid var(--surface-border);border-radius:16px;padding:24px;">
+      <div id="globalDocsSection" style="margin-top:28px;background:var(--surface);border:1px solid var(--surface-border);border-radius:16px;padding:24px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
           <div>
             <div style="font-size:15px;font-weight:700;">All Client Documents</div>
@@ -4502,7 +4506,7 @@ function sidebarSwitchTab(page) {
   if (page === 'passwords') renderPasswords();
   if (page === 'orders')    renderOrders();
   if (page === 'delivery')  renderDelivery();
-  if (page === 'clients')   renderClients();
+  if (page === 'clients')   { renderClients(); renderDocs(); }
   if (page === 'drivers')   renderDrivers();
   if (page === 'users')     renderUsers();
 
