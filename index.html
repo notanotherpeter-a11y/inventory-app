@@ -1628,6 +1628,20 @@
 #page-clients .inv-table thead th { background: #f8fafc; color: #6b7280; border-bottom: 1px solid #e2e6f0; }
 #page-clients .inv-table tbody tr { border-bottom: 1px solid #f0f2f7; color: #1a1d2e; }
 #page-clients .inv-table tbody tr:hover { background: #f5f7ff; }
+/* ── Doc item toggle switch ── */
+.doc-toggle-wrap { flex-shrink: 0; }
+.doc-toggle {
+  width: 32px; height: 18px; border-radius: 9px; background: #e2e6f0;
+  position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+}
+.doc-toggle::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.2s;
+}
+.doc-toggle.on { background: #10b981; }
+.doc-toggle.on::after { transform: translateX(14px); }
+
 /* Doc section */
 .doc-upload-zone {
   border: 2px dashed #d1d5db;
@@ -6301,14 +6315,91 @@ function saveDriverDocs(docs) { localStorage.setItem(DRIVER_DOCS_KEY, JSON.strin
 
 function quickUploadDriver(driverId) {
   activeDriverId = driverId;
-  const input = document.getElementById('driverQuickUploadInput');
-  if (input) { input.value = ''; input.click(); }
+  const input = document.getElementById('driverQuickUploadInput') || document.getElementById('driverPdfInput');
+  if (input) { try { input.value = ''; } catch(e){} input.click(); }
 }
 
-function quickUploadDriver(driverId) {
-  activeDriverId = driverId;
-  const input = document.getElementById('driverQuickUploadInput') || document.getElementById('driverPdfInput');
-  if (input) input.click();
+// Parse AI items string → array of { id, label, checked }
+function parseItemList(itemsStr) {
+  if (!itemsStr) return [];
+  return itemsStr.split(/[,;\/\n]+/).map(s => s.trim()).filter(Boolean).map(label => ({ id: uid(), label, checked: false }));
+}
+
+// Toggle a single item's checked state
+function toggleDocItem(docId, itemId, checked) {
+  const docs = getDriverDocs();
+  const doc = docs.find(d => d.id === docId);
+  if (!doc || !doc.itemList) return;
+  const item = doc.itemList.find(i => i.id === itemId);
+  if (item) item.checked = checked;
+  // Update overall status
+  doc.docketStatus = doc.itemList.every(i => i.checked) ? 'Confirmed' : doc.itemList.some(i => i.checked) ? 'Partial' : 'Pending';
+  saveDriverDocs(docs);
+  // Re-render both pages without full rebuild (just update status badge)
+  const badge = document.getElementById('docketStatus_' + docId);
+  if (badge) {
+    badge.textContent = doc.docketStatus;
+    badge.style.background = doc.docketStatus==='Confirmed' ? 'rgba(16,185,129,0.12)' : doc.docketStatus==='Partial' ? 'rgba(245,158,11,0.12)' : 'rgba(100,100,100,0.1)';
+    badge.style.color = doc.docketStatus==='Confirmed' ? '#059669' : doc.docketStatus==='Partial' ? '#d97706' : '#6b7280';
+  }
+  if (document.getElementById('page-clients')?.style.display !== 'none') renderClientDocsByDriver();
+}
+
+// Add item to a doc's item list
+function addDocItem(docId) {
+  const label = prompt('Item name:');
+  if (!label?.trim()) return;
+  const docs = getDriverDocs();
+  const doc = docs.find(d => d.id === docId);
+  if (!doc) return;
+  if (!doc.itemList) doc.itemList = [];
+  doc.itemList.push({ id: uid(), label: label.trim(), checked: false });
+  saveDriverDocs(docs);
+  renderDriverDocs();
+  if (document.getElementById('page-clients')?.style.display !== 'none') renderClientDocsByDriver();
+}
+
+// Edit item label inline
+function editDocItem(docId, itemId) {
+  const docs = getDriverDocs();
+  const doc = docs.find(d => d.id === docId);
+  if (!doc) return;
+  const item = doc.itemList?.find(i => i.id === itemId);
+  if (!item) return;
+  const newLabel = prompt('Edit item:', item.label);
+  if (newLabel === null) return;
+  item.label = newLabel.trim() || item.label;
+  saveDriverDocs(docs);
+  renderDriverDocs();
+  if (document.getElementById('page-clients')?.style.display !== 'none') renderClientDocsByDriver();
+}
+
+// Remove item
+function removeDocItem(docId, itemId) {
+  const docs = getDriverDocs();
+  const doc = docs.find(d => d.id === docId);
+  if (!doc) return;
+  doc.itemList = (doc.itemList || []).filter(i => i.id !== itemId);
+  saveDriverDocs(docs);
+  renderDriverDocs();
+}
+
+// Build item list HTML (toggle switches)
+function buildItemListHtml(doc, editable = false) {
+  const items = doc.itemList || [];
+  if (!items.length) return `<div style="font-size:11px;color:#9ca3af;padding:6px 0;">No items listed.</div>`;
+  return items.map(item => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f0f2f7;">
+      <label style="display:flex;align-items:center;cursor:pointer;flex:1;gap:8px;min-width:0;">
+        <div class="doc-toggle-wrap">
+          <input type="checkbox" ${item.checked?'checked':''} onchange="toggleDocItem('${doc.id}','${item.id}',this.checked)" style="display:none;">
+          <div class="doc-toggle ${item.checked?'on':''}" onclick="this.classList.toggle('on');this.previousElementSibling.checked=this.classList.contains('on');toggleDocItem('${doc.id}','${item.id}',this.classList.contains('on'))"></div>
+        </div>
+        <span style="font-size:12px;color:${item.checked?'#9ca3af':'#1a1d2e'};text-decoration:${item.checked?'line-through':'none'};flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(item.label)}</span>
+      </label>
+      ${editable ? `<button onclick="editDocItem('${doc.id}','${item.id}')" style="border:none;background:none;cursor:pointer;padding:2px;color:#9ca3af;flex-shrink:0;" title="Edit">${fi('edit-2',11)}</button>
+      <button onclick="removeDocItem('${doc.id}','${item.id}')" style="border:none;background:none;cursor:pointer;padding:2px;color:#ef4444;flex-shrink:0;" title="Remove">${fi('x',11)}</button>` : ''}
+    </div>`).join('');
 }
 
 function uploadDriverDoc(event) {
@@ -6359,6 +6450,11 @@ async function analyzeDriverDoc(docId, file) {
           if (matched) { doc.clientId = matched.id; doc.clientName = matched.name; }
           else { doc.clientName = json.analysis.client; }
         }
+        // Parse items into editable checklist
+        if (json.analysis.items) {
+          doc.itemList = parseItemList(json.analysis.items);
+        }
+        doc.docketStatus = 'Pending';
         saveDriverDocs(docs);
         renderDriverDocs();
         // Refresh clients page if visible
@@ -6384,35 +6480,47 @@ function renderDriverDocs() {
   const color = driverColors[driverIdx % driverColors.length] || '#3b82f6';
   if (!docs.length) {
     el.innerHTML = `<div style="background:#fff;border:1px dashed #e2e6f0;border-radius:12px;padding:32px;text-align:center;color:#9ca3af;font-size:13px;grid-column:1/-1;">
-      No documents uploaded yet.<br><span style="font-size:11px;">Upload delivery dockets — AI will extract client &amp; job details.</span>
+      No documents uploaded yet.<br><span style="font-size:11px;">Upload delivery dockets — AI will extract &amp; build an editable item list.</span>
     </div>`;
     return;
   }
   el.innerHTML = docs.map(doc => {
     const url = getBlobUrl(doc.id);
-    const isImg = /\.(png|jpg|jpeg)$/i.test(doc.name);
-    return `<div style="background:#fff;border:1px solid #e2e6f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+    const status = doc.docketStatus || 'Pending';
+    const statusColor = status==='Confirmed'?'#059669':status==='Partial'?'#d97706':'#6b7280';
+    const statusBg = status==='Confirmed'?'rgba(16,185,129,0.1)':status==='Partial'?'rgba(245,158,11,0.1)':'rgba(100,100,100,0.08)';
+    const checkedCount = (doc.itemList||[]).filter(i=>i.checked).length;
+    const totalCount = (doc.itemList||[]).length;
+    return `<div style="background:#fff;border:1px solid #e2e6f0;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
       <div style="height:3px;background:${color};"></div>
-      <div style="padding:14px 16px;">
-        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
-          <div style="width:40px;height:40px;background:#f8fafc;border:1px solid #e2e6f0;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#6b7280;">${fi(isImg?'image':'file-text',18)}</div>
+      <!-- Docket Header -->
+      <div style="padding:14px 16px 10px;border-bottom:1px solid #f0f2f7;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
           <div style="flex:1;min-width:0;">
             <div style="font-size:12px;font-weight:700;color:#1a1d2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(doc.name)}">${escHtml(doc.name)}</div>
-            <div style="font-size:11px;color:#9ca3af;margin-top:1px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
+              ${doc.clientName!=='Unassigned'?`<span style="background:rgba(192,57,43,0.1);color:#c0392b;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;">${escHtml(doc.clientName)}</span>`:''}
+              ${doc.analysis?.jobNumber?`<span style="background:#f0f2f7;color:#374151;padding:2px 7px;border-radius:10px;font-size:10px;">#${escHtml(doc.analysis.jobNumber)}</span>`:''}
+              ${doc.analysis?.date?`<span style="background:#f0f2f7;color:#374151;padding:2px 7px;border-radius:10px;font-size:10px;">${escHtml(doc.analysis.date)}</span>`:''}
+            </div>
           </div>
+          <span id="docketStatus_${doc.id}" style="background:${statusBg};color:${statusColor};padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;">${status}</span>
         </div>
-        ${doc.analysis ? `<div style="background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;color:#374151;line-height:1.8;margin-bottom:10px;">
-          ${doc.clientName!=='Unassigned'?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">CLIENT</span>  <span style="color:#c0392b;font-weight:600;">${escHtml(doc.clientName)}</span></div>`:''}
-          ${doc.analysis.jobNumber?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">JOB</span>  ${escHtml(doc.analysis.jobNumber)}</div>`:''}
-          ${doc.analysis.date?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">DATE</span>  ${escHtml(doc.analysis.date)}</div>`:''}
-          ${doc.analysis.items?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">ITEMS</span>  ${escHtml(doc.analysis.items)}</div>`:''}
-        </div>` : `<div style="background:#fafafa;border-radius:8px;padding:7px 10px;font-size:11px;color:#9ca3af;text-align:center;margin-bottom:10px;">Awaiting AI analysis…</div>`}
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-          ${doc.clientName!=='Unassigned'?`<span style="background:rgba(192,57,43,0.1);color:#c0392b;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;">${escHtml(doc.clientName)}</span>`:`<span style="background:#f0f2f7;color:#9ca3af;padding:2px 8px;border-radius:20px;font-size:10px;">Unassigned</span>`}
-          <div style="display:flex;gap:4px;">
-            ${url?`<button class="btn btn-subtle btn-sm" onclick="window.open('${url}','_blank')" style="font-size:11px;padding:3px 10px;">View</button>`:''}
-            <button class="btn btn-subtle btn-sm" onclick="deleteDriverDoc('${doc.id}')" style="font-size:11px;padding:3px 10px;color:#ef4444;">Delete</button>
-          </div>
+      </div>
+      <!-- Items Checklist -->
+      <div style="padding:10px 16px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:0.05em;">ITEMS ${totalCount?`(${checkedCount}/${totalCount})`:''}  </span>
+          <button onclick="addDocItem('${doc.id}')" style="border:none;background:none;cursor:pointer;font-size:10px;color:#3b82f6;font-weight:700;padding:0;" title="Add item">+ Add</button>
+        </div>
+        ${doc.analysis||doc.itemList ? buildItemListHtml(doc, true) : `<div style="font-size:11px;color:#9ca3af;text-align:center;padding:8px 0;">Awaiting AI analysis…</div>`}
+      </div>
+      <!-- Footer -->
+      <div style="padding:8px 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
+        <span style="font-size:10px;color:#9ca3af;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</span>
+        <div style="display:flex;gap:4px;">
+          ${url?`<button class="btn btn-subtle btn-sm" onclick="window.open('${url}','_blank')" style="font-size:11px;padding:3px 10px;">View</button>`:''}
+          <button class="btn btn-subtle btn-sm" onclick="deleteDriverDoc('${doc.id}')" style="font-size:11px;padding:3px 10px;color:#ef4444;">Delete</button>
         </div>
       </div>
     </div>`;
@@ -6486,26 +6594,37 @@ function renderClientDocsByDriver() {
           const url = getBlobUrl(doc.id);
           const isImg = /\.(png|jpg|jpeg)$/i.test(doc.name);
           const dColor = driverColorMap[doc.driverName] || '#6b7280';
-          return `<div style="background:#fff;border:1px solid #e2e6f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:box-shadow 0.15s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.10)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,0.06)';this.style.transform=''">
+          const status = doc.docketStatus || 'Pending';
+          const statusColor = status==='Confirmed'?'#059669':status==='Partial'?'#d97706':'#6b7280';
+          const statusBg = status==='Confirmed'?'rgba(16,185,129,0.1)':status==='Partial'?'rgba(245,158,11,0.1)':'rgba(100,100,100,0.08)';
+          const checkedCount = (doc.itemList||[]).filter(i=>i.checked).length;
+          const totalCount = (doc.itemList||[]).length;
+          return `<div style="background:#fff;border:1px solid #e2e6f0;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:box-shadow 0.15s,transform 0.15s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.10)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 1px 4px rgba(0,0,0,0.06)';this.style.transform=''">
             <div style="height:3px;background:${dColor};"></div>
-            <div style="padding:14px 16px;">
-              <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
-                <div style="width:40px;height:40px;background:#f8fafc;border:1px solid #e2e6f0;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#6b7280;">${fi(isImg?'image':'file-text',18)}</div>
+            <!-- Docket Header -->
+            <div style="padding:14px 16px 10px;border-bottom:1px solid #f0f2f7;">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;">
                 <div style="flex:1;min-width:0;">
                   <div style="font-size:12px;font-weight:700;color:#1a1d2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(doc.name)}">${escHtml(doc.name)}</div>
                   <div style="font-size:11px;color:#9ca3af;margin-top:1px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</div>
                 </div>
+                <span id="docketStatus_${doc.id}" style="background:${statusBg};color:${statusColor};padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;">${status}</span>
               </div>
-              ${doc.analysis ? `<div style="background:#f8fafc;border-radius:8px;padding:8px 10px;font-size:11px;color:#374151;line-height:1.85;margin-bottom:10px;">
-                ${doc.analysis.jobNumber?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">JOB</span>  ${escHtml(doc.analysis.jobNumber)}</div>`:''}
-                ${doc.analysis.date?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">DATE</span>  ${escHtml(doc.analysis.date)}</div>`:''}
-                ${doc.analysis.items?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">ITEMS</span>  ${escHtml(doc.analysis.items)}</div>`:''}
-                ${doc.analysis.amount?`<div><span style="color:#9ca3af;font-weight:700;font-size:10px;letter-spacing:0.04em;">AMT</span>  ${escHtml(doc.analysis.amount)}</div>`:''}
-              </div>` : `<div style="background:#fafafa;border-radius:8px;padding:7px 10px;font-size:11px;color:#9ca3af;text-align:center;margin-bottom:10px;">Awaiting AI analysis…</div>`}
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
-                <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${dColor}18;color:${dColor};">${fi('navigation',10)} ${escHtml(doc.driverName)}</span>
-                ${url?`<button class="btn btn-subtle btn-sm" onclick="window.open('${url}','_blank')" style="font-size:11px;padding:3px 10px;">View</button>`:''}
+              <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                ${doc.analysis?.jobNumber?`<span style="background:#f0f2f7;color:#374151;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">#${escHtml(doc.analysis.jobNumber)}</span>`:''}
+                ${doc.analysis?.date?`<span style="background:#f0f2f7;color:#374151;padding:2px 8px;border-radius:10px;font-size:10px;">${escHtml(doc.analysis.date)}</span>`:''}
+                ${doc.analysis?.amount?`<span style="background:rgba(16,185,129,0.1);color:#059669;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;">${escHtml(doc.analysis.amount)}</span>`:''}
               </div>
+            </div>
+            <!-- Items Checklist (read-only toggles) -->
+            <div style="padding:10px 16px 8px;">
+              <div style="font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:0.05em;margin-bottom:6px;">DELIVERY ITEMS ${totalCount?`(${checkedCount}/${totalCount} confirmed)`:''}</div>
+              ${doc.itemList?.length ? buildItemListHtml(doc, false) : doc.analysis ? `<div style="font-size:11px;color:#9ca3af;padding:4px 0;">No items listed.</div>` : `<div style="font-size:11px;color:#9ca3af;padding:4px 0;">Awaiting AI analysis…</div>`}
+            </div>
+            <!-- Footer -->
+            <div style="padding:8px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #f0f2f7;">
+              <span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;background:${dColor}18;color:${dColor};">${fi('navigation',10)} ${escHtml(doc.driverName)}</span>
+              ${url?`<button class="btn btn-subtle btn-sm" onclick="window.open('${url}','_blank')" style="font-size:11px;padding:3px 10px;">View</button>`:''}
             </div>
           </div>`;
         }).join('')}
