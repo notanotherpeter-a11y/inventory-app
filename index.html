@@ -5213,7 +5213,13 @@ initData().then(() => {
   // Re-render portals after data loaded (for client/driver sessions)
   const role   = sessionStorage.getItem('mf_role')   || 'admin';
   const entity = sessionStorage.getItem('mf_entity') || '';
-  if (role === 'client') renderClientPortal(entity);
+  if (role === 'client') {
+    renderClientPortal(entity);
+    // Update location now that clients are loaded
+    const matchedClient = clients.find(c => c.name === entity);
+    const locEl = document.getElementById('portalClientLocation');
+    if (locEl) locEl.textContent = matchedClient?.location ? '📍 ' + matchedClient.location : 'Delivery Status Portal';
+  }
   if (role === 'driver') renderDriverPortal(entity);
   if (typeof feather !== 'undefined') feather.replace();
 });
