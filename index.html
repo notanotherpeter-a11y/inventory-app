@@ -6407,22 +6407,50 @@ function uploadDriverDoc(event) {
   const files = Array.from(event.target.files || []);
   if (!files.length) return;
   const driver = drivers.find(d => d.id === activeDriverId);
+  if (!driver) { showToast('Driver not found.', 'error'); return; }
   const allowedExts = ['.pdf', '.png', '.jpg', '.jpeg'];
+  const uploadedIds = [];
+
   files.forEach(file => {
     if (!allowedExts.some(ext => file.name.toLowerCase().endsWith(ext))) {
       showToast(`${file.name}: unsupported format.`, 'error'); return;
     }
     const id = 'ddoc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
     storeBlobUrl(id, file);
-    const doc = { id, name: file.name, driverId: activeDriverId, driverName: driver?.name || 'Unknown', clientId: null, clientName: 'Unassigned', uploadedAt: new Date().toISOString(), analysis: null };
+    const doc = {
+      id,
+      name: file.name,
+      driverId: activeDriverId,
+      driverName: driver.name,
+      clientId: null,
+      clientName: 'Unassigned',
+      uploadedAt: new Date().toISOString(),
+      analysis: null,
+      itemList: [],
+      docketStatus: 'Pending'
+    };
     const docs = getDriverDocs();
     docs.unshift(doc);
     saveDriverDocs(docs);
-    renderDriverDocs();
+    uploadedIds.push({ id, file });
     showToast(`Uploaded: ${file.name}`, 'success');
-    analyzeDriverDoc(id, file);
   });
+
   try { event.target.value = ''; } catch(e) {}
+
+  if (!uploadedIds.length) return;
+
+  // If uploading from list view → navigate to that driver's Documents tab
+  const onListView = document.getElementById('driverListView')?.style.display !== 'none';
+  if (onListView) {
+    openDriverDetail(activeDriverId);
+    setTimeout(() => switchDriverTab('docs'), 60);
+  } else {
+    renderDriverDocs();
+  }
+
+  // Run AI analysis for each uploaded file
+  uploadedIds.forEach(({ id, file }) => analyzeDriverDoc(id, file));
 }
 
 async function analyzeDriverDoc(docId, file) {
@@ -6456,7 +6484,9 @@ async function analyzeDriverDoc(docId, file) {
         }
         doc.docketStatus = 'Pending';
         saveDriverDocs(docs);
-        renderDriverDocs();
+        // Refresh driver docs if detail view is open on Documents tab
+        const docsTab = document.getElementById('driverTabDocs');
+        if (docsTab && docsTab.style.display !== 'none') renderDriverDocs();
         // Refresh clients page if visible
         if (document.getElementById('page-clients')?.style.display !== 'none') renderClientDocsByDriver();
       }
