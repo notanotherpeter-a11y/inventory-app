@@ -6151,11 +6151,16 @@ function chatReply(text) {
 
 // ─── Client Documents ────────────────────────────────────────────────────────
 function getClientDocs(clientId) {
-  try { return JSON.parse(localStorage.getItem('inv_client_docs_' + clientId) || '[]'); }
-  catch { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem('inv_client_docs_' + clientId) || '[]');
+    return raw.map(d => { const m = { ...d }; delete m.data; return m; });
+  } catch { return []; }
 }
 function saveClientDocs(clientId, docs) {
-  localStorage.setItem('inv_client_docs_' + clientId, JSON.stringify(docs));
+  const metas = docs.map(d => { const m = { ...d }; delete m.data; return m; });
+  try { localStorage.setItem('inv_client_docs_' + clientId, JSON.stringify(metas)); } catch(e) {
+    console.warn('saveClientDocs quota error:', e);
+  }
 }
 
 function renderClientDocs() {
@@ -6306,11 +6311,34 @@ function idbGet(id) {
 // ─── Global Client Documents (Clients Page) ──────────────────────────────────
 const ALL_DOCS_KEY = 'inv_all_client_docs';
 
+// Migrate: strip any legacy base64 data from localStorage on startup
+(function migrateDocStorage() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ALL_DOCS_KEY) || '[]');
+    const hadData = raw.some(d => d.data);
+    if (hadData) {
+      const metas = raw.map(d => { const m = { ...d }; delete m.data; return m; });
+      localStorage.setItem(ALL_DOCS_KEY, JSON.stringify(metas));
+    }
+  } catch(e) {
+    // If localStorage is full/corrupt, clear the doc key so uploads can proceed
+    try { localStorage.removeItem(ALL_DOCS_KEY); } catch {}
+  }
+})();
+
 function getAllDocs() {
-  try { return JSON.parse(localStorage.getItem(ALL_DOCS_KEY) || '[]'); } catch { return []; }
+  try {
+    const raw = JSON.parse(localStorage.getItem(ALL_DOCS_KEY) || '[]');
+    // Strip any legacy base64 data fields (they belong in IDB now)
+    return raw.map(d => { const m = { ...d }; delete m.data; return m; });
+  } catch { return []; }
 }
 function saveAllDocs(docs) {
-  localStorage.setItem(ALL_DOCS_KEY, JSON.stringify(docs));
+  // Always strip data before saving to localStorage
+  const metas = docs.map(d => { const m = { ...d }; delete m.data; return m; });
+  try { localStorage.setItem(ALL_DOCS_KEY, JSON.stringify(metas)); } catch(e) {
+    console.warn('saveAllDocs quota error:', e);
+  }
 }
 
 // AI auto-assign: match filename against client names using keyword scoring
