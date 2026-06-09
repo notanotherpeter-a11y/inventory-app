@@ -414,6 +414,19 @@
     pointer-events: none;
     white-space: nowrap;
   }
+  .topbar-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+  .topbar-page-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
 
   /* ════════════════════════════════════
      BUTTONS
@@ -2183,9 +2196,9 @@ body.light-page #pointer .ptr-label { color: #fff; }
       <div class="topbar-mobile-logo" onclick="sidebarSwitchTab('home')" title="Go to Home">
         <img src="logo.png" alt="Masterform">
       </div>
+      <span class="topbar-divider"></span>
+      <span class="topbar-page-title" id="topbarTitle">Home</span>
     </div>
-    <!-- Page title — absolutely centered -->
-    <span class="topbar-center-title" id="topbarTitle">Home</span>
     <div class="topbar-actions">
       <span class="sync-badge" id="syncStatus">⟳ Loading…</span>
       <span class="topbar-date" id="topbarDate"></span>
