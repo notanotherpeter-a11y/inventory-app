@@ -4538,15 +4538,20 @@ function sidebarSwitchTab(page) {
   const titleEl = document.getElementById('topbarTitle');
   if (titleEl) titleEl.textContent = PAGE_TITLES[page] || page;
 
-  // Auto-collapse sidebar on Home
+  // Sidebar state: collapse on Home, expand on all other pages
+  const sidebar = document.getElementById('sidebar');
+  const layout  = document.getElementById('layout');
+  const btn     = document.getElementById('toggleBtn');
   if (page === 'home') {
-    const sidebar = document.getElementById('sidebar');
-    const layout  = document.getElementById('layout');
-    const btn     = document.getElementById('toggleBtn');
     sidebar.classList.add('collapsed');
     layout.classList.add('collapsed');
-    if (btn) { btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>'; btn.title = 'Expand sidebar'; }
+    if (btn) { btn.title = 'Expand sidebar'; }
     localStorage.setItem('sidebar_collapsed', '1');
+  } else {
+    sidebar.classList.remove('collapsed');
+    layout.classList.remove('collapsed');
+    if (btn) { btn.title = 'Collapse sidebar'; }
+    localStorage.setItem('sidebar_collapsed', '0');
   }
 
   // Page-specific render
