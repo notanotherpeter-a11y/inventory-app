@@ -1815,15 +1815,36 @@ body.light-page .pwd-icon-btn:hover { background: #e5e7eb !important; }
 body.light-page .section-header { border-bottom: none !important; }
 body.light-page .section-title { color: #1a1d2e !important; }
 
-/* ── Pointer: dark on light pages ── */
+/* ── Pointer: synced to light theme ── */
 body.light-page #pointer {
-  background: rgba(0,0,0,0.07);
-  border-color: rgba(0,0,0,0.35);
+  background: transparent;
+  border-color: rgba(26,29,46,0.55);
+  border-width: 2px;
 }
-body.light-page #pointer.hover-btn { background: rgba(192,57,43,0.85); border-color: rgba(192,57,43,0.85); }
-body.light-page #pointer.hover-nav { background: rgba(0,0,0,0.07); border-color: rgba(0,0,0,0.4); }
-body.light-page #pointer.hover-view { background: rgba(192,57,43,0.9); border-color: rgba(192,57,43,0.9); }
-body.light-page #pointer.hover-input { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.3); }
+body.light-page #pointer::after {
+  background: #1a1d2e;
+}
+body.light-page #pointer.hover-btn {
+  background: rgba(192,57,43,0.9);
+  border-color: transparent;
+  box-shadow: 0 0 18px rgba(192,57,43,0.4);
+}
+body.light-page #pointer.hover-btn::after { transform: scale(0); opacity: 0; }
+body.light-page #pointer.hover-nav {
+  background: rgba(26,29,46,0.06);
+  border-color: rgba(26,29,46,0.6);
+  border-width: 2px;
+}
+body.light-page #pointer.hover-view {
+  background: rgba(192,57,43,0.92);
+  border-color: transparent;
+  box-shadow: 0 0 20px rgba(192,57,43,0.35);
+}
+body.light-page #pointer.hover-input {
+  background: transparent;
+  border-color: rgba(192,57,43,0.55);
+  border-width: 2px;
+}
 body.light-page #pointer .ptr-label { color: #fff; }
 </style>
 <style>
@@ -1977,8 +1998,8 @@ body.light-page #pointer .ptr-label { color: #fff; }
   #pointer {
     height: 40px; width: 40px;
     margin-top: -20px; margin-left: -20px;
-    background: rgba(255,255,255,.12);
-    border: 1.5px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.1);
+    border: 2px solid rgba(255,255,255,.55);
     position: fixed; border-radius: 50%;
     top: 0; left: 0; z-index: 99999;
     pointer-events: none;
