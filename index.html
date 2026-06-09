@@ -6173,7 +6173,15 @@ function renderClientDocs() {
     <th>Document</th><th>Uploaded</th><th style="text-align:right;">Actions</th>
   </tr></thead><tbody>${docs.map(doc => `
     <tr>
-      <td style="font-weight:600;">${escHtml(doc.name)}</td>
+      <td style="font-weight:600;">
+        ${escHtml(doc.name)}
+        ${doc.analysis ? `<div style="font-size:11px;color:#6b7280;margin-top:3px;">
+          ${doc.analysis.client ? `<span style="color:#10b981;">👤 ${escHtml(doc.analysis.client)}</span>  ` : ''}
+          ${doc.analysis.jobNumber ? `<span>🔖 ${escHtml(doc.analysis.jobNumber)}</span>  ` : ''}
+          ${doc.analysis.date ? `<span>📅 ${escHtml(doc.analysis.date)}</span>  ` : ''}
+          ${doc.analysis.items ? `<span>📦 ${escHtml(doc.analysis.items)}</span>` : ''}
+        </div>` : '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">Awaiting AI analysis…</div>'}
+      </td>
       <td style="color:var(--muted);font-size:12px;">${new Date(doc.uploadedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}</td>
       <td style="text-align:right;white-space:nowrap;">
         <button class="btn btn-subtle btn-sm" onclick="viewClientDoc('${activeClientId}','${doc.id}')" style="font-size:12px;margin-right:4px;">View</button>
@@ -6200,6 +6208,13 @@ function uploadClientDoc(event) {
   renderClientDocs();
   showToast('Document uploaded.', 'success');
   if (event.target && event.target.value !== undefined) event.target.value = '';
+  // Async AI analysis for per-client doc (don't await — runs in background)
+  analyzeClientDoc(id, activeClientId, file).then(analysis => {
+    if (analysis) {
+      const summary = [analysis.client, analysis.jobNumber, analysis.date].filter(Boolean).join(' · ');
+      if (summary) showToast(`AI: ${summary}`, 'success');
+    }
+  });
 }
 
 function handleClientDocDrop(event) {
@@ -6297,6 +6312,49 @@ function processDocFile(file) {
   saveAllDocs(docs);
   renderDocs();
   showToast(matched ? `Assigned to ${matched.name}` : 'Uploaded — no client matched. Use Reassign to fix.', matched ? 'success' : 'warning');
+  // Async AI analysis (don't await — runs in background)
+  analyzeDoc(id, file).then(analysis => {
+    if (analysis) {
+      const summary = [analysis.client, analysis.jobNumber, analysis.date].filter(Boolean).join(' · ');
+      if (summary) showToast(`AI: ${summary}`, 'success');
+    }
+  });
+}
+
+async function analyzeDoc(docId, file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const data = e.target.result; // base64 data URL
+      const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/png');
+      try {
+        const resp = await fetch('/api/analyze-doc', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data, mimeType })
+        });
+        const json = await resp.json();
+        if (json.success && json.analysis) {
+          // Update the doc metadata with analysis results
+          const docs = getAllDocs();
+          const doc = docs.find(d => d.id === docId);
+          if (doc) {
+            doc.analysis = json.analysis;
+            // Auto-assign client if AI found one and doc is unassigned
+            if (!doc.clientId && json.analysis.client) {
+              const matched = clients.find(c => c.name.toLowerCase().includes(json.analysis.client.toLowerCase()) ||
+                json.analysis.client.toLowerCase().includes(c.name.toLowerCase()));
+              if (matched) { doc.clientId = matched.id; doc.clientName = matched.name; }
+            }
+            saveAllDocs(docs);
+            renderDocs();
+          }
+          resolve(json.analysis);
+        } else { resolve(null); }
+      } catch(e) { console.warn('analyze error:', e); resolve(null); }
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function handleDocUpload(event) {
@@ -6309,6 +6367,35 @@ function handleDocUpload(event) {
 
 function handleDocDrop(event) {
   Array.from(event.dataTransfer.files).forEach(processDocFile);
+}
+
+async function analyzeClientDoc(docId, clientId, file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const data = e.target.result;
+      const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/png');
+      try {
+        const resp = await fetch('/api/analyze-doc', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data, mimeType })
+        });
+        const json = await resp.json();
+        if (json.success && json.analysis) {
+          const docs = getClientDocs(clientId);
+          const doc = docs.find(d => d.id === docId);
+          if (doc) {
+            doc.analysis = json.analysis;
+            saveClientDocs(clientId, docs);
+            renderClientDocs();
+          }
+          resolve(json.analysis);
+        } else { resolve(null); }
+      } catch(e) { console.warn('analyzeClientDoc error:', e); resolve(null); }
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 function renderDocs() {
@@ -6347,7 +6434,15 @@ function renderDocs() {
     <th>Document</th><th>Client</th><th>Uploaded</th><th style="text-align:right;">Actions</th>
   </tr></thead><tbody>${filtered.map(doc => `
     <tr>
-      <td style="font-weight:600;font-size:13px;">${escHtml(doc.name)}</td>
+      <td style="font-weight:600;font-size:13px;">
+        ${escHtml(doc.name)}
+        ${doc.analysis ? `<div style="font-size:11px;color:#6b7280;margin-top:3px;">
+          ${doc.analysis.client ? `<span style="color:#10b981;">👤 ${escHtml(doc.analysis.client)}</span>  ` : ''}
+          ${doc.analysis.jobNumber ? `<span>🔖 ${escHtml(doc.analysis.jobNumber)}</span>  ` : ''}
+          ${doc.analysis.date ? `<span>📅 ${escHtml(doc.analysis.date)}</span>  ` : ''}
+          ${doc.analysis.items ? `<span>📦 ${escHtml(doc.analysis.items)}</span>` : ''}
+        </div>` : '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">Awaiting AI analysis…</div>'}
+      </td>
       <td>
         <span style="background:${doc.clientId ? 'rgba(192,57,43,0.15)' : 'rgba(100,100,100,0.15)'};color:${doc.clientId ? 'var(--accent2)' : 'var(--muted)'};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;">
           ${escHtml(doc.clientName)}
