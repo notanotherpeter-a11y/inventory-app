@@ -6184,62 +6184,42 @@ function renderClientDocs() {
 }
 
 function uploadClientDoc(event) {
-  if (!activeClientId) return;
-  const file = event.target.files[0];
-  if (!file) return;
-  if (file.size > 50 * 1024 * 1024) { showToast('File too large (max 50MB).', 'error'); return; }
-  const reader = new FileReader();
-  reader.onerror = () => showToast('Failed to read file.', 'error');
-  reader.onload = function(e) {
-    const doc = {
-      id: 'cdoc_' + activeClientId + '_' + Date.now(),
-      name: file.name,
-      data: e.target.result,
-      clientId: activeClientId,
-      uploadedAt: new Date().toISOString()
-    };
-    idbPut(doc).then(() => {
-      const meta = { ...doc }; delete meta.data;
-      const metas = getClientDocs(activeClientId);
-      metas.push(meta);
-      saveClientDocs(activeClientId, metas);
-      renderClientDocs();
-      showToast('Document uploaded.', 'success');
-    }).catch(() => showToast('Storage error — could not save PDF.', 'error'));
-  };
-  reader.readAsDataURL(file);
-  event.target.value = '';
+  if (!activeClientId) { showToast('Open a client first.', 'error'); return; }
+  const file = event.target.files ? event.target.files[0] : event;
+  if (!file || !file.name) return;
+  if (!file.name.toLowerCase().endsWith('.pdf')) { showToast('Only PDF files supported.', 'error'); return; }
+  const id = 'cdoc_' + activeClientId + '_' + Date.now();
+  storeBlobUrl(id, file);
+  const doc = { id, name: file.name, clientId: activeClientId, uploadedAt: new Date().toISOString() };
+  const docs = getClientDocs(activeClientId);
+  docs.push(doc);
+  saveClientDocs(activeClientId, docs);
+  renderClientDocs();
+  showToast('Document uploaded.', 'success');
+  if (event.target && event.target.value !== undefined) event.target.value = '';
 }
 
 function handleClientDocDrop(event) {
   if (!activeClientId) return;
-  Array.from(event.dataTransfer.files).forEach(file => {
-    const fakeEvt = { target: { files: [file], value: '' } };
-    uploadClientDoc(fakeEvt);
-  });
+  Array.from(event.dataTransfer.files).forEach(file => uploadClientDoc({ target: { files: [file] }, file }));
 }
 
 function viewClientDoc(clientId, docId) {
-  idbGet(docId).then(doc => {
-    if (!doc?.data) { showToast('Document not found.', 'error'); return; }
-    const win = window.open();
-    if (win) { win.document.write(`<iframe src="${doc.data}" style="width:100%;height:100vh;border:none;"></iframe>`); }
-  });
+  const url = getBlobUrl(docId);
+  if (!url) { showToast('Document not available — please re-upload.', 'error'); return; }
+  window.open(url, '_blank');
 }
 
 function downloadClientDoc(clientId, docId) {
-  idbGet(docId).then(doc => {
-    if (!doc?.data) { showToast('Document not found.', 'error'); return; }
-    const a = document.createElement('a');
-    a.href = doc.data;
-    a.download = doc.name;
-    a.click();
-  });
+  const url = getBlobUrl(docId);
+  if (!url) { showToast('Document not available — please re-upload.', 'error'); return; }
+  const a = document.createElement('a');
+  a.href = url; a.download = _blobUrls[docId]?.name || 'document.pdf'; a.click();
 }
 
 function deleteClientDoc(clientId, docId) {
   if (!confirm('Delete this document?')) return;
-  idbDelete(docId).catch(err => console.warn('IDB delete error:', err));
+  revokeBlobUrl(docId);
   const docs = getClientDocs(clientId).filter(d => d.id !== docId);
   saveClientDocs(clientId, docs);
   renderClientDocs();
@@ -6247,92 +6227,37 @@ function deleteClientDoc(clientId, docId) {
 }
 
 // ─── IndexedDB for PDF storage ────────────────────────────────────────────────
-const IDB_NAME = 'mf_docs_db';
-const IDB_STORE = 'docs';
-let _idb = null;
+// ─── In-memory blob URL store (session only) ──────────────────────────────────
+const _blobUrls = {}; // id → { url, name }
 
-function openIDB() {
-  return new Promise((resolve, reject) => {
-    if (_idb) { resolve(_idb); return; }
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(IDB_STORE)) {
-        db.createObjectStore(IDB_STORE, { keyPath: 'id' });
-      }
-    };
-    req.onsuccess = e => { _idb = e.target.result; resolve(_idb); };
-    req.onerror = e => reject(e);
-  });
+function storeBlobUrl(id, file) {
+  const url = URL.createObjectURL(file);
+  _blobUrls[id] = { url, name: file.name };
+  return url;
 }
-
-function idbPut(doc) {
-  return openIDB().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(IDB_STORE, 'readwrite');
-    tx.objectStore(IDB_STORE).put(doc);
-    tx.oncomplete = resolve;
-    tx.onerror = reject;
-  }));
-}
-
-function idbDelete(id) {
-  return openIDB().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(IDB_STORE, 'readwrite');
-    tx.objectStore(IDB_STORE).delete(id);
-    tx.oncomplete = resolve;
-    tx.onerror = reject;
-  }));
-}
-
-function idbGetAll() {
-  return openIDB().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(IDB_STORE, 'readonly');
-    const req = tx.objectStore(IDB_STORE).getAll();
-    req.onsuccess = e => resolve(e.target.result || []);
-    req.onerror = reject;
-  }));
-}
-
-function idbGet(id) {
-  return openIDB().then(db => new Promise((resolve, reject) => {
-    const tx = db.transaction(IDB_STORE, 'readonly');
-    const req = tx.objectStore(IDB_STORE).get(id);
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = reject;
-  }));
-}
+function getBlobUrl(id) { return _blobUrls[id]?.url || null; }
+function revokeBlobUrl(id) { if (_blobUrls[id]) { URL.revokeObjectURL(_blobUrls[id].url); delete _blobUrls[id]; } }
 
 // ─── Global Client Documents (Clients Page) ──────────────────────────────────
 const ALL_DOCS_KEY = 'inv_all_client_docs';
 
-// Migrate: strip any legacy base64 data from localStorage on startup
-(function migrateDocStorage() {
+// Clean up any legacy base64 data bloating localStorage
+(function cleanDocStorage() {
   try {
     const raw = JSON.parse(localStorage.getItem(ALL_DOCS_KEY) || '[]');
-    const hadData = raw.some(d => d.data);
-    if (hadData) {
-      const metas = raw.map(d => { const m = { ...d }; delete m.data; return m; });
-      localStorage.setItem(ALL_DOCS_KEY, JSON.stringify(metas));
+    if (raw.some(d => d.data)) {
+      localStorage.setItem(ALL_DOCS_KEY, JSON.stringify(raw.map(d => { const m={...d}; delete m.data; return m; })));
     }
-  } catch(e) {
-    // If localStorage is full/corrupt, clear the doc key so uploads can proceed
-    try { localStorage.removeItem(ALL_DOCS_KEY); } catch {}
-  }
+  } catch(e) { try { localStorage.removeItem(ALL_DOCS_KEY); } catch {} }
 })();
 
 function getAllDocs() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(ALL_DOCS_KEY) || '[]');
-    // Strip any legacy base64 data fields (they belong in IDB now)
-    return raw.map(d => { const m = { ...d }; delete m.data; return m; });
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem(ALL_DOCS_KEY) || '[]').map(d => { const m={...d}; delete m.data; return m; }); }
+  catch { return []; }
 }
 function saveAllDocs(docs) {
-  // Always strip data before saving to localStorage
-  const metas = docs.map(d => { const m = { ...d }; delete m.data; return m; });
-  try { localStorage.setItem(ALL_DOCS_KEY, JSON.stringify(metas)); } catch(e) {
-    console.warn('saveAllDocs quota error:', e);
-  }
+  try { localStorage.setItem(ALL_DOCS_KEY, JSON.stringify(docs.map(d => { const m={...d}; delete m.data; return m; }))); }
+  catch(e) { console.warn('saveAllDocs error:', e); }
 }
 
 // AI auto-assign: match filename against client names using keyword scoring
@@ -6349,41 +6274,32 @@ function autoAssignClient(filename) {
 }
 
 function processDocFile(file) {
-  if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+  if (!file) return;
+  // Accept any PDF regardless of MIME type — just check extension
+  if (!file.name.toLowerCase().endsWith('.pdf')) {
     showToast('Only PDF files are supported.', 'error'); return;
   }
-  if (file.size > 50 * 1024 * 1024) { showToast(`${file.name} is too large (max 50MB).`, 'error'); return; }
-  const reader = new FileReader();
-  reader.onerror = () => showToast('Failed to read file.', 'error');
-  reader.onload = function(e) {
-    const matched = autoAssignClient(file.name);
-    const doc = {
-      id: 'gdoc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-      name: file.name,
-      data: e.target.result,   // base64 — stored in IndexedDB only
-      clientId: matched ? matched.id : null,
-      clientName: matched ? matched.name : 'Unassigned',
-      uploadedAt: new Date().toISOString()
-    };
-    // Save full doc (with data) to IndexedDB
-    idbPut(doc).then(() => {
-      // Save metadata only (no data) to localStorage for fast listing
-      const meta = { ...doc }; delete meta.data;
-      const metas = getAllDocs();
-      metas.unshift(meta);
-      saveAllDocs(metas);
-      renderDocs();
-      showToast(matched ? `Assigned to ${matched.name}` : 'Uploaded — no client matched', matched ? 'success' : 'warning');
-    }).catch(err => {
-      console.error('IDB save error:', err);
-      showToast('Storage error — could not save PDF.', 'error');
-    });
+  const matched = autoAssignClient(file.name);
+  const id = 'gdoc_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  storeBlobUrl(id, file);
+  const doc = {
+    id,
+    name: file.name,
+    clientId: matched ? matched.id : null,
+    clientName: matched ? matched.name : 'Unassigned',
+    uploadedAt: new Date().toISOString()
   };
-  reader.readAsDataURL(file);
+  const docs = getAllDocs();
+  docs.unshift(doc);
+  saveAllDocs(docs);
+  renderDocs();
+  showToast(matched ? `Assigned to ${matched.name}` : 'Uploaded — no client matched. Use Reassign to fix.', matched ? 'success' : 'warning');
 }
 
 function handleDocUpload(event) {
-  Array.from(event.target.files).forEach(processDocFile);
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
+  files.forEach(processDocFile);
   event.target.value = '';
 }
 
@@ -6443,16 +6359,14 @@ function renderDocs() {
 }
 
 function viewGlobalDoc(docId) {
-  idbGet(docId).then(doc => {
-    if (!doc?.data) { showToast('Document not found.', 'error'); return; }
-    const win = window.open();
-    if (win) { win.document.write(`<title>${doc.name}</title><iframe src="${doc.data}" style="width:100%;height:100vh;border:none;"></iframe>`); }
-  });
+  const url = getBlobUrl(docId);
+  if (!url) { showToast('Document not available — please re-upload.', 'error'); return; }
+  window.open(url, '_blank');
 }
 
 function deleteGlobalDoc(docId) {
   if (!confirm('Delete this document?')) return;
-  idbDelete(docId).catch(err => console.warn('IDB delete error:', err));
+  revokeBlobUrl(docId);
   saveAllDocs(getAllDocs().filter(d => d.id !== docId));
   renderDocs();
   showToast('Document deleted.', 'success');
