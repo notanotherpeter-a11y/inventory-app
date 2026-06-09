@@ -1641,6 +1641,7 @@
 }
 .doc-toggle.on { background: #10b981; }
 .doc-toggle.on::after { transform: translateX(14px); }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Doc section */
 .doc-upload-zone {
@@ -6450,8 +6451,9 @@ function uploadDriverDoc(event) {
   const onListView = document.getElementById('driverListView')?.style.display !== 'none';
   if (onListView) {
     openDriverDetail(activeDriverId);
-    setTimeout(() => switchDriverTab('docs'), 60);
+    setTimeout(() => { switchDriverTab('docs'); renderDriverDocs(); }, 150);
   } else {
+    switchDriverTab('docs');
     renderDriverDocs();
   }
 
@@ -6490,17 +6492,24 @@ async function analyzeDriverDoc(docId, file) {
         }
         doc.docketStatus = 'Pending';
         saveDriverDocs(docs);
-        // Refresh driver docs if detail view is open on Documents tab
-        const docsTab = document.getElementById('driverTabDocs');
-        if (docsTab && docsTab.style.display !== 'none') renderDriverDocs();
+        // Always re-render driver docs (spinner → items)
+        renderDriverDocs();
         // Refresh clients page if visible
         if (document.getElementById('page-clients')?.style.display !== 'none') renderClientDocsByDriver();
       }
       const summary = [json.analysis.client, json.analysis.jobNumber, json.analysis.date].filter(Boolean).join(' · ');
       if (summary) showToast(`AI: ${summary}`, 'success');
       else showToast('AI: document analyzed.', 'success');
-    } else { showToast('AI: could not extract info.', 'warning'); }
+    } else {
+      // Mark as analyzed (even if no data) so spinner stops
+      const docs2 = getDriverDocs(); const doc2 = docs2.find(d => d.id === docId);
+      if (doc2 && doc2.analysis === null) { doc2.analysis = {}; saveDriverDocs(docs2); renderDriverDocs(); }
+      showToast('AI: could not extract info.', 'warning');
+    }
   } catch(err) {
+    // Mark as analyzed so spinner stops
+    const docs2 = getDriverDocs(); const doc2 = docs2.find(d => d.id === docId);
+    if (doc2 && doc2.analysis === null) { doc2.analysis = {}; saveDriverDocs(docs2); renderDriverDocs(); }
     if (err.name === 'AbortError') showToast('AI timed out — try a smaller image.', 'error');
     else { showToast('AI analysis failed.', 'error'); console.warn('analyzeDriverDoc error:', err); }
   }
@@ -6546,10 +6555,18 @@ function renderDriverDocs() {
       <!-- Items Checklist -->
       <div style="padding:10px 16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <span style="font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:0.05em;">ITEMS ${totalCount?`(${checkedCount}/${totalCount})`:''}  </span>
+          <span style="font-size:10px;font-weight:700;color:#9ca3af;letter-spacing:0.05em;">ITEMS${totalCount?` (${checkedCount}/${totalCount})`:''}</span>
           <button onclick="addDocItem('${doc.id}')" style="border:none;background:none;cursor:pointer;font-size:10px;color:#3b82f6;font-weight:700;padding:0;" title="Add item">+ Add</button>
         </div>
-        ${doc.analysis||doc.itemList ? buildItemListHtml(doc, true) : `<div style="font-size:11px;color:#9ca3af;text-align:center;padding:8px 0;">Awaiting AI analysis…</div>`}
+        ${doc.itemList && doc.itemList.length > 0
+          ? buildItemListHtml(doc, true)
+          : doc.analysis === null
+            ? `<div style="font-size:11px;color:#6b7280;text-align:center;padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:6px;">
+                <span style="display:inline-block;width:14px;height:14px;border:2px solid #d97706;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></span>
+                <span style="color:#d97706;font-weight:600;">AI analyzing…</span>
+               </div>`
+            : `<div style="font-size:11px;color:#9ca3af;text-align:center;padding:8px 0;">No items found — tap <strong style="color:#3b82f6;">+ Add</strong> to add manually.</div>`
+        }
       </div>
       <!-- Footer -->
       <div style="padding:8px 16px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px;">
