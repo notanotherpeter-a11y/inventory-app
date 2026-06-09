@@ -2933,7 +2933,8 @@ body.light-page #pointer .ptr-label { color: #fff; }
           </table>
           <div id="driverEmpty" style="text-align:center;padding:48px;color:#6b7280;font-size:13px;display:none;">No drivers found. Click <strong>+ Add Driver</strong> to get started.</div>
         </div>
-
+        <!-- Shared quick-upload input for driver list -->
+        <input type="file" id="driverQuickUploadInput" accept=".pdf,.png,.jpg,.jpeg,application/pdf,image/*" multiple style="position:absolute;opacity:0;width:1px;height:1px;overflow:hidden;" onchange="uploadDriverDoc(event)">
       </div>
 
       <!-- Driver Detail View -->
@@ -5325,6 +5326,7 @@ function renderDrivers() {
         <td style="font-weight:600;">${delivered}</td>
         <td style="text-align:right;">
           <div style="display:flex;gap:6px;justify-content:flex-end;">
+            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation();quickUploadDriver('${d.id}')" style="white-space:nowrap;">+ Upload</button>
             <button class="btn btn-subtle btn-sm" onclick="event.stopPropagation();openDriverModal('${d.id}')">Edit</button>
             <button class="btn btn-subtle btn-sm" style="color:#dc2626;" onclick="event.stopPropagation();deleteDriver('${d.id}')">Delete</button>
           </div>
@@ -6296,6 +6298,12 @@ function revokeBlobUrl(id) { if (_blobUrls[id]) { URL.revokeObjectURL(_blobUrls[
 const DRIVER_DOCS_KEY = 'inv_driver_docs';
 function getDriverDocs() { try { return JSON.parse(localStorage.getItem(DRIVER_DOCS_KEY)) || []; } catch(e) { return []; } }
 function saveDriverDocs(docs) { localStorage.setItem(DRIVER_DOCS_KEY, JSON.stringify(docs)); }
+
+function quickUploadDriver(driverId) {
+  activeDriverId = driverId;
+  const input = document.getElementById('driverQuickUploadInput');
+  if (input) { input.value = ''; input.click(); }
+}
 
 function uploadDriverDoc(event) {
   if (!activeDriverId) { showToast('Open a driver first.', 'error'); return; }
