@@ -3040,7 +3040,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
         <img src="logo.png" alt="Masterform" style="height:36px;">
         <div>
           <div style="font-size:18px;font-weight:800;" id="portalClientName">—</div>
-          <div style="font-size:11px;color:var(--muted);">Delivery Status Portal</div>
+          <div style="font-size:11px;color:var(--muted);" id="portalClientLocation">Delivery Status Portal</div>
         </div>
       </div>
       <button class="btn btn-subtle btn-sm" onclick="signOut()" style="color:#ef4444;">Sign Out</button>
@@ -3168,6 +3168,10 @@ body.light-page #pointer .ptr-label { color: #fff; }
     <div class="form-group">
       <label class="form-label">Email</label>
       <input class="form-input" type="email" id="cltEmail" placeholder="e.g. contact@sgformwork.com.au">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Location / Site Address</label>
+      <input class="form-input" id="cltLocation" placeholder="e.g. 12 Smith St, Blacktown NSW 2148">
     </div>
     <div class="form-group">
       <label class="form-label">Notes</label>
@@ -3541,6 +3545,9 @@ function applyRoleLayout(role, entity) {
     document.getElementById('sidebar').style.display = 'none';
     document.getElementById('clientPortal').style.display = '';
     document.getElementById('portalClientName').textContent = entity;
+    const matchedClient = clients.find(c => c.name === entity);
+    const locEl = document.getElementById('portalClientLocation');
+    if (locEl) locEl.textContent = matchedClient?.location ? '📍 ' + matchedClient.location : 'Delivery Status Portal';
     renderClientPortal(entity);
   } else if (role === 'driver') {
     document.getElementById('layout').style.display = 'none';
@@ -5656,13 +5663,14 @@ function openClientModal(id) {
   if (id) {
     const c = clients.find(x => x.id === id);
     if (!c) return;
-    document.getElementById('cltName').value    = c.name    || '';
-    document.getElementById('cltContact').value = c.contact || '';
-    document.getElementById('cltPhone').value   = c.phone   || '';
-    document.getElementById('cltEmail').value   = c.email   || '';
-    document.getElementById('cltNotes').value   = c.notes   || '';
+    document.getElementById('cltName').value     = c.name     || '';
+    document.getElementById('cltContact').value  = c.contact  || '';
+    document.getElementById('cltPhone').value    = c.phone    || '';
+    document.getElementById('cltEmail').value    = c.email    || '';
+    document.getElementById('cltLocation').value = c.location || '';
+    document.getElementById('cltNotes').value    = c.notes    || '';
   } else {
-    ['cltName','cltContact','cltPhone','cltEmail','cltNotes'].forEach(f => document.getElementById(f).value = '');
+    ['cltName','cltContact','cltPhone','cltEmail','cltLocation','cltNotes'].forEach(f => document.getElementById(f).value = '');
   }
   document.getElementById('clientModal').classList.add('open');
 }
@@ -5673,10 +5681,11 @@ function saveClient() {
   const id = document.getElementById('clientEditId').value;
   const data = {
     name,
-    contact: document.getElementById('cltContact').value.trim(),
-    phone:   document.getElementById('cltPhone').value.trim(),
-    email:   document.getElementById('cltEmail').value.trim(),
-    notes:   document.getElementById('cltNotes').value.trim(),
+    contact:  document.getElementById('cltContact').value.trim(),
+    phone:    document.getElementById('cltPhone').value.trim(),
+    email:    document.getElementById('cltEmail').value.trim(),
+    location: document.getElementById('cltLocation').value.trim(),
+    notes:    document.getElementById('cltNotes').value.trim(),
   };
   let saved;
   if (id) {
