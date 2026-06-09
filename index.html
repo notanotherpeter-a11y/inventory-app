@@ -1261,17 +1261,31 @@
     transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
   }
   .sidebar.collapsed ~ .layout .home-video-hero { left: var(--sidebar-coll-w); }
-  .home-video-hero video {
+  .home-hero-bg {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    background: linear-gradient(135deg, #0a0c14 0%, #111827 40%, #1a0a0a 70%, #0d1117 100%);
+    background-size: 400% 400%;
+    animation: heroBgShift 12s ease infinite;
+  }
+  .home-hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 50%, rgba(192,57,43,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 80% 30%, rgba(30,40,80,0.35) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 60% 80%, rgba(16,185,129,0.06) 0%, transparent 60%);
+  }
+  @keyframes heroBgShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
   .home-video-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(6,8,14,0.58);
+    background: rgba(6,8,14,0.30);
   }
   .home-video-content {
     position: absolute;
@@ -2505,11 +2519,9 @@ body.light-page #pointer .ptr-label { color: #fff; }
 
     <!-- ── HOME PAGE ── -->
     <div id="page-home">
-      <!-- Video Hero -->
+      <!-- Hero -->
       <div class="home-video-hero">
-        <video autoplay muted loop playsinline>
-          <source src="REMOVED" type="video/mp4" />
-        </video>
+        <div class="home-hero-bg"></div>
         <div class="home-video-overlay"></div>
         <div class="home-video-content">
           <div class="home-video-label">MASTERFORM SYSTEMS PTY. LTD</div>
@@ -6284,7 +6296,7 @@ function chatReply(text) {
   chatShowQuickReplies(QUICK_REPLIES);
 }
 
-// ── CUSTOM CURSOR (desktop only, mirrors  style) ──
+// ── CUSTOM CURSOR (desktop only) ──
 (function() {
   if (window.innerWidth < 1081) return;
   if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) return;
@@ -6300,7 +6312,7 @@ function chatReply(text) {
     mouseY = e.clientY;
   });
 
-  // rAF loop — same technique as 
+  // rAF loop
   (function loop() {
     pointer.style.transform = 'matrix(1,0,0,1,' + mouseX + ',' + mouseY + ')';
     requestAnimationFrame(loop);
