@@ -3703,14 +3703,25 @@ function updateEntityDropdown() {
   const group = document.getElementById('usrEntityGroup');
   if (role === 'staff') {
     group.style.display = 'none';
+    sel.innerHTML = '';
   } else {
     group.style.display = '';
     if (role === 'client') {
-      label.textContent = 'Linked Client *';
-      sel.innerHTML = clients.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('');
+      label.textContent = 'Linked Client * (from Clients page)';
+      if (!clients.length) {
+        sel.innerHTML = '<option value="">— No clients found, add one first —</option>';
+      } else {
+        sel.innerHTML = '<option value="">Select client…</option>' +
+          clients.map(c => `<option value="${escHtml(c.name)}">${escHtml(c.name)}</option>`).join('');
+      }
     } else {
       label.textContent = 'Linked Driver *';
-      sel.innerHTML = drivers.map(d => `<option value="${escHtml(d.name)}">${escHtml(d.name)}</option>`).join('');
+      if (!drivers.length) {
+        sel.innerHTML = '<option value="">— No drivers found —</option>';
+      } else {
+        sel.innerHTML = '<option value="">Select driver…</option>' +
+          drivers.map(d => `<option value="${escHtml(d.name)}">${escHtml(d.name)}</option>`).join('');
+      }
     }
   }
 }
@@ -3743,6 +3754,9 @@ function saveUser() {
   const role     = document.getElementById('usrRole').value;
   const entity   = document.getElementById('usrEntity').value;
   if (!username || !password) { showToast('Username and password are required.', 'error'); return; }
+  if ((role === 'client' || role === 'driver') && !entity) {
+    showToast(`Please select a ${role === 'client' ? 'client' : 'driver'} to link this account to.`, 'error'); return;
+  }
   // Check duplicate username
   const id = document.getElementById('userEditId').value;
   const duplicate = appUsers.find(u => u.username === username && u.id !== id);
