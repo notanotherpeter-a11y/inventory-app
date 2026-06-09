@@ -1664,6 +1664,71 @@
 @media (max-width: 900px) { .clients-stats-bar { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 600px) { .clients-stats-bar { grid-template-columns: 1fr 1fr; } }
 
+/* ── Drivers Page — Light Theme (mirrors Clients page) ── */
+#page-drivers {
+  background: #f0f2f7;
+  margin: -32px -28px;
+  padding: 32px 28px;
+  min-height: calc(100vh - var(--topbar-h));
+  color: #1a1d2e;
+}
+.driver-avatar {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: rgba(59,130,246,0.12);
+  border: 1px solid rgba(59,130,246,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: #3b82f6;
+  flex-shrink: 0;
+}
+.driver-table-wrap {
+  background: #fff;
+  border: 1px solid #e2e6f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.driver-table { width: 100%; border-collapse: collapse; }
+.driver-table thead th {
+  padding: 11px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: #6b7280;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e6f0;
+  white-space: nowrap;
+}
+.driver-table tbody tr {
+  border-bottom: 1px solid #f0f2f7;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.driver-table tbody tr:last-child { border-bottom: none; }
+.driver-table tbody tr:hover { background: #f5f7ff; }
+.driver-table td { padding: 13px 16px; font-size: 13px; vertical-align: middle; color: #1a1d2e; }
+#page-drivers .client-name-cell { display: flex; align-items: center; gap: 12px; }
+#page-drivers .client-name-text { font-weight: 700; font-size: 13px; color: #1a1d2e; }
+#page-drivers .client-contact-text { font-size: 11px; color: #6b7280; margin-top: 2px; }
+#page-drivers [style*="color:var(--muted)"],
+#page-drivers [style*="color: var(--muted)"] { color: #6b7280 !important; }
+#page-drivers .btn-subtle { background: #f0f2f7; color: #374151; border-color: #e2e6f0; }
+#page-drivers .btn-subtle:hover { background: #e5e7eb; }
+/* Driver detail panels */
+#page-drivers .client-detail-header,
+#page-drivers [style*="background:var(--surface)"],
+#page-drivers [style*="background: var(--surface)"] {
+  background: #fff !important;
+  border-color: #e2e6f0 !important;
+  color: #1a1d2e !important;
+}
+#page-drivers .table-wrap { background: #fff; border: 1px solid #e2e6f0; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+#page-drivers .inv-table thead th { background: #f8fafc; color: #6b7280; border-bottom: 1px solid #e2e6f0; }
+#page-drivers .inv-table tbody tr { border-bottom: 1px solid #f0f2f7; color: #1a1d2e; }
+#page-drivers .inv-table tbody tr:hover { background: #f5f7ff; }
+@media (max-width: 900px) { #page-drivers .clients-stats-bar { grid-template-columns: repeat(2,1fr); } }
+
 /* ── Delivery Status Page — Light Theme (mirrors Clients page) ── */
 #page-delivery {
   background: #f0f2f7;
@@ -2718,28 +2783,69 @@ body.light-page #pointer .ptr-label { color: #fff; }
 
       <!-- Driver List View -->
       <div id="driverListView">
-        <div class="section-header">
-          <div>
-            <div class="section-title" style="font-size:18px;">Drivers</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">Driver profiles and assigned deliveries</div>
+
+        <!-- Stats Bar -->
+        <div class="clients-stats-bar" id="driverStatsBar">
+          <div class="clients-stat-card">
+            <div class="clients-stat-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6;"><i data-feather="users"></i></div>
+            <div><div class="clients-stat-val" id="driverStatTotal">0</div><div class="clients-stat-lbl">Total Drivers</div></div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input class="form-input" id="driverSearch" placeholder="Search driver…" style="width:200px;padding:8px 12px;font-size:13px;" oninput="renderDrivers()">
-            <button class="btn btn-primary" onclick="openDriverModal()">+ Add Driver</button>
+          <div class="clients-stat-card">
+            <div class="clients-stat-icon" style="background:rgba(245,158,11,0.12);color:#d97706;"><i data-feather="check-circle"></i></div>
+            <div><div class="clients-stat-val" id="driverStatActive">0</div><div class="clients-stat-lbl">Active</div></div>
+          </div>
+          <div class="clients-stat-card">
+            <div class="clients-stat-icon" style="background:rgba(16,185,129,0.12);color:#059669;"><i data-feather="truck"></i></div>
+            <div><div class="clients-stat-val" id="driverStatDeliveries">0</div><div class="clients-stat-lbl">Deliveries Done</div></div>
+          </div>
+          <div class="clients-stat-card">
+            <div class="clients-stat-icon" style="background:rgba(139,92,246,0.12);color:#7c3aed;"><i data-feather="navigation"></i></div>
+            <div><div class="clients-stat-val" id="driverStatVehicles">0</div><div class="clients-stat-lbl">Vehicles</div></div>
           </div>
         </div>
-        <div id="driverGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:4px;"></div>
-        <div id="driverEmpty" style="text-align:center;padding:48px;color:var(--muted);display:none;">No drivers found. Click <strong>+ Add Driver</strong> to get started.</div>
+
+        <!-- Toolbar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:#1a1d2e;">Driver Directory</div>
+            <div style="font-size:12px;color:#6b7280;margin-top:2px;">Driver profiles and assigned deliveries</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input class="form-input" id="driverSearch" placeholder="Search driver…" style="width:200px;padding:8px 14px;font-size:13px;" oninput="renderDrivers()">
+            <button class="btn btn-primary" onclick="openDriverModal()" style="display:flex;align-items:center;gap:6px;white-space:nowrap;">+ Add Driver</button>
+          </div>
+        </div>
+
+        <!-- Drivers Table -->
+        <div class="driver-table-wrap">
+          <table class="driver-table">
+            <thead>
+              <tr>
+                <th>Driver</th>
+                <th>Phone</th>
+                <th>Active Deliveries</th>
+                <th>Total Deliveries</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="driverGrid"></tbody>
+          </table>
+          <div id="driverEmpty" style="text-align:center;padding:48px;color:#6b7280;font-size:13px;display:none;">No drivers found. Click <strong>+ Add Driver</strong> to get started.</div>
+        </div>
+
       </div>
 
       <!-- Driver Detail View -->
       <div id="driverDetailView" style="display:none;">
-        <div class="section-header" style="margin-bottom:16px;">
-          <button class="btn btn-subtle btn-sm" onclick="closeDriverDetail()" style="display:flex;align-items:center;gap:6px;">← Back to Drivers</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <button class="btn btn-subtle btn-sm" onclick="closeDriverDetail()" style="display:flex;align-items:center;gap:6px;font-weight:600;">← Back to Drivers</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm" id="driverDetailEditBtn">Edit Profile</button>
+          </div>
         </div>
 
         <!-- Driver Info Card -->
-        <div id="driverInfoCard" style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:24px;margin-bottom:20px;"></div>
+        <div id="driverInfoCard" class="client-detail-header" style="margin-bottom:20px;"></div>
 
         <!-- Driver Delivery Stats -->
         <div id="driverDeliveryStats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
@@ -2761,7 +2867,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
             </thead>
             <tbody id="driverDeliveryBody"></tbody>
           </table>
-          <div id="driverDeliveryEmpty" style="text-align:center;padding:32px;color:var(--muted);display:none;">No deliveries assigned to this driver yet.</div>
+          <div id="driverDeliveryEmpty" style="text-align:center;padding:32px;color:#6b7280;display:none;">No deliveries assigned to this driver yet.</div>
         </div>
       </div>
 
@@ -4894,48 +5000,56 @@ function renderDrivers() {
   const search = (document.getElementById('driverSearch')?.value || '').toLowerCase();
   const list = drivers.filter(d => !search || d.name.toLowerCase().includes(search));
 
-  const grid = document.getElementById('driverGrid');
+  // Compute stats from full drivers array (not filtered)
+  const totalDrivers = drivers.length;
+  let totalActive = 0, totalDelivered = 0, totalVehicles = 0;
+  drivers.forEach(d => {
+    const dDeliveries = deliveries.filter(x => x.driver === d.name);
+    const activeCount = dDeliveries.filter(x => x.status !== 'Delivered' && x.status !== 'Cancelled').length;
+    if (activeCount > 0) totalActive++;
+    totalDelivered += dDeliveries.filter(x => x.status === 'Delivered').length;
+    if (d.vehicle) totalVehicles++;
+  });
+  const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  setEl('driverStatTotal', totalDrivers);
+  setEl('driverStatActive', totalActive);
+  setEl('driverStatDeliveries', totalDelivered);
+  setEl('driverStatVehicles', totalVehicles);
+
+  const tbody = document.getElementById('driverGrid');
   const empty = document.getElementById('driverEmpty');
-  if (!list.length) { grid.innerHTML = ''; empty.style.display = ''; return; }
+  if (!list.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
   empty.style.display = 'none';
 
-  grid.innerHTML = list.map(d => {
+  tbody.innerHTML = list.map(d => {
     const dDeliveries = deliveries.filter(x => x.driver === d.name);
     const active    = dDeliveries.filter(x => x.status !== 'Delivered' && x.status !== 'Cancelled').length;
     const delivered = dDeliveries.filter(x => x.status === 'Delivered').length;
     const initials  = d.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const activePill = active > 0
+      ? `<span class="status-pill active">${active} active</span>`
+      : `<span class="status-pill none">—</span>`;
     return `
-      <div style="background:var(--surface);border:1px solid var(--surface-border);border-radius:14px;padding:20px;cursor:pointer;transition:border-color 0.2s,transform 0.15s;"
-           onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'"
-           onmouseout="this.style.borderColor='var(--surface-border)';this.style.transform=''"
-           onclick="openDriverDetail('${d.id}')">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#3b82f6;flex-shrink:0;">${initials}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.name}</div>
-            <div style="font-size:11px;color:var(--muted);">${d.vehicle || 'No vehicle set'}</div>
+      <tr onclick="openDriverDetail('${d.id}')">
+        <td>
+          <div class="client-name-cell">
+            <div class="driver-avatar">${initials}</div>
+            <div>
+              <div class="client-name-text">${escHtml(d.name)}</div>
+              <div class="client-contact-text">${d.vehicle ? escHtml(d.vehicle) : 'No vehicle set'}</div>
+            </div>
           </div>
-          <div style="display:flex;gap:4px;">
-            <button class="btn btn-subtle btn-sm" onclick="event.stopPropagation();openDriverModal('${d.id}')" title="Edit">Edit</button>
-            <button class="btn btn-subtle btn-sm" style="color:var(--red);" onclick="event.stopPropagation();deleteDriver('${d.id}')" title="Delete">Delete</button>
+        </td>
+        <td style="color:#6b7280;">${d.phone ? escHtml(d.phone) : '—'}</td>
+        <td>${activePill}</td>
+        <td style="font-weight:600;">${delivered}</td>
+        <td style="text-align:right;">
+          <div style="display:flex;gap:6px;justify-content:flex-end;">
+            <button class="btn btn-subtle btn-sm" onclick="event.stopPropagation();openDriverModal('${d.id}')">Edit</button>
+            <button class="btn btn-subtle btn-sm" style="color:#dc2626;" onclick="event.stopPropagation();deleteDriver('${d.id}')">Delete</button>
           </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
-          <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px;">
-            <div style="font-size:18px;font-weight:800;">${dDeliveries.length}</div>
-            <div style="font-size:10px;color:var(--muted);">Total</div>
-          </div>
-          <div style="background:rgba(245,158,11,0.1);border-radius:8px;padding:8px;">
-            <div style="font-size:18px;font-weight:800;color:#f59e0b;">${active}</div>
-            <div style="font-size:10px;color:var(--muted);">Active</div>
-          </div>
-          <div style="background:rgba(16,185,129,0.1);border-radius:8px;padding:8px;">
-            <div style="font-size:18px;font-weight:800;color:#10b981;">${delivered}</div>
-            <div style="font-size:10px;color:var(--muted);">Delivered</div>
-          </div>
-        </div>
-        ${d.phone ? `<div style="font-size:11px;color:var(--muted);margin-top:12px;">${d.phone}</div>` : ''}
-      </div>`;
+        </td>
+      </tr>`;
   }).join('');
   setTimeout(() => { if (window.feather) feather.replace(); }, 0);
 }
@@ -4951,19 +5065,22 @@ function openDriverDetail(id) {
   const titleEl = document.getElementById('topbarTitle');
   if (titleEl) titleEl.textContent = d.name;
 
+  // Wire edit button
+  const editBtn = document.getElementById('driverDetailEditBtn');
+  if (editBtn) { editBtn.onclick = () => openDriverModal(d.id); }
+
   const initials = d.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('driverInfoCard').innerHTML = `
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-      <div style="width:56px;height:56px;border-radius:50%;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#3b82f6;">${initials}</div>
+      <div style="width:64px;height:64px;border-radius:16px;background:rgba(59,130,246,0.12);border:1.5px solid rgba(59,130,246,0.25);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;color:#3b82f6;flex-shrink:0;">${initials}</div>
       <div style="flex:1;">
-        <div style="font-size:22px;font-weight:800;">${d.name}</div>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;">
-          ${d.phone   ? `<span style="font-size:13px;color:var(--muted);">${d.phone}</span>` : ''}
-          ${d.vehicle ? `<span style="font-size:13px;color:var(--muted);">${fi('navigation',13)} ${d.vehicle}</span>` : ''}
-          ${d.notes   ? `<span style="font-size:13px;color:var(--muted);">${d.notes}</span>` : ''}
+        <div style="font-size:22px;font-weight:800;color:#1a1d2e;">${escHtml(d.name)}</div>
+        <div class="client-detail-meta" style="margin-top:8px;">
+          ${d.phone   ? `<div class="client-detail-meta-item"><strong style="color:#1a1d2e;">${escHtml(d.phone)}</strong></div>` : ''}
+          ${d.vehicle ? `<div class="client-detail-meta-item">${fi('navigation',13)} <strong style="color:#1a1d2e;">${escHtml(d.vehicle)}</strong></div>` : ''}
+          ${d.notes   ? `<div class="client-detail-meta-item" style="color:#6b7280;">${escHtml(d.notes)}</div>` : ''}
         </div>
       </div>
-      <button class="btn btn-outline btn-sm" onclick="openDriverModal('${d.id}')">Edit Profile</button>
     </div>`;
 
   renderDriverDeliveries(d.name);
