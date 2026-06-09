@@ -2400,7 +2400,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
   </div>
 
   <!-- Nav -->
-  <nav class="sidebar-nav">
+  <nav class="sidebar-nav" onclick="event.stopPropagation()">
     <button class="nav-item active" id="nav-home" onclick="sidebarSwitchTab('home')">
       <span class="nav-icon"><i data-feather="home"></i></span>
       <span class="nav-label">Home</span>
@@ -2464,7 +2464,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
   </div>
 
   <!-- Sign Out -->
-  <div style="padding: 8px 10px 4px;">
+  <div style="padding: 8px 10px 4px;" onclick="event.stopPropagation()">
     <button class="nav-item" onclick="signOut()" style="width:100%; color:#ef4444;">
       <span class="nav-icon"><i data-feather="log-out"></i></span>
       <span class="nav-label">Sign Out</span>
