@@ -998,6 +998,7 @@
   .toast.show { transform: translateX(0); }
   .toast.toast-success { border-color: rgba(16,185,129,0.3); }
   .toast.toast-error { border-color: rgba(239,68,68,0.3); }
+  .toast.toast-warning { border-color: rgba(245,158,11,0.3); }
   .toast-icon {
     width: 24px; height: 24px;
     border-radius: 50%;
@@ -1007,6 +1008,7 @@
   }
   .toast-success .toast-icon { background: rgba(16,185,129,0.15); color: var(--green); }
   .toast-error   .toast-icon { background: rgba(239,68,68,0.15); color: var(--red); }
+  .toast-warning .toast-icon { background: rgba(245,158,11,0.15); color: var(--yellow); }
 
   /* ════════════════════════════════════
      EMPTY STATE
@@ -2533,6 +2535,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
           </select>
         </div>
         <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Item</button>
           <button class="btn btn-outline btn-sm" onclick="sendInventoryEmail()">Send Inventory</button>
           <button class="btn btn-subtle btn-sm" onclick="openTransactionModal()">Stock In / Out</button>
         </div>
@@ -2993,6 +2996,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
           <div class="section-title" style="font-size:18px;">Users</div>
           <div style="font-size:12px;color:var(--muted);margin-top:4px;">Manage app login accounts for clients and drivers</div>
         </div>
+        <button class="btn btn-primary btn-sm" onclick="openUserModal()">+ Add User</button>
       </div>
       <div class="table-wrap" style="margin-top:8px;">
         <table class="inv-table">
@@ -4799,12 +4803,14 @@ document.addEventListener('keydown', e => {
 function toast(msg, type = 'success') {
   const el = document.createElement('div');
   el.className = `toast toast-${type}`;
-  const icon = type === 'success' ? '✓' : '✕';
+  const icon = type === 'success' ? '✓' : type === 'warning' ? '!' : '✕';
   el.innerHTML = `<div class="toast-icon">${icon}</div><span>${msg}</span>`;
   document.getElementById('toastContainer').appendChild(el);
   requestAnimationFrame(() => { el.classList.add('show'); });
   setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2800);
 }
+// Alias — many functions call showToast() instead of toast()
+function showToast(msg, type = 'success') { toast(msg, type); }
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 function exportData() {
@@ -5773,10 +5779,6 @@ function fmtDate(dateStr) {
   if (!dateStr) return '—';
   const [y, m, d] = dateStr.split('-');
   return `${d}/${m}/${y}`;
-}
-
-function escHtml(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function openDeliveryModal(id) {
