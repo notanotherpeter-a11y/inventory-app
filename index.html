@@ -6305,6 +6305,12 @@ function quickUploadDriver(driverId) {
   if (input) { input.value = ''; input.click(); }
 }
 
+function quickUploadDriver(driverId) {
+  activeDriverId = driverId;
+  const input = document.getElementById('driverQuickUploadInput') || document.getElementById('driverPdfInput');
+  if (input) input.click();
+}
+
 function uploadDriverDoc(event) {
   if (!activeDriverId) { showToast('Open a driver first.', 'error'); return; }
   const files = Array.from(event.target.files || []);
