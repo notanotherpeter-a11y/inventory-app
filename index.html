@@ -1063,17 +1063,30 @@
   }
   @media (max-width: 767px) {
     /* Sidebar slides in from left as a drawer */
-    .sidebar {
-      left: calc(-1 * var(--sidebar-w));
-      width: var(--sidebar-w) !important;
-      transition: left 0.28s cubic-bezier(0.4,0,0.2,1);
+    .sidebar,
+    .sidebar.collapsed {
+      left: 0 !important;
+      width: 220px !important;
+      transform: translateX(-100%);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
       top: 0; bottom: 0;
       z-index: 300;
     }
-    .sidebar.mobile-open { left: 0; box-shadow: 4px 0 32px rgba(0,0,0,0.6); }
+    .sidebar.mobile-open {
+      transform: translateX(0) !important;
+      box-shadow: 4px 0 32px rgba(0,0,0,0.6);
+    }
+    /* Show all labels in mobile drawer (not collapsed look) */
+    .sidebar.collapsed .nav-label { opacity: 1 !important; pointer-events: auto !important; width: auto !important; }
+    .sidebar.collapsed .nav-item { justify-content: flex-start !important; padding: 10px 16px !important; gap: 12px !important; }
+    .sidebar.collapsed .sidebar-brand-text { opacity: 1 !important; }
+    .sidebar.collapsed .sidebar-stat-label { opacity: 1 !important; width: auto !important; overflow: visible !important; }
+    .sidebar.collapsed .sidebar-stat { justify-content: flex-start !important; padding: 8px 16px !important; }
+    .sidebar.collapsed .sidebar-brand { justify-content: flex-start !important; }
+    .sidebar.collapsed .sidebar-stats-title { opacity: 1 !important; }
 
     /* Layout takes full width */
-    .layout { margin-left: 0 !important; }
+    .layout,
     .layout.collapsed { margin-left: 0 !important; }
 
     /* Hero full width on mobile */
@@ -5087,11 +5100,13 @@ function toggleSidebar() {
 function openMobileSidebar() {
   document.getElementById('sidebar').classList.add('mobile-open');
   document.getElementById('sidebarOverlay').classList.add('visible');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeMobileSidebar() {
   document.getElementById('sidebar').classList.remove('mobile-open');
   document.getElementById('sidebarOverlay').classList.remove('visible');
+  document.body.style.overflow = '';
 }
 
 // ─── Modals ───────────────────────────────────────────────────────────────────
