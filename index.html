@@ -4390,13 +4390,16 @@ function renderInventory() {
       if (status === 'low-stock')    { pillCls = 'priority-high';  pillLabel = 'Low'; }
       if (status === 'out-of-stock') { pillCls = 'priority-urgent'; pillLabel = 'Out'; }
       return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-        <td style="padding:12px 14px;font-weight:600;font-size:13px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name}</td>
-        <td style="padding:12px 14px;font-weight:800;font-size:14px;color:${barColor(item)};">${item.qty.toLocaleString()}</td>
+        <td style="padding:12px 14px;font-weight:600;font-size:13px;">${item.name}</td>
+        <td style="padding:12px 14px;">
+          <input class="order-qty-input" type="number" value="${item.qty}" min="0"
+            onchange="updateInvQtyMobile('${item.id}', this.value)"
+            onblur="updateInvQtyMobile('${item.id}', this.value)">
+        </td>
         <td style="padding:12px 14px;color:var(--muted);font-size:12px;font-weight:500;">${item.unit}</td>
         <td style="padding:12px 14px;"><span class="order-status-btn ${pillCls}" style="cursor:default;">${pillLabel}</span></td>
         <td style="padding:12px 14px;text-align:right;white-space:nowrap;">
           <button class="pwd-icon-btn" onclick="openEditModal('${item.id}')" title="Edit" style="display:inline-flex;">${fi('edit-2',14)}</button>
-          <button class="pwd-icon-btn" onclick="openTransactionModal('${item.id}')" title="Adjust stock" style="display:inline-flex;margin-left:4px;">${fi('refresh-cw',14)}</button>
         </td>
       </tr>`;
     }).join('');
@@ -5127,6 +5130,23 @@ function updateOrderQty(id, val) {
   if (!order) return;
   order.qty = parseInt(val) || 0;
   saveOrders();
+}
+
+function updateInvQtyMobile(id, val) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  const newQty = Math.max(0, parseInt(val) || 0);
+  if (newQty === item.qty) return;
+  const diff = newQty - item.qty;
+  const before = item.qty;
+  item.qty = newQty;
+  const log = { id: uid(), ts: new Date().toISOString(), itemId: id, itemName: item.name, type: diff > 0 ? 'IN' : 'OUT', change: diff, balance: newQty, note: 'Mobile edit' };
+  logs.unshift(log);
+  save();
+  dbSaveItem(item);
+  dbSaveLog(log, before);
+  renderSummary();
+  toast(diff > 0 ? `+${diff} added to ${item.name}` : `${Math.abs(diff)} removed from ${item.name}`, diff > 0 ? 'success' : 'error');
 }
 
 function renderOrderSummary() {
