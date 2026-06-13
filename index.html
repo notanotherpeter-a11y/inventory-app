@@ -3732,12 +3732,20 @@ function applyRoleLayout(role, entity) {
     // Hide quick stats (admin-only info)
     const stats = document.querySelector('.sidebar-stats');
     if (stats) stats.style.display = 'none';
+    // Hide bottom nav for non-admin
+    const bottomNav = document.querySelector('.mobile-bottom-nav');
+    if (bottomNav) bottomNav.style.display = 'none';
     // Auto land on Inventory
     sidebarSwitchTab('inventory');
   } else {
     // admin — show Users nav item + all nav
     const navUsers = document.getElementById('nav-users');
     if (navUsers) navUsers.style.display = '';
+  }
+  // Hide bottom nav for client and driver portals
+  if (role === 'client' || role === 'driver') {
+    const bottomNav = document.querySelector('.mobile-bottom-nav');
+    if (bottomNav) bottomNav.style.display = 'none';
   }
 }
 
