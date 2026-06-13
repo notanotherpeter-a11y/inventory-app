@@ -2102,14 +2102,11 @@ body.light-page .section-title { color: #1a1d2e !important; }
 /* ── Inventory page — Desktop Table Layout (≥1081px) ── */
 @media (min-width: 1081px) {
   #page-inventory {
-    background: #f0f2f7;
-    margin: -32px -28px;
-    padding: 32px 28px;
-    min-height: calc(100vh - var(--topbar-h));
-    color: #1a1d2e;
+    background: transparent;
+    color: var(--text);
   }
   #page-inventory .section-header {
-    margin-bottom: 20px;
+    display: none;
   }
   /* Stats bar */
   .inv-stats-bar {
@@ -4225,56 +4222,85 @@ function renderInventory() {
   filtered = [...filtered].sort((a,b) => order[stockStatus(a)] - order[stockStatus(b)]);
 
   if (isDesktop) {
-    // ── Desktop table view ───────────────────────────────────────────────────
+    // ── Desktop: order page theme ────────────────────────────────────────────
+    const total   = items.length;
+    const inStock = items.filter(i => i.qty > i.threshold).length;
+    const low     = items.filter(i => i.qty > 0 && i.qty <= i.threshold).length;
+    const out     = items.filter(i => i.qty <= 0).length;
+
     const rows = filtered.map(item => {
-      const style = categoryStyle(item.category);
       const status = stockStatus(item);
-      const letter = item.name.charAt(0).toUpperCase();
-      const avatarBg = style.bg;
-      const avatarColor = style.color;
-      let pillClass = 'inv-pill-green';
-      let pillLabel = 'In Stock';
-      if (status === 'low-stock')    { pillClass = 'inv-pill-yellow'; pillLabel = 'Low Stock'; }
-      if (status === 'out-of-stock') { pillClass = 'inv-pill-red';    pillLabel = 'Out of Stock'; }
+      let pillCls = 'status-received'; let pillLabel = 'In Stock';
+      if (status === 'low-stock')    { pillCls = 'priority-high';   pillLabel = 'Low Stock'; }
+      if (status === 'out-of-stock') { pillCls = 'priority-urgent'; pillLabel = 'Out of Stock'; }
       return `
       <tr>
+        <td style="font-weight:600;font-size:13px;">${item.name}</td>
+        <td style="color:var(--muted);font-size:12px;font-weight:500;">${item.category}</td>
         <td>
-          <div class="inv-name-cell">
-            <div class="inv-avatar" style="background:${avatarBg};color:${avatarColor};border:1px solid ${avatarColor}33;">${letter}</div>
-            <div>
-              <div class="inv-name-text">${item.name}</div>
-            </div>
-          </div>
+          <input class="order-qty-input" type="number" value="${item.qty}" min="0"
+            onchange="updateInvQtyMobile('${item.id}', this.value)"
+            onblur="updateInvQtyMobile('${item.id}', this.value)">
         </td>
-        <td style="color:#6b7280;">${item.category}</td>
-        <td><span class="inv-qty-bold">${item.qty.toLocaleString()}</span></td>
-        <td style="color:#6b7280;">${item.unit}</td>
-        <td style="color:#6b7280;">${item.threshold}</td>
-        <td><span class="inv-pill ${pillClass}">${pillLabel}</span></td>
-        <td>
-          <button class="inv-action-btn" onclick="openEditModal('${item.id}')" title="Edit item">${fi('edit-2',14)}</button>
-          <button class="inv-action-btn" onclick="openTransactionModal('${item.id}')" title="Stock In / Out">${fi('refresh-cw',14)}</button>
+        <td style="color:var(--muted);font-size:12px;font-weight:500;">${item.unit}</td>
+        <td style="color:var(--muted);font-size:12px;">${item.threshold}</td>
+        <td><span class="order-status-btn ${pillCls}" style="cursor:default;">${pillLabel}</span></td>
+        <td style="text-align:right;white-space:nowrap;">
+          <button class="pwd-icon-btn" onclick="openEditModal('${item.id}')" title="Edit" style="display:inline-flex;">${fi('edit-2',14)}</button>
+          <button class="pwd-icon-btn" onclick="openTransactionModal('${item.id}')" title="Stock In / Out" style="display:inline-flex;margin-left:4px;">${fi('refresh-cw',14)}</button>
         </td>
       </tr>`;
     }).join('');
 
     document.getElementById('inventoryGrid').innerHTML = `
-      <div class="inv-table-wrap">
-        <table class="inv-table">
+      <div class="order-header">
+        <div>
+          <div class="section-title" style="font-size:18px;">Stock</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">All inventory items</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-subtle btn-sm" onclick="sendInventoryEmail()">Send Inventory</button>
+          <button class="btn btn-outline btn-sm" onclick="openTransactionModal()">Stock In / Out</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Item</button>
+        </div>
+      </div>
+      <div class="order-summary-bar">
+        <div class="order-summary-pill">Total <span>${total}</span></div>
+        <div class="order-summary-pill" style="color:#10b981;">In Stock <span style="color:#10b981;">${inStock}</span></div>
+        <div class="order-summary-pill" style="color:#f59e0b;">Low <span style="color:#f59e0b;">${low}</span></div>
+        <div class="order-summary-pill" style="color:#ef4444;">Out <span style="color:#ef4444;">${out}</span></div>
+      </div>
+      <div class="order-filters">
+        <select class="search-box" style="width:auto;padding:9px 14px;font-size:13px;border-radius:10px;"
+          onchange="document.getElementById('categoryFilter').value=this.value;renderInventory();" id="categoryFilterDesk">
+          <option value="">All Categories</option>
+          <option value="Bar Chair">Bar Chair</option>
+          <option value="Metal Pallet">Metal Pallet</option>
+          <option value="Timber Pallet">Timber Pallet</option>
+        </select>
+      </div>
+      <div class="order-table-wrap">
+        <table style="width:100%;border-collapse:collapse;">
           <thead>
             <tr>
-              <th>Item Name</th>
-              <th>Category</th>
-              <th>Stock</th>
-              <th>Unit</th>
-              <th>Threshold</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th style="padding:12px 16px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Item</th>
+              <th style="padding:12px 16px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Category</th>
+              <th style="padding:12px 16px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Qty</th>
+              <th style="padding:12px 16px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Unit</th>
+              <th style="padding:12px 16px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Threshold</th>
+              <th style="padding:12px 16px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Status</th>
+              <th style="padding:12px 16px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);"></th>
             </tr>
           </thead>
-          <tbody>${rows}</tbody>
+          <tbody style="font-size:13px;">
+            ${rows}
+          </tbody>
         </table>
       </div>`;
+
+    // Sync desktop category dropdown
+    const deskSel = document.getElementById('categoryFilterDesk');
+    if (deskSel) deskSel.value = document.getElementById('categoryFilter').value;
   } else {
     // ── Mobile: exact order page theme ───────────────────────────────────────
     const total   = items.length;
