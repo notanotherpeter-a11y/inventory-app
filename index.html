@@ -374,19 +374,23 @@
   /* Mobile hamburger */
   .mobile-menu-btn {
     display: none;
-    width: 36px; height: 36px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: transparent;
-    color: var(--text);
+    width: 38px; height: 38px;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
+    line-height: 1;
     align-items: center; justify-content: center;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
   }
+  .mobile-menu-btn:active { background: rgba(255,255,255,0.12); }
 
-  /* Mobile logo in topbar */
+  /* Mobile logo in topbar — hidden on desktop */
   .topbar-mobile-logo {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 9px;
     cursor: pointer;
