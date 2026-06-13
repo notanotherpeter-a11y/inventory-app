@@ -2225,7 +2225,7 @@ body.light-page #pointer .ptr-label { color: #fff; }
   /* Hide card grid on desktop */
   .inv-card-grid { display: none !important; }
 }
-/* On mobile: dark mode — hide stats bar and card grid, show slim table */
+/* On mobile: inventory matches order page theme exactly */
 @media (max-width: 1080px) {
   #page-inventory {
     background: transparent !important;
@@ -2233,77 +2233,29 @@ body.light-page #pointer .ptr-label { color: #fff; }
     margin: -32px -28px !important;
     padding: 20px 16px 80px !important;
   }
-  #page-inventory .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  #page-inventory .section-header > div:last-child {
-    width: 100%;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  #page-inventory .section-header > div:last-child .btn {
-    flex: 1;
-    justify-content: center;
-    font-size: 12px;
-    padding: 8px 10px;
-  }
-  .inv-stats-bar { display: none !important; }
-  .inv-card-grid { display: none !important; }
-  /* Dark mobile table */
-  .inv-mobile-table-wrap {
-    overflow-x: auto;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.07);
-    background: rgba(13,15,24,0.6);
-  }
-  .inv-mobile-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .inv-mobile-table thead th {
-    padding: 11px 14px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.03);
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    white-space: nowrap;
-  }
-  .inv-mobile-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .inv-mobile-table tbody tr:last-child { border-bottom: none; }
-  .inv-mobile-table td {
-    padding: 11px 14px;
-    font-size: 13px;
-    color: var(--text);
-    vertical-align: middle;
-    white-space: nowrap;
-  }
-  /* Summary pills matching order page */
-  .inv-mobile-summary {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-  .inv-mobile-pill {
+  /* Hide desktop-only elements */
+  .inv-stats-bar  { display: none !important; }
+  .inv-card-grid  { display: none !important; }
+  .inv-table-wrap { display: none !important; }
+  /* Hide original section header — replaced by inv-mobile-header */
+  #page-inventory .section-header { display: none !important; }
+  /* Mobile header — same as order-header */
+  .inv-mobile-header {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 12px;
-    background: rgba(18,21,35,0.92);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.5);
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
-  .inv-mobile-pill span { font-weight: 800; font-size: 14px; }
+  /* Mobile filter row — same as order-filters */
+  .inv-mobile-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
 }
 </style>
 <style>
@@ -4426,7 +4378,7 @@ function renderInventory() {
         </table>
       </div>`;
   } else {
-    // ── Mobile: dark table matching orders page style ─────────────────────────
+    // ── Mobile: exact order page theme ───────────────────────────────────────
     const total   = items.length;
     const inStock = items.filter(i => i.qty > i.threshold).length;
     const low     = items.filter(i => i.qty > 0 && i.qty <= i.threshold).length;
@@ -4434,43 +4386,66 @@ function renderInventory() {
 
     const rows = filtered.map(item => {
       const status = stockStatus(item);
-      let pillStyle = 'background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.25);';
-      let pillLabel = 'OK';
-      if (status === 'low-stock')    { pillStyle = 'background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);'; pillLabel = 'Low'; }
-      if (status === 'out-of-stock') { pillStyle = 'background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);'; pillLabel = 'Out'; }
-      return `<tr>
-        <td style="font-weight:600;max-width:140px;overflow:hidden;text-overflow:ellipsis;">${item.name}</td>
-        <td style="font-weight:800;color:${barColor(item)};">${item.qty.toLocaleString()}</td>
-        <td style="color:rgba(255,255,255,0.4);font-size:11px;">${item.unit}</td>
-        <td><span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;${pillStyle}">${pillLabel}</span></td>
-        <td>
-          <button onclick="openEditModal('${item.id}')" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:0 4px;" title="Edit">${fi('edit-2',14)}</button>
-          <button onclick="openTransactionModal('${item.id}')" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:0 4px;" title="Adjust">${fi('refresh-cw',14)}</button>
+      let pillCls = 'status-received'; let pillLabel = 'In Stock';
+      if (status === 'low-stock')    { pillCls = 'priority-high';  pillLabel = 'Low'; }
+      if (status === 'out-of-stock') { pillCls = 'priority-urgent'; pillLabel = 'Out'; }
+      return `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+        <td style="padding:12px 14px;font-weight:600;font-size:13px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.name}</td>
+        <td style="padding:12px 14px;font-weight:800;font-size:14px;color:${barColor(item)};">${item.qty.toLocaleString()}</td>
+        <td style="padding:12px 14px;color:var(--muted);font-size:12px;font-weight:500;">${item.unit}</td>
+        <td style="padding:12px 14px;"><span class="order-status-btn ${pillCls}" style="cursor:default;">${pillLabel}</span></td>
+        <td style="padding:12px 14px;text-align:right;white-space:nowrap;">
+          <button class="pwd-icon-btn" onclick="openEditModal('${item.id}')" title="Edit" style="display:inline-flex;">${fi('edit-2',14)}</button>
+          <button class="pwd-icon-btn" onclick="openTransactionModal('${item.id}')" title="Adjust stock" style="display:inline-flex;margin-left:4px;">${fi('refresh-cw',14)}</button>
         </td>
       </tr>`;
     }).join('');
 
     document.getElementById('inventoryGrid').innerHTML = `
-      <div class="inv-mobile-summary">
-        <div class="inv-mobile-pill">Total <span>${total}</span></div>
-        <div class="inv-mobile-pill" style="color:#10b981;">In Stock <span style="color:#10b981;">${inStock}</span></div>
-        <div class="inv-mobile-pill" style="color:#f59e0b;">Low <span style="color:#f59e0b;">${low}</span></div>
-        <div class="inv-mobile-pill" style="color:#ef4444;">Out <span style="color:#ef4444;">${out}</span></div>
+      <div class="inv-mobile-header">
+        <div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;">Stock</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">All inventory items</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-subtle btn-sm" onclick="openTransactionModal()">Stock In/Out</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Item</button>
+        </div>
       </div>
-      <div class="inv-mobile-table-wrap">
-        <table class="inv-mobile-table">
+      <div class="order-summary-bar">
+        <div class="order-summary-pill">Total <span>${total}</span></div>
+        <div class="order-summary-pill" style="color:#10b981;">In Stock <span style="color:#10b981;">${inStock}</span></div>
+        <div class="order-summary-pill" style="color:#f59e0b;">Low <span style="color:#f59e0b;">${low}</span></div>
+        <div class="order-summary-pill" style="color:#ef4444;">Out <span style="color:#ef4444;">${out}</span></div>
+      </div>
+      <div class="order-filters">
+        <select class="search-box" id="categoryFilterMob" onchange="document.getElementById('categoryFilter').value=this.value;renderInventory();" style="flex:1;">
+          <option value="">All Categories</option>
+          <option value="Bar Chair">Bar Chair</option>
+          <option value="Metal Pallet">Metal Pallet</option>
+          <option value="Timber Pallet">Timber Pallet</option>
+        </select>
+      </div>
+      <div class="order-table-wrap">
+        <table style="width:100%;border-collapse:collapse;">
           <thead>
             <tr>
-              <th>Item</th>
-              <th>Qty</th>
-              <th>Unit</th>
-              <th>Status</th>
-              <th></th>
+              <th style="padding:11px 14px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Item</th>
+              <th style="padding:11px 14px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Qty</th>
+              <th style="padding:11px 14px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Unit</th>
+              <th style="padding:11px 14px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);">Status</th>
+              <th style="padding:11px 14px;background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.07);"></th>
             </tr>
           </thead>
-          <tbody>${rows}</tbody>
+          <tbody style="font-size:13px;">
+            ${rows}
+          </tbody>
         </table>
       </div>`;
+
+    // Sync the mobile category dropdown with the desktop one
+    const mobSel = document.getElementById('categoryFilterMob');
+    if (mobSel) mobSel.value = document.getElementById('categoryFilter').value;
   }
 }
 
