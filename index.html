@@ -3534,7 +3534,7 @@ body.light-page .section-title { color: #1a1d2e !important; }
 let appUsers = JSON.parse(localStorage.getItem('inv_users') || '[]');
 // Seed default admin in localStorage cache so login works immediately on first load
 if (!appUsers.find(u => u.role === 'admin')) {
-  appUsers.unshift({ id: uid(), username: 'admin', password: 'GC@Master26!', role: 'admin', entity: '' });
+  appUsers.unshift({ id: uid(), username: 'admin', password: '3236', role: 'admin', entity: '' });
   localStorage.setItem('inv_users', JSON.stringify(appUsers));
 }
 
@@ -4012,7 +4012,7 @@ async function initData() {
       const sbUsers = r6.data || [];
       // Ensure admin exists in Supabase
       if (!sbUsers.find(u => u.role === 'admin')) {
-        const admin = appUsers.find(u => u.role === 'admin') || { id: uid(), username: 'admin', password: 'GC@Master26!', role: 'admin', entity: '' };
+        const admin = appUsers.find(u => u.role === 'admin') || { id: uid(), username: 'admin', password: '3236', role: 'admin', entity: '' };
         await sb.from('app_users').upsert(admin);
         sbUsers.push(admin);
       }
@@ -4747,7 +4747,7 @@ const DEFAULT_PASSWORDS = [
   { service: 'NCPrg', category: 'Machine Login', username: '', password: 'hans901', url: '', notes: 'HAN\'S LASER NC Program' },
   { service: 'Pdata Program', category: 'Software', username: 'Admin', password: '1111', url: '', notes: '' },
   { service: 'Masterform Gmail', category: 'Email', username: 'masterformsystem@gmail.com', password: 'Masterform1122', url: 'https://mail.google.com', notes: 'Inventory app sender email' },
-  { service: 'Inventory App Login', category: 'Software', username: 'admin', password: 'GC@Master26!', url: 'https://inventory-app-bay-delta.vercel.app', notes: 'App login credentials — changed 24 Jun 2026' },
+  { service: 'Inventory App Login', category: 'Software', username: 'admin', password: '3236', url: 'https://inventory-app-bay-delta.vercel.app', notes: 'App login credentials — changed 24 Jun 2026' },
 ];
 
 let passwords = JSON.parse(localStorage.getItem('inv_passwords') || '[]');
