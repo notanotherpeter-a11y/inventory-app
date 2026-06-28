@@ -3880,12 +3880,13 @@ function deleteUser(id) {
   showToast('User deleted.', 'success');
 }
 
-// Login bypassed — auto-login as admin
-sessionStorage.setItem('mf_auth', '1');
-sessionStorage.setItem('mf_role', 'admin');
-sessionStorage.setItem('mf_entity', '');
-document.getElementById('loginScreen').style.display = 'none';
-applyRoleLayout('admin', '');
+// Check session on load
+if (sessionStorage.getItem('mf_auth') === '1') {
+  document.getElementById('loginScreen').style.display = 'none';
+  const role   = sessionStorage.getItem('mf_role')   || 'admin';
+  const entity = sessionStorage.getItem('mf_entity') || '';
+  applyRoleLayout(role, entity);
+}
 
 // ─── Supabase ────────────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://mpgeagbeaexqdiazyifc.supabase.co';
